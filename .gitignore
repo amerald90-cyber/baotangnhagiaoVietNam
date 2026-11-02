@@ -1,0 +1,28 @@
+# Root scratch scripts
+design_scurve_wall.js
+generate_continuous_scurve_wall.js
+generate_perfect_gallery_layout.js
+shot_*.png
+screenshot_*.png
+test_*.js
+verify_*.js
+check_*.js
+apply_*.js
+patch_*.js
+inspect_*.js
+calc_*.js
+gen_*.js
+snippet.js
+build_*.js
+debug_*.js
+capture_*.js
+solve_*.js
+fix_*.js
+scratch_*.js
+
+# Agent cache & system
+.agent/
+.gemini/
+node_modules/
+*.tmp
+*.bak

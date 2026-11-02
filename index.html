@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BẢO TÀNG NHÀ GIÁO VIỆT NAM — Hành trình của những người gieo hạt tri thức</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <!-- Không gian WebGL 3D -->
+  <div id="canvas-container"></div>
+
+  <!-- Mũi tên chuyển không gian nhanh hai bên màn hình -->
+  <button id="btn-arrow-prev-room" type="button" class="room-side-arrow left" title="Chuyển sang không gian trước">
+    <span class="arrow-icon">‹</span>
+    <span class="arrow-text">
+      <small>KHÔNG GIAN TRƯỚC</small>
+      <strong id="arrow-prev-room-label">Không Gian Bộ Đồ Dùng Dạy Học</strong>
+    </span>
+  </button>
+
+  <button id="btn-arrow-next-room" type="button" class="room-side-arrow right" title="Chuyển sang không gian tiếp theo">
+    <span class="arrow-text">
+      <small>KHÔNG GIAN TIẾP</small>
+      <strong id="arrow-next-room-label">Lịch Sử Phát Triển Giáo Dục</strong>
+    </span>
+    <span class="arrow-icon">›</span>
+  </button>
+
+  <!-- Màn hình Khởi đầu Trang trọng (Thu gọn dạng Kiosk/Nút bấm, không che toàn màn hình ban đầu) -->
+  <div id="welcome-overlay" class="hidden">
+    <div class="welcome-card">
+      <div class="welcome-emblem">KHÔNG GIAN TRIỂN LÃM SỐ 360°</div>
+      <h1 class="welcome-title">BẢO TÀNG NHÀ GIÁO VIỆT NAM</h1>
+      <p class="welcome-subtitle">“Hành trình của những người gieo hạt tri thức”</p>
+      <div class="welcome-divider"></div>
+      <p class="welcome-desc">
+        Không gian Bảo tàng 3D gồm <b>Đại Sảnh Trung Tâm</b> (Đài Biểu Tượng Khuê Văn Các – Ngọn Đuốc Tri Thức) và <b>5 Không Gian Chuyên Đề</b>:
+        <br />• <b>Lịch Sử Phát Triển Giáo Dục Việt Nam</b> qua các thời kỳ (1076 – Nay)
+        <br />• <b>15 Nhà Giáo Nổi Tiếng & Ưu Tú Nhất</b> lịch sử Việt Nam
+        <br />• <b>15 Bộ Trưởng Bộ Giáo Dục Việt Nam</b> (1945 – Nay)
+        <br />• <b>Không Gian Bộ Đồ Dùng & Hiện Vật Dạy Học</b>
+        <br />• <b>Điện Tri Ân – Cội Cây Tri Thức 3D</b> (Gian phòng riêng trang trọng với Lá Vàng thông điệp & Bàn Giấy Bút ở gốc cây)
+      </p>
+
+      <div class="welcome-guides">
+        <div class="guide-box">
+          <strong>✦ Giao Diện 3D Thoáng Đẹp & Nút ☰ Menu</strong>
+          <span>Màn hình 3D được giữ thoáng tối đa. Bấm nút <b>☰ Menu & Sơ Đồ</b> (góc trên phải) để xem <b>Sơ đồ Bảo tàng</b> và chuyển nhanh giữa <b>5 Không gian trưng bày</b>.</span>
+        </div>
+        <div class="guide-box">
+          <strong>✦ Điện Tri Ân – Cội Cây Tri Thức 3D</strong>
+          <span>Click vào từng <b>Lá Vàng / Thẻ Lụa trên cây</b> để đọc lời chúc, hoặc bấm <b>✍️ Bàn Giấy Bút ở gốc cây</b> để viết thông điệp mới và tìm kiếm lời chúc.</span>
+        </div>
+        <div class="guide-box">
+          <strong>✦ Điều Hướng Bằng Mũi Tên Dưới Sàn</strong>
+          <span>Bấm vào các <b>Biển chỉ dẫn tròn màu vàng trên sàn</b> tại các cửa phòng để di chuyển trực quan và mượt mà giữa Đại Sảnh và 4 Gian Trưng Bày.</span>
+        </div>
+      </div>
+
+      <button
+        id="btn-close-welcome"
+        type="button"
+        class="btn-primary-gold"
+        onclick="document.getElementById('welcome-overlay').classList.add('hidden')"
+      >
+        ĐÃ HIỂU • ĐÓNG BẢNG THÔNG TIN
+      </button>
+    </div>
+  </div>
+
+  <!-- NÚT CTA TỐI GIẢN TRÊN NGOẠI CẢNH (MẶT TIỀN BẢO TÀNG) -->
+  <div id="exterior-cta-bar" class="exterior-cta-overlay">
+    <button id="btn-exterior-enter" type="button" class="btn-exterior-enter-pill" title="Bước vào Bảo tàng" aria-label="Bước vào Bảo tàng">
+      <span class="enter-pulse-ring"></span>
+      <span class="enter-btn-text">BƯỚC VÀO</span>
+      <span class="enter-arrow-icon">➔</span>
+    </button>
+  </div>
+
+  <!-- Thanh Header HUD trên cùng: Cực kỳ tinh gọn, không tràn viền (Góc trái: Tên Bảo Tàng; Góc phải: [Icon Loa] + [Menu]) -->
+  <header class="top-hud">
+    <div class="brand-block">
+      <div class="brand-kicker">BẢO TÀNG SỐ QUỐC GIA VỀ GIÁO DỤC</div>
+      <div class="brand-name">BẢO TÀNG NHÀ GIÁO VIỆT NAM</div>
+    </div>
+
+    <div class="top-actions">
+      <button id="btn-header-speaker" type="button" class="hud-btn speaker-icon-only-btn" title="Bật / Tắt âm nhạc" aria-label="Bật / Tắt âm nhạc">
+        <span id="header-speaker-icon" class="speaker-icon">🔊</span>
+      </button>
+      <button id="btn-toggle-menu" type="button" class="hud-btn menu-trigger-btn" aria-expanded="false" title="Mở Menu & Sơ Đồ">
+        <span class="menu-bars">☰</span>
+        <span>Menu</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- GIAO DIỆN MENU TRUNG TÂM SANG TRỌNG (Gom trọn 4 tính năng chính, Sơ đồ, 5 Không gian & Công cụ) -->
+  <aside id="museum-menu-drawer" class="museum-menu-popover hidden" aria-label="Menu điều khiển Bảo tàng">
+    <div class="menu-popover-header">
+      <div>
+        <div class="menu-kicker">ĐIỀU HƯỚNG • SƠ ĐỒ • TIỆN ÍCH 3D</div>
+        <h4>Menu Bảo Tàng Nhà Giáo</h4>
+      </div>
+      <button id="btn-close-menu" type="button" class="btn-icon-close" title="Đóng Menu">✕</button>
+    </div>
+
+    <!-- 4 TÍNH NĂNG CHÍNH ĐÃ ĐƯỢC CHUYỂN GỌN VÀO TRONG MENU -->
+    <div class="menu-section menu-quick-actions-section">
+      <div class="menu-section-title">TIỆN ÍCH TRỌNG TÂM</div>
+      <div class="menu-primary-actions-grid">
+        <button id="btn-wishing-tree-quick" type="button" class="menu-primary-action-btn gold" title="Gửi lời tri ân Thầy Cô">
+          <span class="action-icon">🪷</span>
+          <div class="action-text">
+            <strong>Gửi Lời Tri Ân</strong>
+            <small>Viết thiệp vàng dâng Thầy Cô</small>
+          </div>
+        </button>
+        <button id="btn-memory-wall-quick" type="button" class="menu-primary-action-btn blue" title="Bức Tường Ký Ức">
+          <span class="action-icon">🖼️</span>
+          <div class="action-text">
+            <strong>Bức Tường Ký Ức</strong>
+            <small>Kho tư liệu ảnh học trò đóng góp</small>
+          </div>
+        </button>
+        <button id="btn-header-search-tribute" type="button" class="menu-primary-action-btn" title="Tìm lời chúc trên cây tri ân">
+          <span class="action-icon">🔍</span>
+          <div class="action-text">
+            <strong>Tìm Lời Chúc Của Bạn</strong>
+            <small>Tra cứu thông điệp trên Cội Cây</small>
+          </div>
+        </button>
+        <button id="btn-quick-guide" type="button" class="menu-primary-action-btn" title="Xem Giới Thiệu & Sơ Đồ">
+          <span class="action-icon">📖</span>
+          <div class="action-text">
+            <strong>Giới Thiệu & Sơ Đồ</strong>
+            <small>Khám phá bản đồ bảo tàng</small>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Khu vực Vị trí hiện tại & Sơ đồ Bảo tàng nằm gọn trong Menu -->
+    <div class="menu-section menu-location-card">
+      <div class="menu-location-info">
+        <div class="menu-section-title">KHÔNG GIAN ĐANG ĐỨNG</div>
+        <div id="current-zone-title" class="menu-current-zone-name">Đại Sảnh & Cây Tri Ân 3D</div>
+        <div id="current-zone-subtitle" class="menu-current-zone-sub">Đài Biểu Tượng Khuê Văn Các & Cây Xoay 3D</div>
+      </div>
+      <div class="menu-minimap-wrap" title="Sơ đồ vị trí trong Bảo tàng 3D">
+        <div class="minimap-label">SƠ ĐỒ 3D</div>
+        <canvas id="minimap-canvas" width="110" height="110"></canvas>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">DI CHUYỂN ĐẾN 5 KHÔNG GIAN TRƯNG BÀY</div>
+      <div id="menu-zone-list" class="menu-zone-grid"></div>
+    </div>
+
+    <!-- TƯƠNG TÁC CỘI CÂY TRI THỨC & THÔNG ĐIỆP HỌC TRÒ TRONG MENU -->
+    <div class="menu-section menu-tree-actions-card">
+      <div class="menu-section-title">CỘI CÂY TRI THỨC & THÔNG ĐIỆP TRI ÂN</div>
+      <div class="menu-tree-buttons-row">
+        <button id="btn-menu-write-tribute" type="button" class="btn-menu-gold-action">
+          <span>✍️</span> <strong>Bàn Giấy Bút: Viết Lời Tri Ân</strong>
+        </button>
+        <button id="btn-menu-random-leaf" type="button" class="btn-menu-gold-action secondary">
+          <span>🍃</span> <strong>Đọc 1 Thông Điệp Ngẫu Nhiên</strong>
+        </button>
+      </div>
+      <div class="menu-tree-search-wrap">
+        <input
+          id="menu-tree-search-input"
+          type="search"
+          placeholder="🔍 Tìm theo tên học sinh, thầy cô, trường, tỉnh..."
+          autocomplete="off"
+        />
+        <div id="menu-tree-search-results" class="menu-search-results-list hidden"></div>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">CÔNG CỤ & TRA CỨU</div>
+      <div class="menu-tools-grid">
+        <button id="btn-menu-go-exterior" type="button" class="menu-tool-btn">
+          <span class="tool-icon">🏛️</span>
+          <span class="tool-info">
+            <strong>Mặt Tiền & Quảng Trường</strong>
+            <small>Ra ngoài ngắm kiến trúc, bậc tam cấp & biển vàng</small>
+          </span>
+        </button>
+
+        <button id="btn-guided-tour" type="button" class="menu-tool-btn">
+          <span class="tool-icon">🧭</span>
+          <span class="tool-info">
+            <strong>Tour Tham Quan Tự Động</strong>
+            <small>Tự động di chuyển qua các không gian</small>
+          </span>
+        </button>
+
+        <button id="btn-toggle-catalog" type="button" class="menu-tool-btn">
+          <span class="tool-icon">🏛</span>
+          <span class="tool-info">
+            <strong>Danh Mục Tư Liệu & Chân Dung</strong>
+            <small>Tra cứu nhanh 15 Bộ trưởng, 15 Nhà giáo & Hiện vật</small>
+          </span>
+        </button>
+
+        <button id="btn-menu-wishing-tree" type="button" class="menu-tool-btn">
+          <span class="tool-icon">✨</span>
+          <span class="tool-info">
+            <strong>Cội Cây Tri Thức Ngàn Sao 3D</strong>
+            <small>Gửi thiệp tri ân & khám phá ngàn vì sao lời chúc</small>
+          </span>
+        </button>
+
+        <button id="btn-open-intro" type="button" class="menu-tool-btn">
+          <span class="tool-icon">📖</span>
+          <span class="tool-info">
+            <strong>Giới Thiệu Chung Về Bảo Tàng</strong>
+            <small>Xem lại trang giới thiệu tổng quan</small>
+          </span>
+        </button>
+
+        <button id="btn-toggle-audio" type="button" class="menu-tool-btn">
+          <span class="tool-icon">♪</span>
+          <span class="tool-info">
+            <strong id="menu-audio-label">Âm Thanh: Đang Tắt</strong>
+            <small>Nhạc nền hòa tấu trang trọng</small>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-section menu-controls-guide">
+      <div class="menu-section-title">HƯỚNG DẪN THAO TÁC</div>
+      <div class="menu-guide-row"><span>🖱 Kéo chuột trái:</span> <strong>Xoay góc nhìn 360°</strong></div>
+      <div class="menu-guide-row"><span>🎯 Click Tranh / Hiện vật / Thiệp:</span> <strong>Mở xem chi tiết</strong></div>
+      <div class="menu-guide-row"><span>‹ › Mũi tên 2 bên / Sàn 3D:</span> <strong>Chuyển không gian</strong></div>
+      <div class="menu-guide-row"><span>⌨️ Phím W, A, S, D / Mũi tên:</span> <strong>Đi bộ tự do</strong></div>
+    </div>
+  </aside>
+
+  <!-- Tooltip khi rê chuột qua hiện vật hoặc khung chân dung -->
+  <div id="artifact-tooltip"></div>
+
+  <!-- Ngăn kéo Danh mục Toàn bộ Hiện vật, 15 Bộ trưởng & 15 Nhà giáo -->
+  <aside id="catalog-drawer">
+    <div class="drawer-header">
+      <h3>Danh Mục Trưng Bày Toàn Bảo Tàng</h3>
+      <button id="btn-close-catalog" type="button" class="btn-icon-close" title="Đóng">✕</button>
+    </div>
+    <div id="catalog-list"></div>
+  </aside>
+
+  <!-- Modal / Drawer Chi Tiết Tư Liệu & Hiện Vật (Chỉ hiển thị Thông tin & Hình ảnh tư liệu sạch đẹp) -->
+  <section id="artifact-modal" aria-label="Thông tin chi tiết tư liệu">
+    <div class="modal-top-bar">
+      <div>
+        <div id="modal-code">ĐS-01</div>
+        <h2 id="modal-title">Tên hiện vật</h2>
+        <div id="modal-subtitle">Phụ đề hiện vật</div>
+      </div>
+      <button id="btn-close-modal" type="button" class="btn-icon-close" title="Đóng cửa sổ">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div id="tab-story" class="modal-tab-pane active">
+        <!-- Hình ảnh tư liệu / Chân dung chính hiển thị trực tiếp ngay đầu trang thông tin -->
+        <div id="modal-primary-image-box" style="display:none; margin-bottom: 16px;"></div>
+
+        <div class="meta-grid">
+          <div class="meta-cell">
+            <span>Thời kỳ / Nhiệm kỳ</span>
+            <strong id="modal-era">—</strong>
+          </div>
+          <div class="meta-cell">
+            <span>Chất liệu / Thể loại</span>
+            <strong id="modal-material">—</strong>
+          </div>
+          <div class="meta-cell">
+            <span>Vị trí trưng bày</span>
+            <strong id="modal-dimensions">—</strong>
+          </div>
+        </div>
+
+        <blockquote id="modal-quote" class="quote-banner"></blockquote>
+
+        <div id="modal-story" class="story-content"></div>
+
+        <div class="highlights-box">
+          <h4>Dấu ấn Lịch sử & Nội dung Trọng tâm</h4>
+          <ul id="modal-highlights"></ul>
+        </div>
+
+        <div id="modal-gallery-grid" class="gallery-grid" style="margin-top: 14px;"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button id="btn-prev-artifact" type="button" class="hud-btn">← Tư liệu trước</button>
+      <span style="font-size: 11.5px; color: var(--ivory-soft);">Click vào từng tư liệu / khung ảnh để xem thông tin</span>
+      <button id="btn-next-artifact" type="button" class="hud-btn">Tư liệu tiếp →</button>
+    </div>
+  </section>
+
+  <!-- KHUNG THIỆP TRI ÂN TUYỆT ĐẸP HIỂN THỊ KHI CLICK VÀO THẺ TRÊN CÂY TRI ÂN 3D -->
+  <div id="tribute-card-viewer-modal" class="tribute-viewer-backdrop hidden" aria-label="Thiệp tri ân của học sinh">
+    <div class="tribute-royal-card">
+      <span class="royal-corner tl"></span>
+      <span class="royal-corner tr"></span>
+      <span class="royal-corner bl"></span>
+      <span class="royal-corner br"></span>
+
+      <button id="btn-close-tribute-viewer" type="button" class="royal-close-btn" title="Đóng thiệp">✕</button>
+
+      <div class="royal-card-header">
+        <div class="royal-seal">🪷</div>
+        <div id="tribute-viewer-badge" class="royal-kicker">CÂY TRI ÂN 3D • THẺ LỜI CHÚC SỐ #01</div>
+        <h3 class="royal-title">Thiệp Tri Ân Nhà Giáo Việt Nam</h3>
+        <div class="royal-divider"><span>✦</span></div>
+      </div>
+
+      <div class="royal-card-body">
+        <div class="royal-recipient-line">
+          <span>Kính gửi:</span>
+          <strong id="tribute-viewer-teacher">Thầy / Cô kính mến</strong>
+        </div>
+
+        <blockquote id="tribute-viewer-message" class="royal-message-box">
+          “Lời tri ân của học sinh...”
+        </blockquote>
+
+        <div class="royal-sender-block">
+          <div class="sender-label">Người gửi lời tri ân</div>
+          <div id="tribute-viewer-sender" class="sender-name">Nguyễn Minh Quân</div>
+          <div id="tribute-viewer-meta" class="sender-meta">Lớp 12A1 • THPT Chu Văn An • Hà Nội</div>
+          <div id="tribute-viewer-time" class="sender-time">Đã gắn trên Cây Tri Ân 3D</div>
+        </div>
+      </div>
+
+      <div class="royal-card-footer">
+        <button id="btn-prev-tribute-card" type="button" class="royal-nav-btn">‹ Thông điệp trước</button>
+        <button id="btn-close-tribute-center" type="button" class="royal-close-center-btn" onclick="document.getElementById('tribute-card-viewer-modal').classList.add('hidden')">
+          ✓ Đã Đọc Xong
+        </button>
+        <button id="btn-next-tribute-card" type="button" class="royal-nav-btn">Thông điệp tiếp ›</button>
+      </div>
+      <div class="royal-reading-hint">
+        💡 <em>Muốn viết lời chúc: Bấm vào <b>Giấy Bút dưới gốc cây</b> • </em>
+        <button id="btn-viewer-open-search" type="button" class="inline-search-link">🔍 Tìm kiếm lời chúc của bạn</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TRA CỨU & TÌM KIẾM THÔNG ĐIỆP TRI ÂN TRÊN CỘI CÂY TRI THỨC 3D -->
+  <div id="tribute-search-modal" class="tribute-viewer-backdrop hidden" aria-label="Tra cứu thông điệp trên cây">
+    <div class="tribute-search-dialog starry-theme">
+      <div class="modal-top-bar starry-modal-header">
+        <div>
+          <div class="starry-kicker">✦ CỘI CÂY TRI THỨC 3D • TRA CỨU LỜI NHẮN ✦</div>
+          <h2 class="starry-heading">Tìm Kiếm Thông Điệp Tri Ân Trên Cây</h2>
+          <div class="starry-subtitle">Tìm kiếm lời chúc của bạn hoặc bạn bè theo Tên học sinh, Lớp, Trường, Tỉnh thành hoặc Tên Thầy/Cô</div>
+        </div>
+        <button id="btn-close-tribute-search" type="button" class="btn-icon-close" title="Đóng">✕</button>
+      </div>
+
+      <div class="tribute-search-dialog-body">
+        <div class="tribute-search-bar-wrap">
+          <span class="search-lens-icon">🔍</span>
+          <input
+            id="modal-tribute-search-input"
+            type="search"
+            placeholder="Nhập tên học sinh, thầy cô, lớp, trường hoặc tỉnh thành..."
+            autocomplete="off"
+          />
+          <button id="btn-clear-modal-search" type="button" class="btn-clear-search hidden" title="Xóa">✕</button>
+        </div>
+
+        <div id="modal-search-count-badge" class="search-count-info-badge">
+          Đang tải danh sách thông điệp...
+        </div>
+
+        <div id="modal-tribute-search-results" class="modal-search-cards-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL BÀN GIẤY BÚT & CỘI CÂY TRI THỨC 3D (Mở khi click vào Bàn Giấy Bút dưới gốc cây - Chuyên dụng để viết gửi thư tri ân) -->
+  <div id="wishing-tree-modal" class="tribute-viewer-backdrop hidden" aria-label="Gửi lời tri ân lên cây 3D">
+    <div class="wishing-tree-dialog starry-theme">
+      <div class="modal-top-bar starry-modal-header">
+        <div>
+          <div class="starry-kicker">✦ ĐIỆN TRI ÂN • BÀN GIẤY BÚT & NGHIÊN MỰC 3D ✦</div>
+          <h2 class="starry-heading">Viết Lời Tri Ân & Khắc Lên Lá Vàng Cội Cây Tri Thức</h2>
+          <div class="starry-subtitle">Mỗi lời nhắn gửi của bạn sẽ hóa thành một chiếc Lá Vàng Bồ Đề và cánh thiệp lụa vĩnh cửu trên Cội Cây Tri Thức.</div>
+        </div>
+        <button id="btn-close-wishing-modal" type="button" class="btn-icon-close" title="Đóng">✕</button>
+      </div>
+
+      <div class="wishing-dialog-body">
+        <div class="tribute-form-box starry-form-card">
+          <div class="form-header-row">
+            <h4>✍️ Bàn Giấy Bút: Viết Thông Điệp Tri Ân Mới Gửi Thầy Cô</h4>
+            <span class="auto-cap-badge">✨ Tự động chuẩn hóa chính tả Tiếng Việt</span>
+          </div>
+
+          <form id="tribute-form">
+            <div class="form-row-grid cols-2">
+              <div class="form-group">
+                <label for="tribute-sender">Họ và tên người gửi *</label>
+                <input id="tribute-sender" type="text" placeholder="VD: Nguyễn Minh Quân" required />
+              </div>
+              <div class="form-group">
+                <label for="tribute-class">Lớp *</label>
+                <input id="tribute-class" type="text" placeholder="VD: 12A1" required />
+              </div>
+            </div>
+
+            <div class="form-row-grid cols-2">
+              <div class="form-group">
+                <label for="tribute-school">Trường *</label>
+                <input id="tribute-school" type="text" placeholder="VD: THPT Chu Văn An" required />
+              </div>
+              <div class="form-group">
+                <label for="tribute-province">Tỉnh / Thành phố *</label>
+                <input id="tribute-province" type="text" list="vn-provinces-datalist" placeholder="VD: Hà Nội" required />
+                <datalist id="vn-provinces-datalist">
+                  <option value="Hà Nội"></option>
+                  <option value="TP. Hồ Chí Minh"></option>
+                  <option value="Đà Nẵng"></option>
+                  <option value="Hải Phòng"></option>
+                  <option value="Cần Thơ"></option>
+                  <option value="Thừa Thiên Huế"></option>
+                  <option value="Nghệ An"></option>
+                  <option value="Thanh Hóa"></option>
+                  <option value="Hà Tĩnh"></option>
+                  <option value="Quảng Ninh"></option>
+                  <option value="Bắc Ninh"></option>
+                  <option value="Hải Dương"></option>
+                  <option value="Nam Định"></option>
+                  <option value="Thái Bình"></option>
+                  <option value="Vĩnh Phúc"></option>
+                  <option value="Phú Thọ"></option>
+                  <option value="Thái Nguyên"></option>
+                  <option value="Lâm Đồng"></option>
+                  <option value="Khánh Hòa"></option>
+                  <option value="Bình Dương"></option>
+                  <option value="Đồng Nai"></option>
+                </datalist>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="tribute-teacher">Kính gửi Thầy / Cô *</label>
+              <input id="tribute-teacher" type="text" placeholder="VD: Cô Trần Thu Hà – Giáo Viên Ngữ Văn" required />
+            </div>
+
+            <div class="form-group">
+              <label for="tribute-message">Thông điệp tri ân *</label>
+              <div class="wish-preset-chips">
+                <span class="preset-label">Gợi ý nhanh:</span>
+                <button type="button" class="wish-preset-chip" data-preset="Cảm ơn Thầy Cô đã kiên nhẫn dìu dắt và thắp sáng ước mơ trong suốt những năm tháng học trò của chúng em!">✨ Lời cảm ơn sâu sắc</button>
+                <button type="button" class="wish-preset-chip" data-preset="Dù đi xa muôn phương, những bài học làm người của Thầy Cô vẫn mãi là hành trang quý giá nhất cuộc đời em.">🪷 Kỷ niệm mái trường</button>
+                <button type="button" class="wish-preset-chip" data-preset="Kính chúc Thầy Cô luôn dồi dào sức khỏe, hạnh phúc và giữ mãi ngọn lửa nhiệt huyết trên bục giảng!">🍃 Chúc sức khỏe & bình an</button>
+              </div>
+              <textarea id="tribute-message" rows="3" placeholder="Viết lời chúc, kỷ niệm hoặc lời tri ân chân thành tới Thầy Cô để gắn Lá Vàng lên Cội Cây Tri Thức 3D..." required></textarea>
+            </div>
+
+            <button id="btn-submit-tribute" type="submit" class="btn-primary-gold btn-submit-star-wish">
+              ✍️ KHẮC LÊN LÁ VÀNG & TREO LÊN CỘI CÂY TRI THỨC 3D
+            </button>
+            <div id="tribute-success-msg" style="display:none; color:#f2cf82; font-size:12.5px; margin-top:10px; text-align:center; font-weight:600;"></div>
+          </form>
+        </div>
+
+        <div class="wishing-bottom-hint">
+          💡 <em>Sau khi khắc xong, thông điệp sẽ lập tức biến thành <b>Lá Vàng Bồ Đề</b> đung đưa trên Cây 3D. Bạn có thể bấm vào từng chiếc lá trên cây để mở xem từng bức thư chúc!</em>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thanh điều hướng và HUD dưới đáy được chuyển toàn bộ vào Menu theo yêu cầu để khung nhìn 3D luôn thoáng đãng, sang trọng tuyệt đối -->
+  <div id="tree-sanctuary-hud-bar" class="tree-sanctuary-hud hidden" style="display: none !important;" aria-label="Tương tác Cội Cây Tri Thức">
+    <div id="tree-hud-search-results" class="tree-hud-results-popover hidden"></div>
+  </div>
+  <nav id="zone-nav-bar" style="display: none !important;" aria-label="Chọn không gian trưng bày"></nav>
+
+  <!-- Nạp Three.js, CSDL Nhà giáo qua các thời kỳ, Kho ảnh 15 Bộ trưởng và các script ứng dụng -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="data/teachersData.js"></script>
+  <script src="data/memoryWallData.js"></script>
+  <script src="./js/teacher-images.js"></script>
+  <script src="./js/minister-images.js"></script>
+  <script src="./js/data.js"></script>
+  <script src="./js/media-player.js"></script>
+  <script src="./js/museum-builder.js"></script>
+  <script src="./js/app.js"></script>
+
+  <!-- MODAL 2D HIỂN THỊ CHI TIẾT 15 BỘ TRƯỞNG BỘ GIÁO DỤC (DEEP HISTORICAL DOSSIER) -->
+  <div id="minister-detail-modal" class="minister-modal-wrapper" style="display: none;">
+    <div class="minister-modal-backdrop" onclick="window.app && window.app.closeMinisterModal()"></div>
+    <div class="minister-modal-container">
+      <button class="minister-modal-close" onclick="window.app && window.app.closeMinisterModal()" aria-label="Đóng & Tiếp tục tham quan">✕</button>
+      
+      <div class="minister-modal-content">
+        <!-- Cột trái: Ảnh chân dung khổ lớn trang trọng viền vàng kim, nhãn nhiệm kỳ & năm sinh - mất -->
+        <div class="minister-modal-col-portrait">
+          <div class="minister-portrait-frame">
+            <img id="minister-modal-img" src="" alt="Chân dung Bộ trưởng" />
+            <div class="portrait-corner-decor tl"></div>
+            <div class="portrait-corner-decor tr"></div>
+            <div class="portrait-corner-decor bl"></div>
+            <div class="portrait-corner-decor br"></div>
+          </div>
+          <div class="minister-modal-order-tag" id="minister-modal-order-tag">BỘ TRƯỞNG VỊ THỨ 01 / 15</div>
+          
+          <div class="minister-portrait-badges">
+            <div class="portrait-badge-pill years">
+              <span class="badge-icon">📅</span>
+              <span id="minister-modal-years-left">1912 – 2011</span>
+            </div>
+            <div class="portrait-badge-pill term">
+              <span class="badge-icon">📜</span>
+              <span id="minister-modal-term-left">Bộ trưởng Bộ Quốc gia Giáo dục (8/1945 – 3/1946)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Vùng cuộn nội dung mượt mà, phân tách 3 khối thẻ rõ ràng -->
+        <div class="minister-modal-col-info">
+          <div class="minister-info-header">
+            <div class="minister-sub-badge">HỒ SƠ TƯ LIỆU CHUYÊN SÂU • TƯ LỆNH NGÀNH GIÁO DỤC VIỆT NAM</div>
+            <h2 class="minister-gold-name" id="minister-modal-name">GS. VŨ ĐÌNH HÒE</h2>
+          </div>
+
+          <div class="minister-modal-divider">
+            <span class="divider-gem">✦</span>
+          </div>
+
+          <!-- Vùng cuộn nội dung mượt mà 3 khối thẻ -->
+          <div class="minister-details-scrollable">
+            <!-- KHỐI 1: XUẤT THÂN & QUÁ TRÌNH CÔNG TÁC (career) -->
+            <div class="minister-section-card block-career">
+              <div class="section-title">
+                <span class="title-icon">📜</span>
+                <span>XUẤT THÂN & QUÁ TRÌNH CÔNG TÁC</span>
+              </div>
+              <p class="section-text" id="minister-modal-career"></p>
+            </div>
+
+            <!-- KHỐI 2: DẤU ẤN CẢI CÁCH & QUYẾT SÁCH GIÁO DỤC (reforms) -->
+            <div class="minister-section-card block-reforms">
+              <div class="section-title">
+                <span class="title-icon">🏛️</span>
+                <span>DẤU ẤN CẢI CÁCH & QUYẾT SÁCH GIÁO DỤC</span>
+              </div>
+              <div class="section-text reforms-list" id="minister-modal-reforms"></div>
+            </div>
+
+            <!-- KHỐI 3: DANH HIỆU CAO QUÝ & DI SẢN LỊCH SỬ (legacy) -->
+            <div class="minister-section-card block-legacy">
+              <div class="section-title">
+                <span class="title-icon">🏅</span>
+                <span>DANH HIỆU CAO QUÝ & DI SẢN LỊCH SỬ</span>
+              </div>
+              <p class="section-text" id="minister-modal-legacy"></p>
+            </div>
+          </div>
+
+          <!-- Footer: Điều hướng danh nhân & Nút tắt tham quan tiếp -->
+          <div class="minister-modal-footer">
+            <button type="button" class="minister-nav-btn prev" id="minister-btn-prev" onclick="window.app && window.app.navigateMinister(-1)">
+              <span>←</span> Vị trước
+            </button>
+            <div class="minister-stepper" id="minister-modal-stepper">1 / 15</div>
+            <button type="button" class="minister-nav-btn next" id="minister-btn-next" onclick="window.app && window.app.navigateMinister(1)">
+              Vị tiếp theo <span>→</span>
+            </button>
+            <button type="button" class="minister-nav-btn resume" onclick="window.app && window.app.closeMinisterModal()">
+              <span>Tiếp tục tham quan 3D</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2D HIỂN THỊ HỒ SƠ CHI TIẾT NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ -->
+  <div id="teacher-detail-modal" class="minister-modal-wrapper teacher-modal-wrapper" style="display: none;">
+    <div class="minister-modal-backdrop" onclick="window.app && window.app.closeTeacherModal()"></div>
+    <div class="minister-modal-container">
+      <button class="minister-modal-close" onclick="window.app && window.app.closeTeacherModal()" aria-label="Đóng & Tiếp tục tham quan">✕</button>
+      
+      <div class="minister-modal-content">
+        <!-- Cột trái: Ảnh chân dung khổ lớn trang trọng viền vàng kim, nhãn thời kỳ & năm sinh - mất -->
+        <div class="minister-modal-col-portrait">
+          <div class="minister-portrait-frame teacher-portrait-frame">
+            <img id="teacher-modal-img" src="" alt="Chân dung Nhà giáo" />
+            <div class="portrait-corner-decor tl"></div>
+            <div class="portrait-corner-decor tr"></div>
+            <div class="portrait-corner-decor bl"></div>
+            <div class="portrait-corner-decor br"></div>
+          </div>
+          <div class="minister-modal-order-tag teacher-period-tag" id="teacher-modal-period-tag">THỜI KỲ PHONG KIẾN</div>
+          
+          <div class="minister-portrait-badges">
+            <div class="portrait-badge-pill years">
+              <span class="badge-icon">📅</span>
+              <span id="teacher-modal-years-left">1292 – 1370</span>
+            </div>
+            <div class="portrait-badge-pill term teacher-subtheme-badge">
+              <span class="badge-icon">📜</span>
+              <span id="teacher-modal-subtheme-left">Khơi nguồn đạo học</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Vùng cuộn nội dung mượt mà 3 khối thẻ -->
+        <div class="minister-modal-col-info">
+          <div class="minister-info-header">
+            <div class="minister-sub-badge" id="teacher-modal-honor-title">VẠN THẾ SƯ BIỂU • BẬC DANH SƯ CHUẨN MỰC MUÔN ĐỜI</div>
+            <h2 class="minister-gold-name" id="teacher-modal-name">THẦY GIÁO CHU VĂN AN</h2>
+          </div>
+
+          <div class="minister-modal-divider">
+            <span class="divider-gem">✦</span>
+          </div>
+
+          <!-- Vùng cuộn nội dung mượt mà 3 khối thẻ -->
+          <div class="minister-details-scrollable">
+            <!-- KHỐI 1: XUẤT THÂN & QUÁ TRÌNH CÔNG TÁC (career) -->
+            <div class="minister-section-card block-career">
+              <div class="section-title">
+                <span class="title-icon">📜</span>
+                <span>XUẤT THÂN & QUÁ TRÌNH HOẠT ĐỘNG</span>
+              </div>
+              <p class="section-text" id="teacher-modal-career"></p>
+            </div>
+
+            <!-- KHỐI 2: DẤU ẤN CẢI CÁCH & ĐÓNG GÓP GIÁO DỤC (reforms) -->
+            <div class="minister-section-card block-reforms">
+              <div class="section-title">
+                <span class="title-icon">🏛️</span>
+                <span>DẤU ẤN CẢI CÁCH & ĐÓNG GÓP CHO GIÁO DỤC</span>
+              </div>
+              <div class="section-text reforms-list" id="teacher-modal-reforms"></div>
+            </div>
+
+            <!-- KHỐI 3: DANH HIỆU CAO QUÝ & DI SẢN LỊCH SỬ (legacy) -->
+            <div class="minister-section-card block-legacy">
+              <div class="section-title">
+                <span class="title-icon">🏅</span>
+                <span>DANH HIỆU TÔN VINH & DI SẢN LỊCH SỬ</span>
+              </div>
+              <p class="section-text" id="teacher-modal-legacy"></p>
+            </div>
+
+            <!-- NGUỒN TÀI LIỆU LỊCH SỬ -->
+            <div class="teacher-source-footnote" id="teacher-modal-source"></div>
+          </div>
+
+          <!-- Footer: Điều hướng danh nhân & Nút tắt tham quan tiếp -->
+          <div class="minister-modal-footer">
+            <button type="button" class="minister-nav-btn prev" id="teacher-btn-prev" onclick="window.app && window.app.navigateTeacher(-1)">
+              <span>←</span> Vị trước
+            </button>
+            <div class="minister-stepper" id="teacher-modal-stepper">1 / 46</div>
+            <button type="button" class="minister-nav-btn next" id="teacher-btn-next" onclick="window.app && window.app.navigateTeacher(1)">
+              Vị tiếp theo <span>→</span>
+            </button>
+            <button type="button" class="minister-nav-btn resume" onclick="window.app && window.app.closeTeacherModal()">
+              <span>Tiếp tục tham quan 3D</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2D PHÓNG TO BÀI DẪN LUẬN & 5 MỐC SON LỊCH SỬ CỦA PANO CHUYÊN ĐỀ -->
+  <div id="theme-intro-modal" class="minister-modal-wrapper theme-modal-wrapper" style="display: none;">
+    <div class="minister-modal-backdrop" onclick="window.app && window.app.closeThemeModal()"></div>
+    <div class="minister-modal-container theme-modal-container">
+      <button class="minister-modal-close" onclick="window.app && window.app.closeThemeModal()" aria-label="Đóng bảng dẫn nhập">✕</button>
+      
+      <div class="theme-modal-inner">
+        <div class="theme-modal-header" id="theme-modal-header">
+          <div class="theme-modal-badge" id="theme-modal-badge">CHUYÊN ĐỀ I • THẾ KỶ XI – XV</div>
+          <h2 class="theme-modal-title" id="theme-modal-title">KHƠI NGUỒN ĐẠO HỌC</h2>
+          <div class="theme-modal-subtitle" id="theme-modal-subtitle">Dấu ấn khởi dựng, phát triển giáo dục và khoa cử Nho học Đại Việt</div>
+        </div>
+
+        <div class="theme-modal-divider">
+          <span class="divider-gem">✦</span>
+        </div>
+
+        <div class="theme-modal-body-scrollable">
+          <!-- Cột trái: Toàn văn dẫn luận -->
+          <div class="theme-intro-essay">
+            <h3 class="essay-heading">📜 TOÀN VĂN DẪN LUẬN CHUYÊN ĐỀ</h3>
+            <div class="essay-paragraphs" id="theme-modal-essay"></div>
+          </div>
+
+          <!-- Cột phải: Bảng mốc son lịch sử thời kỳ -->
+          <div class="theme-milestones-card">
+            <h3 class="milestones-heading">🏛️ CÁC MỐC SON LỊCH SỬ TIÊU BIỂU</h3>
+            <div class="milestones-timeline" id="theme-modal-milestones"></div>
+          </div>
+        </div>
+
+        <div class="theme-modal-footer">
+          <button type="button" class="minister-nav-btn resume" onclick="window.app && window.app.closeThemeModal()">
+            <span>Tiếp tục dạo bước ngắm vách tranh</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+
+
+  <script>
+    // Kích hoạt ngay sự kiện click nút Bước Vào / Bắt Đầu không để người dùng chờ đợi
+    (function() {
+      window.handleEnterMuseumClick = function() {
+        if (window.app && typeof window.app.flyIntoMuseum === 'function') {
+          window.app.flyIntoMuseum();
+        } else if (window.museumApp && typeof window.museumApp.flyIntoMuseum === 'function') {
+          window.museumApp.flyIntoMuseum();
+        } else {
+          window.__pendingEnter = true;
+          const cta = document.getElementById('exterior-cta-bar');
+          if (cta) cta.style.opacity = '0.7';
+        }
+      };
+
+      const btn = document.getElementById('btn-exterior-enter');
+      if (btn) {
+        btn.addEventListener('click', window.handleEnterMuseumClick);
+      }
+    })();
+  </script>
+
+
+  <!-- ==================== MODAL 1: THƯ VIỆN KÝ ỨC (TRA CỨU VÔ TẬN & DANH SÁCH ẢNH HỌC SINH ĐÓNG GÓP) ==================== -->
+  <div id="memory-wall-library-modal" class="memory-wall-modal-wrapper hidden">
+    <div class="memory-modal-backdrop" onclick="window.app && window.app.closeMemoryLibraryModal()"></div>
+    <div class="memory-modal-container">
+      <button type="button" class="memory-modal-close-btn" onclick="window.app && window.app.closeMemoryLibraryModal()" title="Đóng">✕</button>
+      
+      <div class="memory-library-header">
+        <div class="memory-badge">🏛️ BẢO TÀNG NHÀ GIÁO VIỆT NAM • KHÔNG GIAN HỌC SINH TRI ÂN</div>
+        <h2 class="memory-title">BỨC TƯỜNG KÝ ỨC — SÁNG MÃI ƠN THẦY</h2>
+        <p class="memory-subtitle">Kho tư liệu hình ảnh và thông tin Thầy Cô giáo do các thế hệ học sinh, sinh viên cả nước đóng góp và tôn vinh</p>
+      </div>
+
+      <div class="memory-toolbar">
+        <div class="memory-search-box">
+          <span class="memory-search-icon">🔍</span>
+          <input type="text" id="memory-search-input" class="memory-search-input" placeholder="Tìm theo Tên Thầy Cô, Người gửi, Trường công tác, Tỉnh thành..." />
+        </div>
+
+        <div class="memory-filter-pills">
+          <button type="button" class="memory-filter-btn active" data-filter="all">Tất cả (<span id="memory-count-all">0</span>)</button>
+          <button type="button" class="memory-filter-btn" data-filter="resis">Kháng chiến</button>
+          <button type="button" class="memory-filter-btn" data-filter="modern">Đổi mới</button>
+          <button type="button" class="memory-filter-btn" data-filter="highland">Vùng cao & Hải đảo</button>
+          <button type="button" class="memory-filter-btn" data-filter="ancient">Cổ điển</button>
+        </div>
+
+        <button type="button" id="btn-open-memory-upload" class="memory-btn-upload" onclick="window.app && window.app.openMemoryUploadModal()">
+          <span>📤</span>
+          <span>Đóng Góp Ảnh Nhà Giáo</span>
+        </button>
+      </div>
+
+      <div id="memory-cards-container" class="memory-cards-grid-scrollable">
+        <!-- Render danh sách thẻ ảnh động qua JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: XEM CHI TIẾT 01 ẢNH DUY NHẤT & LỜI TRI ÂN (SINGLE PHOTO MODAL) ==================== -->
+  <div id="memory-detail-modal" class="memory-wall-modal-wrapper hidden">
+    <div class="memory-modal-backdrop" onclick="window.app && window.app.closeMemoryDetailModal()"></div>
+    <div class="memory-modal-container" style="max-width: 1020px;">
+      <button type="button" class="memory-modal-close-btn" onclick="window.app && window.app.closeMemoryDetailModal()" title="Đóng">✕</button>
+
+      <div class="memory-detail-content">
+        <!-- Nửa trái: Khung ảnh khổ lớn trang trọng viền vàng kim -->
+        <div class="memory-single-photo-container">
+          <div class="memory-single-photo-frame">
+            <img id="detail-memory-photo" src="" alt="Ảnh chân dung Nhà giáo" />
+            <span class="memory-photo-badge">🏛️ ẢNH TƯ LIỆU NHÀ GIÁO</span>
+          </div>
+          <div class="memory-photo-caption" id="detail-photo-caption">
+            <span>🏛️ Bảo tàng số Nhà giáo Việt Nam • Không gian ký ức</span>
+          </div>
+        </div>
+
+        <!-- Nửa phải: Thông tin Thầy Cô & Lời tri ân gửi gắm -->
+        <div class="memory-detail-info-col">
+          <div class="memory-badge" id="detail-memory-badge">🏛️ BỨC TƯỜNG KÝ ỨC — SÁNG MÃI ƠN THẦY</div>
+          <h2 class="memory-detail-teacher-name" id="detail-teacher-name"></h2>
+          <div class="memory-detail-workplace" id="detail-teacher-workplace">
+            <span class="workplace-icon">🏫</span>
+            <span id="detail-workplace-text"></span>
+          </div>
+
+          <div class="memory-story-box">
+            <div class="memory-story-heading">📖 THÔNG TIN NHÀ GIÁO:</div>
+            <p class="memory-story-text" id="detail-teacher-info"></p>
+          </div>
+
+          <div class="memory-author-card">
+            <span class="memory-author-title">💝 NGƯỜI GỬI ĐÓNG GÓP:</span>
+            <span class="memory-author-name" id="detail-sender-name"></span>
+          </div>
+
+          <div style="margin-top: auto; display: flex; gap: 12px; padding-top: 14px;">
+            <button type="button" class="btn-submit-memory" style="flex: 1;" onclick="window.app && window.app.openMemoryLibraryModal()">
+              <span>📚 Mở Thư Viện Ký Ức</span>
+            </button>
+            <button type="button" class="btn-submit-memory" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 215, 0, 0.4); color: #ffd700;" onclick="window.app && window.app.closeMemoryDetailModal()">
+              <span>✕ Đóng</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: ĐÓNG GÓP ẢNH TƯ LIỆU NHÀ GIÁO (UPLOAD FORM) ==================== -->
+  <div id="memory-upload-modal" class="memory-wall-modal-wrapper hidden">
+    <div class="memory-modal-backdrop" onclick="window.app && window.app.closeMemoryUploadModal()"></div>
+    <div class="memory-modal-container memory-upload-modal-container">
+      <button type="button" class="memory-modal-close-btn" onclick="window.app && window.app.closeMemoryUploadModal()" title="Đóng">✕</button>
+
+      <div class="memory-library-header">
+        <div class="memory-badge">📤 ĐÓNG GÓP TƯ LIỆU CHO BẢO TÀNG</div>
+        <h2 class="memory-title">ĐÓNG GÓP ẢNH TƯ LIỆU NHÀ GIÁO</h2>
+      </div>
+
+      <form id="memory-upload-form" class="memory-upload-form" onsubmit="window.app && window.app.handleMemoryUploadSubmit(event)">
+        <!-- PHẦN 1: THÔNG TIN NHÀ GIÁO ĐƯỢC ĐÓNG GÓP -->
+        <div class="form-section-banner">
+          <span class="section-badge">PHẦN 1</span>
+          <span class="section-title">THÔNG TIN NHÀ GIÁO ĐƯỢC ĐÓNG GÓP</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tên Thầy / Cô giáo *</label>
+          <input type="text" id="upload-teacher-name" class="form-input" placeholder="VD: Thầy Nguyễn Văn A / Cô Trần Thị B / GS. Đặng Thai Mai..." required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Thông tin & Tiểu sử nhà giáo *</label>
+          <textarea id="upload-teacher-bio" class="form-textarea" placeholder="Ghi rõ môn giảng dạy, chức vụ, học hàm/học vị, giai đoạn công tác, cống hiến tiêu biểu... KHÔNG PHẢI lời chúc/lời tri ân." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tải lên ĐÚNG 01 ảnh chân dung / tư liệu (JPG / PNG) *</label>
+          <div class="file-drop-zone" onclick="document.getElementById('file-photo-input').click()">
+            <input type="file" id="file-photo-input" accept="image/*" style="display: none;" onchange="window.app && window.app.handlePreviewFile(event, 'preview-photo-img')" required />
+            <div class="file-drop-icon">📸</div>
+            <div class="file-drop-text" id="label-photo">Bấm vào đây để chọn 01 file ảnh chân dung/tư liệu</div>
+            <div class="file-drop-hint">Định dạng JPG, PNG (tối đa 10MB)</div>
+            <img id="preview-photo-img" class="file-preview-img" alt="Xem trước ảnh nhà giáo" />
+          </div>
+        </div>
+
+        <!-- PHẦN 2: THÔNG TIN NGƯỜI ĐÓNG GÓP TƯ LIỆU -->
+        <div class="form-section-banner" style="margin-top: 10px;">
+          <span class="section-badge">PHẦN 2</span>
+          <span class="section-title">THÔNG TIN NGƯỜI ĐÓNG GÓP TƯ LIỆU</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Họ và tên người gửi * (Học sinh / Cựu học sinh / Đồng nghiệp)</label>
+          <input type="text" id="upload-sender-name" class="form-input" placeholder="VD: Nguyễn Văn C (Học sinh) / Trần Thị D (Cựu học sinh)..." required />
+        </div>
+
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label class="form-label">Trường học & Lớp (của người gửi)</label>
+            <input type="text" id="upload-sender-school" class="form-input" placeholder="VD: THPT Chuyên Chu Văn An • Lớp 12A1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tỉnh / Thành phố (của người gửi)</label>
+            <input type="text" id="upload-sender-city" class="form-input" placeholder="VD: Hà Nội / TP. Hồ Chí Minh" />
+          </div>
+        </div>
+
+        <button type="submit" id="btn-submit-upload-memory" class="btn-submit-memory">
+          <span>🚀 ĐĂNG ẢNH LÊN BỨC TƯỜNG KÝ ỨC NGAY</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>

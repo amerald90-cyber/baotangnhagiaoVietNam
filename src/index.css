@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, h4, .font-museum {
+    font-family: 'Playfair Display', 'Noto Serif', Georgia, serif;
+  }
+}
+
+/* Custom Museum Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0C1425;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #B68D40;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #CCA452;
+}
+
+/* Subtle Museum Spotlight & Texture Effects */
+.museum-gradient-dark {
+  background: radial-gradient(circle at 50% 20%, #1B2A4A 0%, #0C1425 65%, #070C17 100%);
+}
+
+.museum-parchment {
+  background: linear-gradient(180deg, #FCFBF7 0%, #F4EFE2 100%);
+}
+
+.gold-border-glow {
+  box-shadow: 0 0 0 1px rgba(182, 141, 64, 0.35), 0 10px 30px -5px rgba(7, 12, 23, 0.5);
+}
+
+.portrait-frame {
+  border: 3px solid #B68D40;
+  box-shadow:
+    inset 0 0 0 3px #261910,
+    inset 0 0 18px rgba(0, 0, 0, 0.65),
+    0 14px 32px rgba(0, 0, 0, 0.55);
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.85;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+.hotspot-pulse::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 2px solid #DFC17B;
+  animation: pulseRing 2.2s infinite cubic-bezier(0.25, 0.8, 0.25, 1);
+}
