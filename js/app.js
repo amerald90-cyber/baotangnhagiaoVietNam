@@ -3680,68 +3680,10 @@ class VietnamTeachersMuseumApp {
       this.treeAngularVelocity = 0;
     }
 
-    // Tự động kiểm tra khoảng cách đến Cây Tri Thức (sảnh ngoài) và Cây Đa (trong phòng) để hiển thị thanh xoay cây
-    this.updateTreeRotationHUD();
-
     this.builder.update(elapsed, delta);
     this.renderMinimap();
 
     this.renderer.render(this.scene, this.camera);
-  }
-
-  // Cập nhật thanh HUD xoay cây chọn đọc thiệp tri ân (Tự động hiện khi ở gần Cội Cây Tri Thức hoặc Cây Đa)
-  updateTreeRotationHUD() {
-    const hud = document.getElementById('tree-rotation-hud');
-    const hudName = document.getElementById('tree-hud-name');
-    if (!hud || !hudName) return;
-
-    if (this.cameraMode === 'inspect') {
-      hud.classList.add('hidden');
-      return;
-    }
-
-    const camPos = this.camera.position;
-    // Vị trí Cây Đa trong phòng: (0, 1.6, -24.3)
-    const distBanyan = camPos.distanceTo(new THREE.Vector3(0, 1.6, -24.3));
-    // Vị trí Cội Cây Tri Thức sảnh ngoài: (0, 1.6, 0)
-    const distWishing = Math.hypot(camPos.x, camPos.z);
-
-    if (distBanyan < 10.5) {
-      this.activeNearTree = 'banyan';
-      hudName.textContent = 'CÂY ĐA TRI ÂN • GIAN NHÀ GIÁO VIỆT NAM';
-      hud.classList.remove('hidden');
-    } else if (distWishing < 9.5) {
-      this.activeNearTree = 'wishing';
-      hudName.textContent = 'CỘI CÂY TRI THỨC • ĐẠI SẢNH';
-      hud.classList.remove('hidden');
-    } else {
-      this.activeNearTree = null;
-      hud.classList.add('hidden');
-    }
-  }
-
-  // Xoay cây đang đứng gần theo hướng chỉ định (+1: xoay phải, -1: xoay trái)
-  rotateActiveTree(direction = 1) {
-    if (!this.builder) return;
-    const step = (Math.PI / 8) * direction; // ~22.5 độ mỗi lần bấm
-
-    if (this.activeNearTree === 'banyan') {
-      this.builder.rotateTreeCanopy('banyan', step);
-      if (this.builder.banyanCanopyRotatingGroup) {
-        this.treeDragTarget = this.builder.banyanCanopyRotatingGroup;
-        this.treeAngularVelocity = direction * 0.04;
-      }
-    } else {
-      this.builder.rotateTreeCanopy('wishing', step);
-      if (this.builder.wishingTreeRotatingGroup) {
-        this.treeDragTarget = this.builder.wishingTreeRotatingGroup;
-        this.treeAngularVelocity = direction * 0.04;
-      }
-    }
-
-    if (typeof this.playChimeSound === 'function') {
-      this.playChimeSound();
-    }
   }
 }
 

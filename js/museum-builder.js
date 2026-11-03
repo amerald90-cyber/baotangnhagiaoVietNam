@@ -200,6 +200,76 @@ class MuseumBuilder {
     ctx.fillText(str, x, y, maxWidth);
   }
 
+  createGrandWelcomeSignTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 2048;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Nền Navy hoàng gia chuyển sắc sâu thẳm
+    const grad = ctx.createLinearGradient(0, 0, 2048, 512);
+    grad.addColorStop(0, '#0a1a2f');
+    grad.addColorStop(0.5, '#122644');
+    grad.addColorStop(1, '#081527');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 2048, 512);
+
+    // Khung viền kép dập nổi thếp Vàng Kim 24K
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 14;
+    ctx.strokeRect(24, 24, 2000, 464);
+
+    ctx.strokeStyle = '#dfa528';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(48, 48, 1952, 416);
+
+    // 4 góc hoa văn thếp vàng kim cổ truyền
+    const cornerSize = 42;
+    ctx.fillStyle = '#ffd700';
+    [[48, 48], [2000 - cornerSize, 48], [48, 464 - cornerSize], [2000 - cornerSize, 464 - cornerSize]].forEach(([cx, cy]) => {
+      ctx.fillRect(cx, cy, cornerSize, cornerSize);
+    });
+
+    // Biểu tượng Hoa Sen / Quốc hoa & Ngôi sao đỉnh biển
+    ctx.fillStyle = '#ffd700';
+    ctx.font = '28px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('✦   🏛️   ✦', 1024, 115);
+
+    // TÊN BẢO TÀNG LỚN MẠ VÀNG 24K: BẢO TÀNG NHÀ GIÁO VIỆT NAM
+    ctx.fillStyle = '#ffd700';
+    ctx.font = 'bold 84px "Cinzel", "Cormorant Garamond", serif';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+    ctx.shadowBlur = 18;
+    ctx.fillText('BẢO TÀNG NHÀ GIÁO VIỆT NAM', 1024, 245);
+    ctx.shadowBlur = 0;
+
+    // Đường gạch chỉ vàng hoàng gia
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(340, 290);
+    ctx.lineTo(1708, 290);
+    ctx.stroke();
+
+    // Dòng phụ đề trang trọng
+    ctx.fillStyle = '#fce4a6';
+    ctx.font = '600 34px "Be Vietnam Pro", sans-serif';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 8;
+    ctx.fillText('KHÔNG GIAN TRƯNG BÀY & TÔN VINH SỰ NGHIỆP TRỒNG NGƯỜI', 1024, 355);
+    ctx.shadowBlur = 0;
+
+    // Dòng chào đón
+    ctx.fillStyle = '#e6be6a';
+    ctx.font = 'italic 26px "Cormorant Garamond", serif';
+    ctx.fillText('CHÀO MỪNG QUÝ KHÁCH THAM QUAN', 1024, 420);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.anisotropy = 16;
+    return tex;
+  }
+
   createTextPlaqueTexture({ title, subtitle, quote, bg = '#102138', border = '#c89d54', width = 2048, height = 512 }) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -1337,28 +1407,60 @@ class MuseumBuilder {
     });
 
     // Biển cổng vòm tại Đại Sảnh dẫn vào 4 phòng
+    // Biển cổng vòm tại Đại Sảnh dẫn vào các phòng & Cổng sảnh đón khách
     const portals = [
       { x: -10.2, z: 0, rotY: Math.PI / 2, label: 'LỊCH SỬ PHÁT TRIỂN GIÁO DỤC VIỆT NAM' },
       { x: 0, z: -10.2, rotY: 0, label: 'GIAN TRƯNG BÀY: NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ' },
-      // (Đã có Cổng vòm thông phòng Archway Portal với biển hiệu đồng bộ mới tại x = 11.0)
-      { x: 0, z: 10.2, rotY: Math.PI, label: 'KHU BỘ ĐỒ DÙNG & HIỆN VẬT DẠY HỌC' }
+      // Biển cổng vòm chính đón khách từ đại sảnh (z = 10.2): mang tên BẢO TÀNG NHÀ GIÁO VIỆT NAM cả 2 mặt
+      { x: 0, z: 10.2, rotY: Math.PI, label: 'BẢO TÀNG NHÀ GIÁO VIỆT NAM', isGrandWelcome: true }
     ];
     portals.forEach((p) => {
-      const bannerTex = this.createTextPlaqueTexture({
-        title: p.label,
-        subtitle: 'BẢO TÀNG NHÀ GIÁO VIỆT NAM',
-        quote: '',
-        width: 1536,
-        height: 384
-      });
+      let frontTex = null;
+      let backTex = null;
+
+      if (p.isGrandWelcome || p.z === 10.2) {
+        // Biển đón khách cổng sảnh: mang tên BẢO TÀNG NHÀ GIÁO VIỆT NAM rực rỡ cả 2 mặt
+        frontTex = this.createGrandWelcomeSignTexture();
+        backTex = this.createGrandWelcomeSignTexture();
+      } else {
+        frontTex = this.createTextPlaqueTexture({
+          title: p.label,
+          subtitle: 'BẢO TÀNG NHÀ GIÁO VIỆT NAM',
+          quote: '',
+          width: 1536,
+          height: 384
+        });
+        backTex = this.createTextPlaqueTexture({
+          title: p.label,
+          subtitle: 'BẢO TÀNG NHÀ GIÁO VIỆT NAM',
+          quote: '',
+          width: 1536,
+          height: 384
+        });
+      }
+
       const board = new THREE.Mesh(new THREE.BoxGeometry(6.4, 1.15, 0.24), this.materials.navyPanel);
       board.position.set(p.x, 6.4, p.z);
       board.rotation.y = p.rotY;
       this.scene.add(board);
 
-      const face = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 1.02), new THREE.MeshBasicMaterial({ map: bannerTex }));
-      face.position.set(0, 0, 0.13);
-      board.add(face);
+      // Viền kim loại đồng mạ vàng bọc quanh mép biển
+      const boardFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(6.46, 1.21, 0.25),
+        this.materials.bronzeGold
+      );
+      board.add(boardFrame);
+
+      // Mặt trước (Facing local +Z)
+      const faceFront = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 1.02), new THREE.MeshBasicMaterial({ map: frontTex }));
+      faceFront.position.set(0, 0, 0.132);
+      board.add(faceFront);
+
+      // Mặt sau (Facing local -Z) - Giúp bất kỳ ai nhìn từ hướng nào cũng thấy tên bảo tàng rực rỡ, không bao giờ bị trống
+      const faceBack = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 1.02), new THREE.MeshBasicMaterial({ map: backTex }));
+      faceBack.position.set(0, 0, -0.132);
+      faceBack.rotation.y = Math.PI;
+      board.add(faceBack);
     });
   }
 
