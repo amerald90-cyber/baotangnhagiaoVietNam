@@ -402,26 +402,30 @@ class VietnamTeachersMuseumApp {
               vSender.toLowerCase().includes('người gửi') ||
               vTeacher.toLowerCase().includes('nhà giáo') ||
               vTeacher.toLowerCase().includes('test') ||
-              vPhoto.toLowerCase().includes('link ảnh')
+              vTeacher.toLowerCase().includes('nháp')
             ) {
               return;
             }
 
-            if (vTeacher && (vPhoto || vBio)) {
-              const workplace = [vSchool, vClass, vCity].filter(Boolean).join(' • ') || 'Đóng góp tư liệu';
-              let directPhoto = vPhoto;
-              if (directPhoto.includes('drive.google.com/file/d/')) {
-                const idMatch = directPhoto.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                if (idMatch) directPhoto = 'https://lh3.googleusercontent.com/d/' + idMatch[1];
-              } else if (directPhoto.includes('id=')) {
-                const idMatch = directPhoto.match(/id=([a-zA-Z0-9_-]+)/);
-                if (idMatch) directPhoto = 'https://lh3.googleusercontent.com/d/' + idMatch[1];
-              }
+            // Bắt buộc phải có ảnh tư liệu hợp lệ mới đưa lên Bức Tường Ký Ức
+            if (!vPhoto || vPhoto.toLowerCase().includes('link ảnh') || vPhoto === 'null') {
+              return;
+            }
 
-              // Fallback an toàn nếu link ảnh trống hoặc không hợp lệ
-              if (!directPhoto || directPhoto.toLowerCase().includes('link') || (!directPhoto.startsWith('http') && !directPhoto.startsWith('data:image'))) {
-                directPhoto = 'assets/teachers/dt_26_nguyen_tat_thanh.jpg';
-              }
+            const workplace = [vSchool, vClass, vCity].filter(Boolean).join(' • ') || 'Đóng góp tư liệu';
+            let directPhoto = vPhoto;
+            if (directPhoto.includes('drive.google.com/file/d/')) {
+              const idMatch = directPhoto.match(/\/d\/([a-zA-Z0-9_-]+)/);
+              if (idMatch) directPhoto = 'https://lh3.googleusercontent.com/d/' + idMatch[1];
+            } else if (directPhoto.includes('id=')) {
+              const idMatch = directPhoto.match(/id=([a-zA-Z0-9_-]+)/);
+              if (idMatch) directPhoto = 'https://lh3.googleusercontent.com/d/' + idMatch[1];
+            }
+
+            // Nếu không phải URL ảnh hoặc chuỗi ảnh Base64 thì bỏ qua
+            if (!directPhoto.startsWith('http') && !directPhoto.startsWith('data:image')) {
+              return;
+            }
 
               memoriesFromSheet.push({
                 id: `sheet-mem-${idx}`,
@@ -1847,13 +1851,13 @@ class VietnamTeachersMuseumApp {
       const preview = document.getElementById(previewId);
       const labelPhoto = document.getElementById('label-photo');
 
-      // Tự động tối ưu dung lượng ảnh qua Canvas (tối đa 1200px, JPEG 0.85) để tải siêu nhanh lên Drive
+      // Tự động tối ưu dung lượng ảnh qua Canvas (tối đa 520px, JPEG 0.72) để vừa lưu được Drive vừa lưu trực tiếp vào Sheet
       const img = new Image();
       img.onload = () => {
         try {
           let width = img.width;
           let height = img.height;
-          const maxDim = 1200;
+          const maxDim = 520;
           if (width > maxDim || height > maxDim) {
             if (width > height) {
               height = Math.round((height * maxDim) / width);
@@ -1868,7 +1872,7 @@ class VietnamTeachersMuseumApp {
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
 
           if (preview) {
             preview.src = compressedDataUrl;
@@ -2019,6 +2023,7 @@ class VietnamTeachersMuseumApp {
     const drivePayload = {
       action: 'addMemory',
       base64: base64Data,
+      photoUrl: photoDataUrl,
       mimeType: mimeType,
       fileName: fileName,
       teacherName: teacherName,

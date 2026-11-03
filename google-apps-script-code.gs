@@ -218,15 +218,23 @@ function appendMemoryWall(payload) {
   var teacherName = toProperCaseVN(payload.teacherName || payload.teacher || 'Thầy Cô Kính Mến');
   var teacherBio = formatSentenceVN(payload.teacherBio || payload.story || payload.message || '');
 
-  // Lưu ảnh vào Drive Folder chỉ định
-  var photoUrl = payload.photoUrl || '';
+  // Lưu ảnh: Ưu tiên tải lên Google Drive, nếu Drive chưa cấp quyền thì lưu trực tiếp Base64 vào Sheet
+  var photoUrl = '';
   var fileId = '';
   if (payload.base64) {
     var fileName = payload.fileName || ('Anh_' + teacherName.replace(/\s+/g, '_') + '_' + now.getTime() + '.jpg');
     var uploadRes = saveBase64ImageToDrive(payload.base64, fileName, payload.mimeType);
-    if (uploadRes.url) {
+    if (uploadRes && uploadRes.url) {
       photoUrl = uploadRes.url;
       fileId = uploadRes.fileId;
+    }
+  }
+
+  // Dự phòng kép: Nếu Google Drive chưa lưu được link, lưu trực tiếp chuỗi Base64 ảnh vào ô Column H
+  if (!photoUrl) {
+    var directData = payload.photoUrl || (payload.base64 ? ('data:image/jpeg;base64,' + payload.base64) : '');
+    if (directData && directData.length < 49000) {
+      photoUrl = directData;
     }
   }
 
