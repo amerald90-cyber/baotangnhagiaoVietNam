@@ -71,7 +71,7 @@ class VietnamTeachersMuseumApp {
     // Cấu hình kết nối ngầm lưu trữ lời tri ân của học sinh (ẩn hoàn toàn khỏi giao diện công khai)
     this.googleSheetId = '1NTR--NxzjtvlzQVDhuVNYQ5q71tVJ8i-4DMnW3uMdSg';
     this.sheetWebAppUrl =
-      'https://script.google.com/macros/s/AKfycbx6LKL6AeWpq0-16bUCnbzifahJus3LepSPmHMYirICKuEUXTxv99jZaJFbND2oPol4/exec';
+      'https://script.google.com/macros/s/AKfycbzD8V6ZrwyjZawy7WgTjGgWeLolB_ejPyMwQ0T29PVlWvI3lWC-gzqNn_M8XqmhzRs4/exec';
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const customUrl = urlParams.get('scriptUrl') || localStorage.getItem('custom_sheet_webapp_url');
@@ -427,25 +427,24 @@ class VietnamTeachersMuseumApp {
               return;
             }
 
-              memoriesFromSheet.push({
-                id: `sheet-mem-${idx}`,
-                teacherName: this.formatVietnameseProperName(vTeacher),
-                workplace: workplace,
-                school: vSchool,
-                className: vClass,
-                province: vCity,
-                teacherInfo: this.formatVietnameseSentence(vBio),
-                teacherTitle: workplace,
-                senderName: this.formatVietnameseProperName(vSender) || 'Học sinh',
-                studentName: this.formatVietnameseProperName(vSender) || 'Học sinh',
-                photo: directPhoto,
-                photoAfter: directPhoto,
-                photoBefore: directPhoto,
-                story: this.formatVietnameseSentence(vBio),
-                category: 'modern',
-                createdAt: vTime || 'Lưu trữ trên Bảo tàng'
-              });
-            }
+            memoriesFromSheet.push({
+              id: `sheet-mem-${idx}`,
+              teacherName: this.formatVietnameseProperName(vTeacher),
+              workplace: workplace,
+              school: vSchool,
+              className: vClass,
+              province: vCity,
+              teacherInfo: this.formatVietnameseSentence(vBio),
+              teacherTitle: workplace,
+              senderName: this.formatVietnameseProperName(vSender) || 'Học sinh',
+              studentName: this.formatVietnameseProperName(vSender) || 'Học sinh',
+              photo: directPhoto,
+              photoAfter: directPhoto,
+              photoBefore: directPhoto,
+              story: this.formatVietnameseSentence(vBio),
+              category: 'modern',
+              createdAt: vTime || 'Lưu trữ trên Bảo tàng'
+            });
           });
 
           if (memoriesFromSheet.length > 0) {

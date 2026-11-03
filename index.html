@@ -74,7 +74,7 @@
 
   <!-- NÚT CTA TỐI GIẢN TRÊN NGOẠI CẢNH (MẶT TIỀN BẢO TÀNG) -->
   <div id="exterior-cta-bar" class="exterior-cta-overlay">
-    <button id="btn-exterior-enter" type="button" class="btn-exterior-enter-pill" title="Bước vào Bảo tàng" aria-label="Bước vào Bảo tàng">
+    <button id="btn-exterior-enter" type="button" class="btn-exterior-enter-pill" title="Bước vào Bảo tàng" aria-label="Bước vào Bảo tàng" onclick="window.handleEnterMuseumClick ? window.handleEnterMuseumClick() : (window.app && window.app.flyIntoMuseum && window.app.flyIntoMuseum())">
       <span class="enter-pulse-ring"></span>
       <span class="enter-btn-text">BƯỚC VÀO</span>
       <span class="enter-arrow-icon">➔</span>
