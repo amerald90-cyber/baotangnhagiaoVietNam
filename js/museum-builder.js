@@ -708,12 +708,37 @@ class MuseumBuilder {
       { x: 0, z: -29.0, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -35.0 } },           // Phía sau cây Đa
       { x: 0, z: -33.5, rotY: 0, lookAt: { x: 0, y: 1.6, z: -24.3 } },                 // Cuối phòng ngắm ngược lại cây
 
-      // 4. TIẾN VÀO PHÒNG 15 VỊ BỘ TRƯỞNG (ĐÔNG WING)
+      // 4. MẠNG LƯỚI MŨI TÊN NHỎ ĐIỀU HƯỚNG DÀY ĐẶC TRONG PHÒNG BỘ TRƯỞNG (ĐÔNG WING)
+      // Lối vào từ Đại Sảnh
       { x: 3.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 10.0, y: 1.6, z: 0 } },
-      { x: 8.0, z: 0, rotY: Math.PI / 2, lookAt: { x: 16.0, y: 1.6, z: 0 } },
-      { x: 14.0, z: 0, rotY: Math.PI / 2, lookAt: { x: 22.0, y: 1.6, z: 0 } },
-      { x: 20.0, z: 0, rotY: Math.PI / 2, lookAt: { x: 28.0, y: 1.6, z: 0 } },
-      { x: 26.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: 16.0, y: 1.6, z: 0 } }, // Quay lại
+      { x: 7.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 14.0, y: 1.6, z: 0 } },
+      { x: 11.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 18.0, y: 1.6, z: 0 } }, // Cửa phòng
+
+      // Trục trung tâm xuyên suốt phòng
+      { x: 14.8, z: 0, rotY: Math.PI / 2, lookAt: { x: 21.0, y: 1.6, z: 0 } },
+      { x: 18.0, z: 0, rotY: Math.PI / 2, lookAt: { x: 22.5, y: 1.6, z: 0 } },
+      { x: 21.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 26.5, y: 1.6, z: 0 } }, // Ngang bục Quả Cầu Vàng
+      { x: 25.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 30.0, y: 1.6, z: 0 } },
+      { x: 29.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 34.0, y: 1.6, z: 0 } },
+      { x: 32.0, z: 0, rotY: Math.PI / 2, lookAt: { x: 34.5, y: 1.6, z: 0 } }, // Sát tường cuối
+
+      // Dãy hành lang phía Bắc (ngắm chi tiết các chân dung Bộ trưởng tường Bắc)
+      { x: 16.0, z: -3.0, rotY: -Math.PI / 2, lookAt: { x: 16.0, y: 1.6, z: -6.5 } },
+      { x: 20.0, z: -3.0, rotY: -Math.PI / 2, lookAt: { x: 20.0, y: 1.6, z: -6.5 } },
+      { x: 24.0, z: -3.0, rotY: -Math.PI / 2, lookAt: { x: 24.0, y: 1.6, z: -6.5 } },
+      { x: 28.0, z: -3.0, rotY: -Math.PI / 2, lookAt: { x: 28.0, y: 1.6, z: -6.5 } },
+
+      // Dãy hành lang phía Nam (ngắm chi tiết các chân dung Bộ trưởng tường Nam)
+      { x: 16.0, z: 3.0, rotY: Math.PI / 2, lookAt: { x: 16.0, y: 1.6, z: 6.5 } },
+      { x: 20.0, z: 3.0, rotY: Math.PI / 2, lookAt: { x: 20.0, y: 1.6, z: 6.5 } },
+      { x: 24.0, z: 3.0, rotY: Math.PI / 2, lookAt: { x: 24.0, y: 1.6, z: 6.5 } },
+      { x: 28.0, z: 3.0, rotY: Math.PI / 2, lookAt: { x: 28.0, y: 1.6, z: 6.5 } },
+
+      // Chiều quay ngược lại hướng về Đại Sảnh
+      { x: 30.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: 22.0, y: 1.6, z: 0 } },
+      { x: 24.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: 16.0, y: 1.6, z: 0 } },
+      { x: 17.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: 10.0, y: 1.6, z: 0 } },
+      { x: 10.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: 0.0, y: 1.6, z: 0 } },
 
       // 5. TIẾN VÀO PHÒNG LỊCH SỬ GIÁO DỤC (TÂY WING)
       { x: -3.5, z: 0, rotY: -Math.PI / 2, lookAt: { x: -10.0, y: 1.6, z: 0 } },
@@ -806,7 +831,7 @@ class MuseumBuilder {
       {
         x: 8.8, z: 0,
         icon: '➡', action: 'TIẾN VÀO • GIAN PHÒNG ĐỘC LẬP',
-        title: 'PHÒNG 15 VỊ BỘ TRƯỞNG',
+        title: 'BỘ TRƯỞNG BỘ GD&ĐT QUA CÁC THỜI KỲ',
         subtitle: 'Khám phá Chân dung & Dấu ấn 15 vị Tư lệnh ngành Giáo dục (1945 – Nay)',
         targetZoneId: 'room-ministers'
       },
@@ -3427,6 +3452,128 @@ class MuseumBuilder {
       rotateY: 0.10
     });
 
+    
+    // ==================== 4b. 2 CÂY BONSAI PHA LÊ LẤP LÁNH ĐỐI XỨNG 2 BÊN CÂY ĐA TRI ÂN ====================
+    // Tạo điểm nhấn tiền cảnh lung linh, sang trọng bậc nhất hai bên vòm đại thụ
+    const createMiniCrystalBonsai = (offsetX, offsetZ, treeRotY) => {
+      const bonsaiG = new THREE.Group();
+      bonsaiG.position.set(offsetX, 0.16, offsetZ);
+      bonsaiG.rotation.y = treeRotY;
+
+      // 1. Chậu đế cẩm thạch trắng viền đồng mạ vàng
+      const potBase = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.52, 0.62, 0.18, 24),
+        this.materials.plinthStone
+      );
+      potBase.position.y = 0.09;
+      bonsaiG.add(potBase);
+
+      const potTrim = new THREE.Mesh(
+        new THREE.TorusGeometry(0.53, 0.025, 8, 32),
+        this.materials.bronzeGold
+      );
+      potTrim.rotation.x = Math.PI / 2;
+      potTrim.position.y = 0.18;
+      bonsaiG.add(potTrim);
+
+      // Thân bonsai bằng đồng mạ vàng uốn lượn nghệ thuật
+      const trunkCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 0.18, 0),
+        new THREE.Vector3(0.08, 0.65, 0.05),
+        new THREE.Vector3(-0.12, 1.15, -0.04),
+        new THREE.Vector3(0.05, 1.55, 0.02)
+      ]);
+      const trunkGeo = new THREE.TubeGeometry(trunkCurve, 20, 0.042, 8, false);
+      const trunkMesh = new THREE.Mesh(trunkGeo, this.materials.bronzeGold);
+      bonsaiG.add(trunkMesh);
+
+      // Tán bonsai xoay 360 độ êm ái
+      const bonsaiCanopy = new THREE.Group();
+      bonsaiCanopy.position.set(0.05, 1.55, 0.02);
+
+      // 12 Cành nhánh vươn xòe mềm mại
+      for (let b = 0; b < 12; b++) {
+        const bAngle = (b / 12) * Math.PI * 2;
+        const bReach = 0.65 + (b % 3) * 0.14;
+        const bY = 0.08 + (b % 2) * 0.08;
+
+        const bBranch = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.012, 0.024, bReach, 6),
+          this.materials.brightGold
+        );
+        bBranch.position.set(Math.cos(bAngle) * (bReach / 2), bY + 0.12, Math.sin(bAngle) * (bReach / 2));
+        bBranch.rotation.z = -Math.cos(bAngle) * 1.05;
+        bBranch.rotation.x = Math.sin(bAngle) * 1.05;
+        bonsaiCanopy.add(bBranch);
+
+        // Lá pha lê kim cương phát sáng
+        const crystalLeaf = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.075, 0),
+          crystalLeafMat
+        );
+        crystalLeaf.scale.set(0.85, 1.4, 0.4);
+        crystalLeaf.position.set(Math.cos(bAngle) * bReach, bY + 0.22, Math.sin(bAngle) * bReach);
+        bonsaiCanopy.add(crystalLeaf);
+
+        // Tinh cầu mini buông nhẹ
+        const isCyan = b % 2 === 0;
+        const miniOrb = new THREE.Mesh(
+          new THREE.SphereGeometry(0.045, 12, 12),
+          isCyan ? cyanOrbMat : goldMirrorOrbMat
+        );
+        miniOrb.position.set(Math.cos(bAngle) * (bReach * 0.85), bY - 0.08, Math.sin(bAngle) * (bReach * 0.85));
+        bonsaiCanopy.add(miniOrb);
+      }
+
+      // Đỉnh ngọn bonsai: Búp sen pha lê phát sáng
+      const crown = new THREE.Mesh(new THREE.OctahedronGeometry(0.14, 0), crystalLeafMat);
+      crown.scale.set(0.85, 1.45, 0.85);
+      crown.position.y = 0.32;
+      bonsaiCanopy.add(crown);
+
+      // Đám mây 200 hạt sao lấp lánh mini
+      const miniStarCount = 200;
+      const miniStarPos = new Float32Array(miniStarCount * 3);
+      const miniStarCol = new Float32Array(miniStarCount * 3);
+      for (let s = 0; s < miniStarCount; s++) {
+        const theta = s * 2.4;
+        const r = 0.25 + Math.random() * 0.65;
+        miniStarPos[s * 3] = r * Math.cos(theta);
+        miniStarPos[s * 3 + 1] = 0.05 + Math.random() * 0.55;
+        miniStarPos[s * 3 + 2] = r * Math.sin(theta);
+        const col = starPalette[s % starPalette.length];
+        miniStarCol[s * 3] = col.r;
+        miniStarCol[s * 3 + 1] = col.g;
+        miniStarCol[s * 3 + 2] = col.b;
+      }
+      const miniStarGeo = new THREE.BufferGeometry();
+      miniStarGeo.setAttribute('position', new THREE.BufferAttribute(miniStarPos, 3));
+      miniStarGeo.setAttribute('color', new THREE.BufferAttribute(miniStarCol, 3));
+      const miniStarPoints = new THREE.Points(miniStarGeo, this.banyanStarMaterial);
+      miniStarPoints.raycast = () => {};
+      bonsaiCanopy.add(miniStarPoints);
+
+      // Đèn PointLight vàng ấm dịu
+      const miniLight = new THREE.PointLight(0xffdf99, 1.2, 8, 1.5);
+      miniLight.position.set(0, 0.3, 0);
+      bonsaiCanopy.add(miniLight);
+
+      bonsaiG.add(bonsaiCanopy);
+
+      this.animatedObjects.push({
+        mesh: bonsaiCanopy,
+        rotateY: 0.15
+      });
+
+      return bonsaiG;
+    };
+
+    // Đặt 2 cây Bonsai Pha Lê đối xứng 2 bên trái & phải của bục Cây Đa Tri Ân
+    const leftBonsai = createMiniCrystalBonsai(-5.5, 0.8, 0.35);
+    const rightBonsai = createMiniCrystalBonsai(5.5, 0.8, -0.35);
+    treeGroup.add(leftBonsai);
+    treeGroup.add(rightBonsai);
+
     parent.add(treeGroup);
   }
 
@@ -4340,7 +4487,7 @@ class MuseumBuilder {
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 88px "Cinzel", "Cormorant Garamond", Georgia, serif';
     ctx.letterSpacing = '4px';
-    ctx.fillText('15 VỊ BỘ TRƯỞNG BỘ GIÁO DỤC', 1024, 255);
+    ctx.fillText('BỘ TRƯỞNG BỘ GIÁO DỤC QUA CÁC THỜI KỲ', 1024, 255);
     ctx.shadowBlur = 0;
 
     // Đường kẻ phân cách
@@ -4741,7 +4888,7 @@ class MuseumBuilder {
         lifespan: min.years,
         code: `BỘ TRƯỞNG #${min.id < 10 ? '0' + min.id : min.id}`,
         zoneId: 'room-ministers',
-        zoneName: 'Gian Phòng 15 Vị Bộ Trưởng',
+        zoneName: 'Bộ trưởng Bộ Giáo dục Việt Nam qua các thời kỳ',
         era: min.term,
         material: 'Ảnh chân dung lịch sử & Dấu ấn ngành Giáo dục',
         dimensions: `Chân dung số ${min.id}/15 • Phòng Trưng Bày Chuyên Đề`,
@@ -5023,7 +5170,7 @@ class MuseumBuilder {
         this.buildCenterpiecePodium(group, '15 NHÀ GIÁO ƯU TÚ NHẤT LỊCH SỬ');
         break;
       case 'exhibit-15-ministers':
-        this.buildCenterpiecePodium(group, '15 BỘ TRƯỞNG BỘ GIÁO DỤC');
+        this.buildCenterpiecePodium(group, 'BỘ TRƯỞNG BỘ GIÁO DỤC QUA CÁC THỜI KỲ');
         break;
       case 'art-uncle-ho-letter':
         this.buildUncleHoLetterExhibit3D(group);

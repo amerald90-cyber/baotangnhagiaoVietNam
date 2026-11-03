@@ -938,7 +938,7 @@ class VietnamTeachersMuseumApp {
           { icon: '🏛️', label: 'Quảng Trường & Mặt Tiền', zoneId: 'zone-exterior' },
           { icon: '⬅', label: 'Lịch Sử Giáo Dục (Tây)', zoneId: 'room-history' },
           { icon: '⬆', label: '15 Nhà Giáo & Hành Lang (Bắc)', zoneId: 'room-educators' },
-          { icon: '➡', label: '15 Bộ Trưởng (Đông)', zoneId: 'room-ministers' },
+          { icon: '➡', label: 'Bộ trưởng Bộ GD', zoneId: 'room-ministers' },
           { icon: '⬇', label: 'Đồ Dùng Dạy Học (Nam)', zoneId: 'room-tools' }
         ];
         break;
@@ -1336,7 +1336,7 @@ class VietnamTeachersMuseumApp {
     } else if (art.isMinistersGallery) {
       rosterGridHTML = `
         <div class="roster-section">
-          <h4>✦ Danh sách 15 Bộ trưởng Bộ Giáo dục (Click vào ảnh để xem):</h4>
+          <h4>✦ Danh sách Bộ trưởng Bộ Giáo dục Việt Nam qua các thời kỳ (Click vào ảnh để xem):</h4>
           <div class="ministers-grid">
             ${(window.FIFTEEN_MINISTERS || [])
               .map((m) => {
@@ -1424,7 +1424,7 @@ class VietnamTeachersMuseumApp {
   }
 
   
-  // ==================== QUẢN LÝ MODAL 2D 15 BỘ TRƯỞNG BỘ GIÁO DỤC (DEEP HISTORICAL DOSSIER) ====================
+  // ==================== QUẢN LÝ MODAL BỘ TRƯỞNG BỘ GIÁO DỤC VIỆT NAM QUA CÁC THỜI KỲ (DEEP HISTORICAL DOSSIER) ====================
   openMinisterModal(min) {
     if (!min) return;
     this.currentMinisterId = min.id || 1;

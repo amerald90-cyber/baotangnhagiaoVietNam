@@ -105,7 +105,7 @@ const ministersData = [
     "name": "GS. TS. Nguyễn Minh Hiển",
     "years": "Sinh năm 1948",
     "term": "Bộ trưởng Bộ GD&ĐT (1997 – 2006)",
-    "img": "assets/ministers/Giáo sư Nguyễn Minh Hiển..jpg",
+    "img": "assets/ministers/bt_10_nguyen_minh_hien.jpg",
     "career": "GS. TS. Nguyễn Minh Hiển quê Tiền Hải, Thái Bình. Ông là cựu sinh viên, giảng viên và từng giữ cương vị Hiệu trưởng Trường Đại học Bách khoa Hà Nội trước khi được Quốc hội phê chuẩn giữ chức Bộ trưởng Bộ Giáo dục và Đào tạo liên tục trong gần một thập kỷ (1997–2006).",
     "reforms": "• Lãnh đạo thực hiện thắng lợi Mục tiêu Quốc gia: Hoàn thành phổ cập giáo dục trung học cơ sở trên phạm vi toàn quốc vào năm 2000.\n• Chỉ đạo soạn thảo và ban hành Luật Giáo dục năm 1998 (đạo luật giáo dục toàn diện đầu tiên) và Luật Giáo dục năm 2005.\n• Triển khai chương trình đổi mới chương trình và thay sách giáo khoa phổ thông đại trà từ lớp 1 đến lớp 12 trên toàn quốc giai đoạn 2000–2006; phát động chương trình kiên cố hóa trường lớp, xóa bỏ phòng học tranh tre nứa lá.",
     "legacy": "Huân chương Độc lập hạng Nhất. Đóng góp nổi bật trong việc mở rộng quy mô trường lớp, chuẩn hóa hệ thống quản lý ngành giáo dục đáp ứng yêu cầu công nghiệp hóa và chuẩn bị hội nhập quốc tế.",
@@ -205,8 +205,8 @@ const MUSEUM_ZONES = [
   },
   {
     id: 'room-ministers',
-    name: 'Phòng 15 Vị Bộ Trưởng',
-    subtitle: 'Chân dung & Dấu ấn 15 Vị Bộ trưởng Bộ Giáo dục Việt Nam (1945 – Nay)',
+    name: 'Bộ trưởng Bộ Giáo dục Việt Nam qua các thời kỳ',
+    subtitle: 'Chân dung & Dấu ấn các vị Bộ trưởng Bộ Giáo dục Việt Nam qua các thời kỳ',
     description: 'Gian phòng triển lãm chuyên đề độc lập với tông màu xanh Navy hoàng gia (#16243b), sàn đá cẩm thạch đen bóng và hệ đèn rọi spotlight 45 độ tôn vinh 15 vị Tư lệnh ngành Giáo dục.',
     cameraPos: { x: 13.8, y: 2.8, z: 0 },
     lookAt: { x: 23.5, y: 2.4, z: 0 },
@@ -1065,10 +1065,10 @@ Hệ thống trường lớp và quy mô giáo dục phát triển nhanh, thực
   {
     id: 'exhibit-15-ministers',
     code: 'BT-15',
-    title: 'Không Gian Trưng Bày Chân Dung 15 Bộ Trưởng Bộ Giáo Dục Việt Nam (1945 – Nay)',
+    title: 'Bộ Trưởng Bộ Giáo Dục Việt Nam Qua Các Thời Kỳ',
     subtitle: 'Trưng bày hình ảnh tư liệu gốc và dấu ấn lịch sử của 15 vị Bộ trưởng',
     zoneId: 'room-ministers',
-    zoneName: '15 Bộ Trưởng Bộ Giáo Dục',
+    zoneName: 'Bộ trưởng Bộ Giáo dục Việt Nam qua các thời kỳ',
     era: 'Từ tháng 8/1945 đến nay',
     material: 'Ảnh chân dung tư liệu gốc đóng khung gỗ tự nhiên viền đồng mạ vàng',
     dimensions: 'Hệ thống 15 khung chân dung 3D chiếu sáng chuẩn bảo tàng quốc gia',
@@ -1085,7 +1085,7 @@ Hệ thống trường lớp và quy mô giáo dục phát triển nhanh, thực
       'Có bảng tra cứu nhanh toàn bộ 15 Bộ trưởng kèm ảnh gốc.'
     ],
     videoData: {
-      title: 'Phim tư liệu: Chân dung 15 Bộ trưởng Bộ Giáo dục Việt Nam (1945 – Nay)',
+      title: 'Phim tư liệu: Bộ trưởng Bộ Giáo dục Việt Nam qua các thời kỳ',
       duration: '02:15',
       scenes: [
         { time: '00:00 - 00:45', heading: 'Những vị Bộ trưởng thời kỳ Kháng chiến & Kiến quốc', caption: 'Vũ Đình Hòe, Đặng Thai Mai, Ca Văn Thỉnh, Nguyễn Văn Huyên, Tạ Quang Bửu.', visualType: 'lamp' },
