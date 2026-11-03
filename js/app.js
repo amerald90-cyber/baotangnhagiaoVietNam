@@ -270,38 +270,52 @@ class VietnamTeachersMuseumApp {
 
   loadSavedMemories() {
     try {
-      const raw = localStorage.getItem('vn_museum_memories_v1');
+      // Dọn dẹp vĩnh viễn các bộ nhớ đệm cũ chứa dữ liệu mẫu chibi / avatar hoạt hình
+      localStorage.removeItem('vn_museum_memories_v1');
+      localStorage.removeItem('vn_museum_memories');
+      localStorage.removeItem('vn_museum_memories_demo');
+
+      const raw = localStorage.getItem('vn_museum_memories_v3');
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Lọc bỏ triệt để toàn bộ ảnh mẫu chibi / avatar hoạt hình cũ và thẻ bài test rác
+          // Lọc bỏ triệt để toàn bộ ảnh mẫu chibi / avatar hoạt hình và bài đăng rác không có ảnh thật
           const filtered = parsed.filter((m) => {
-            if (!m) return false;
+            if (!m || !m.teacherName) return false;
             const id = String(m.id || '');
-            // Xóa tất cả các bài đăng demo cũ có ID dạng mem-01, mem-04,... hoặc demo-
+            // Xóa tất cả các bài đăng demo cũ có ID dạng mem-01, mem-1, demo-
             if (/^(mem|demo)-/i.test(id)) return false;
-            // Xóa bài có tên Thầy giáo Nguyễn Văn Căn hoặc hình avatar hoạt hình mẫu
-            const teacherName = String(m.teacherName || '');
-            if (teacherName.includes('Nguyễn Văn Căn') && /^(mem|demo)-/i.test(id)) return false;
-            if (teacherName.includes('Trần Văn Giàu') && /^(mem|demo)-/i.test(id)) return false;
-            if (teacherName.includes('Đặng Huỳnh Mai') && /^(mem|demo)-/i.test(id)) return false;
+
+            const teacherName = String(m.teacherName || '').toLowerCase();
+            // Xóa bài có tên Nguyễn Văn Căn, Trần Văn Giàu, Đặng Huỳnh Mai nếu có dấu hiệu bài mẫu cũ
+            if (teacherName.includes('nguyễn văn căn') || teacherName.includes('trần văn giàu') || teacherName.includes('đặng huỳnh mai')) {
+              if (id.startsWith('mem-') || id.startsWith('demo-')) return false;
+            }
+
             const p = m.photo || m.photoAfter || m.photoBefore || '';
-            // Xóa bất kỳ ảnh dummy < 1500 ký tự hoặc ảnh chibi
-            if (!p || (p.startsWith('data:image') && p.length < 1500)) return false;
-            if (typeof p === 'string' && (p.includes('chibi') || p.includes('cartoon') || p.includes('sample_avatar'))) return false;
+            // Bắt buộc phải có ảnh hợp lệ
+            if (!p || typeof p !== 'string') return false;
+            // Xóa ảnh dummy 1x1 test pixel (< 1500 ký tự base64)
+            if (p.startsWith('data:image') && p.length < 1500) return false;
+            if (p.includes('chibi') || p.includes('cartoon') || p.includes('sample_avatar')) return false;
+            // Bắt buộc phải là link URL http/https hoặc chuỗi ảnh Base64 thực thụ
+            if (!p.startsWith('http') && !p.startsWith('data:image') && !p.startsWith('assets/')) return false;
+
             return true;
           });
+
           const normalized = filtered.map((m) => ({
             ...m,
             photo: m.photo || m.photoAfter || m.photoBefore || '',
             photoAfter: m.photo || m.photoAfter || m.photoBefore || '',
-            photoBefore: m.photo || m.photoAfter || m.photoBefore || '',
+            photoBefore: m.photo || m.photoBefore || m.photoAfter || '',
             workplace: m.workplace || [m.school, m.province].filter(Boolean).join(' • ') || m.teacherTitle || 'Ngành Giáo dục Việt Nam',
             teacherInfo: m.teacherInfo || m.story || m.teacherTitle || '',
             senderName: m.senderName || m.studentName || 'Học sinh'
           }));
+
           window.MEMORY_WALL_DATA = normalized;
-          localStorage.setItem('vn_museum_memories_v1', JSON.stringify(normalized));
+          localStorage.setItem('vn_museum_memories_v3', JSON.stringify(normalized));
           return normalized;
         }
       }
@@ -314,7 +328,7 @@ class VietnamTeachersMuseumApp {
 
   saveMemoriesToLocal() {
     try {
-      localStorage.setItem('vn_museum_memories_v1', JSON.stringify(window.MEMORY_WALL_DATA || []));
+      localStorage.setItem('vn_museum_memories_v3', JSON.stringify(window.MEMORY_WALL_DATA || []));
     } catch (e) {
       console.warn('Không lưu được localStorage memories:', e);
     }
@@ -470,7 +484,7 @@ class VietnamTeachersMuseumApp {
             const vBio = c(6);
             const vPhoto = c(7);
 
-            // Chỉ bỏ qua dòng tiêu đề của bảng tính nếu có
+            // Bỏ qua dòng tiêu đề của bảng tính nếu có
             const lowerTime = vTime.toLowerCase();
             const lowerTeacher = vTeacher.toLowerCase();
             const lowerSender = vSender.toLowerCase();
@@ -489,17 +503,16 @@ class VietnamTeachersMuseumApp {
               return;
             }
 
-            // Bắt buộc phải có ảnh tư liệu hợp lệ mới đưa lên Bức Tường Ký Ức
-            if (!vPhoto || lowerPhoto.includes('link ảnh') || vPhoto === 'null') {
+            // Bắt buộc phải có ảnh tư liệu thật mới hiển thị trên Bức Tường Ký Ức
+            if (!vPhoto || vPhoto.length < 15 || lowerPhoto.includes('link ảnh') || vPhoto === 'null') {
               return;
             }
 
-            // Bỏ qua dữ liệu test dummy 1x1 pixel (< 500 ký tự base64)
-            if (vPhoto.startsWith('data:image') && vPhoto.length < 500) {
+            // Bỏ qua ảnh dummy 1x1 test pixel (< 1500 ký tự base64)
+            if (vPhoto.startsWith('data:image') && vPhoto.length < 1500) {
               return;
             }
 
-            const workplace = [vSchool, vClass, vCity].filter(Boolean).join(' • ') || 'Đóng góp tư liệu';
             let directPhoto = vPhoto;
             if (directPhoto.includes('drive.google.com/file/d/')) {
               const idMatch = directPhoto.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -510,9 +523,11 @@ class VietnamTeachersMuseumApp {
             }
 
             // Nếu không phải URL ảnh hoặc chuỗi ảnh Base64 thì bỏ qua
-            if (!directPhoto.startsWith('http') && !directPhoto.startsWith('data:image')) {
+            if (!directPhoto.startsWith('http') && !directPhoto.startsWith('data:image') && !directPhoto.startsWith('assets/')) {
               return;
             }
+
+            const workplace = [vSchool, vClass, vCity].filter(Boolean).join(' • ') || 'Đóng góp tư liệu';
 
             memoriesFromSheet.push({
               id: `sheet-mem-${idx}`,
@@ -521,14 +536,14 @@ class VietnamTeachersMuseumApp {
               school: vSchool,
               className: vClass,
               province: vCity,
-              teacherInfo: this.formatVietnameseSentence(vBio),
+              teacherInfo: this.formatVietnameseSentence(vBio) || 'Tư liệu tri ân người thầy cho sự nghiệp trồng người.',
               teacherTitle: workplace,
               senderName: this.formatVietnameseProperName(vSender) || 'Học sinh',
               studentName: this.formatVietnameseProperName(vSender) || 'Học sinh',
               photo: directPhoto,
               photoAfter: directPhoto,
               photoBefore: directPhoto,
-              story: this.formatVietnameseSentence(vBio),
+              story: this.formatVietnameseSentence(vBio) || 'Tư liệu tri ân người thầy cho sự nghiệp trồng người.',
               category: 'modern',
               createdAt: vTime || 'Lưu trữ trên Bảo tàng'
             });
@@ -536,20 +551,19 @@ class VietnamTeachersMuseumApp {
 
           if (memoriesFromSheet.length > 0) {
             window.MEMORY_WALL_DATA = window.MEMORY_WALL_DATA || [];
-            // Dọn dẹp các ảnh dummy 1x1 pixel test cũ nếu có trong bộ nhớ
+            // Dọn dẹp các ảnh dummy hoặc bài không hợp lệ trong bộ nhớ
             window.MEMORY_WALL_DATA = window.MEMORY_WALL_DATA.filter((m) => {
               const p = m.photo || m.photoAfter || '';
-              return !(p.startsWith('data:image') && p.length < 500);
+              return (p.startsWith('http') || p.startsWith('assets/') || (p.startsWith('data:image') && p.length >= 1500));
             });
 
             let addedCount = 0;
-            // Đưa bài đăng mới nhất từ Google Sheet lên đầu danh sách (hàng dưới cùng của Sheet là mới nhất -> unshift cuối cùng sẽ ở vị trí số 0)
+            // Đưa bài đăng mới nhất từ Google Sheet lên đầu danh sách
             memoriesFromSheet.forEach((m) => {
               const existingIdx = window.MEMORY_WALL_DATA.findIndex(
                 (item) => item.teacherName.toLowerCase() === m.teacherName.toLowerCase() && item.senderName.toLowerCase() === m.senderName.toLowerCase()
               );
               if (existingIdx !== -1) {
-                // Cập nhật lại ảnh và thông tin mới nhất từ Google Sheet
                 window.MEMORY_WALL_DATA[existingIdx] = { ...window.MEMORY_WALL_DATA[existingIdx], ...m };
               } else {
                 window.MEMORY_WALL_DATA.unshift(m);
@@ -1815,6 +1829,28 @@ class VietnamTeachersMuseumApp {
     });
   }
 
+  createTeacherFallbackSVG(name) {
+    const cleanName = (name || 'Nhà Giáo Việt Nam').toUpperCase();
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="100%" height="100%">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0e1f38"/>
+          <stop offset="50%" stop-color="#142b4d"/>
+          <stop offset="100%" stop-color="#081426"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="500" fill="url(#bg)"/>
+      <rect x="24" y="24" width="352" height="452" fill="none" stroke="#d4af37" stroke-width="2" rx="8"/>
+      <circle cx="200" cy="180" r="70" fill="rgba(212, 175, 55, 0.12)" stroke="#d4af37" stroke-width="2.5"/>
+      <text x="200" y="195" font-family="'Cinzel', serif" font-size="52" fill="#ffd700" text-anchor="middle">🏛️</text>
+      <text x="200" y="300" font-family="'Cinzel', 'Playfair Display', serif" font-weight="bold" font-size="20" fill="#ffd700" text-anchor="middle">ẢNH TƯ LIỆU NHÀ GIÁO</text>
+      <text x="200" y="335" font-family="'Inter', sans-serif" font-weight="600" font-size="16" fill="#f8fafc" text-anchor="middle">${cleanName.length > 28 ? cleanName.slice(0, 26) + '...' : cleanName}</text>
+      <line x1="120" y1="360" x2="280" y2="360" stroke="#d4af37" stroke-width="1.5" opacity="0.6"/>
+      <text x="200" y="420" font-family="'Inter', sans-serif" font-style="italic" font-size="13" fill="#94a3b8" text-anchor="middle">Bảo tàng số Nhà giáo Việt Nam</text>
+    </svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
   renderMemoryLibraryCards(query = '', category = 'all') {
     const container = document.getElementById('memory-cards-container');
     if (!container) return;
@@ -1871,7 +1907,7 @@ class VietnamTeachersMuseumApp {
       return `
         <div class="memory-card-item" onclick="window.app && window.app.openMemoryDetailModalById('${item.id}')">
           <div class="memory-card-thumb-wrap">
-            <img class="memory-card-thumb" src="${photoSrc}" alt="${item.teacherName}" onerror="this.src='assets/teachers/dt_26_nguyen_tat_thanh.jpg'" loading="lazy" />
+            <img class="memory-card-thumb" src="${photoSrc}" alt="${item.teacherName}" referrerpolicy="no-referrer" crossorigin="anonymous" loading="lazy" onerror="this.onerror=null; this.src=window.app ? window.app.createTeacherFallbackSVG('${encodeURIComponent(item.teacherName)}') : '';" />
             <span class="memory-card-badge">📸 ẢNH TƯ LIỆU</span>
             <div class="memory-card-hover-prompt">
               <span class="memory-card-hover-btn">🔍 Xem Chi Tiết & Tri Ân</span>

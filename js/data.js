@@ -1248,6 +1248,66 @@ HỒ CHÍ MINH`,
     ]
   },
 
+  // --- ĐẠI TỰ TƯỜNG TÂY: BỨC THƯ CUỐI CÙNG CỦA CHỦ TỊCH HỒ CHÍ MINH GỬI NGÀNH GIÁO DỤC (15/10/1968) ---
+  {
+    id: 'mural-uncle-ho-final-letter',
+    code: 'BH-02',
+    title: 'Bức Thư Cuối Cùng Của Chủ Tịch Hồ Chí Minh Gửi Ngành Giáo Dục (15/10/1968)',
+    subtitle: '“Dù khó khăn đến đâu cũng phải tiếp tục thi đua dạy tốt và học tốt.”',
+    zoneId: 'room-tools',
+    zoneName: 'Hành Lang Lời Bác Dạy & Bộ Đồ Dùng Dạy Học',
+    era: '15/10/1968',
+    material: 'Đại tự sơn mài lam ngọc thếp vàng kim, khung đồng chạm sen cổ điển',
+    dimensions: '7.6m × 3.5m',
+    position: { x: -10.92, y: 3.8, z: 18.0 },
+    viewOffset: { x: -7.0, y: 3.8, z: 18.0 },
+    lookAtOffset: { x: -10.92, y: 3.8, z: 18.0 },
+    summary: 'Bức thư lịch sử ngày 15/10/1968 – bức thư cuối cùng Chủ tịch Hồ Chí Minh gửi các thầy giáo, cô giáo, cán bộ công nhân viên và học sinh, sinh viên nhân dịp khai giảng năm học mới giữa khói lửa kháng chiến chống Mỹ.',
+    quote: '“Dù khó khăn đến đâu cũng phải tiếp tục thi đua dạy tốt và học tốt.”',
+    story: `Các cô các chú và các cháu thân mến,
+
+Nhân dịp đầu năm học thứ tư chống Mỹ, cứu nước, Bác thân ái gửi lời thăm hỏi tất cả các cô, các chú và các cháu.
+
+Trong hoàn cảnh cả nước có chiến tranh, sự nghiệp giáo dục của chúng ta vẫn phát triển nhanh, mạnh hơn bao giờ hết.
+
+Bác vui lòng biết rằng mặc dù hoàn cảnh khó khăn, hiện nay miền Bắc nước ta đã có một vạn hai nghìn trường phổ thông, mỗi xã đều có trường cấp một, nhiều xã đã có trường cấp hai, các huyện đều có ít nhất một trường cấp 3. Số người đi học đã hơn 6 triệu, trong đó có hơn 1 triệu cán bộ và công nông đang học bổ túc văn hoá. Số người vào học các trường đại học và trung học chuyên nghiệp tăng gần gấp 3 lần so với trước chiến tranh chống Mỹ. Hơn 30 trường đại học và 200 trường trung học chuyên nghiệp đã phối hợp chặt chẽ với các ngành và các địa phương, đẩy mạnh công tác đào tạo cán bộ, tập trung cũng như tại chức.
+
+Các trường đã có nhiều cố gắng trong việc thi đua dạy tốt và học tốt, bảo đảm an toàn cho thầy và trò, làm cho đời sống vật chất và tinh thần ngày càng tiến bộ.
+
+Mặc dù giặc Mỹ điên cuồng đánh phá miền Bắc ác liệt, chúng không những đã thất bại thảm hại trên mặt trận chính trị, quân sự, mà ta đã thắng chúng cả trên mặt trận giáo dục và đào tạo cán bộ.
+
+Làm được như vậy là nhờ Đảng ta có đường lối đúng đắn, quân đội và nhân dân ta rất anh hùng; và cũng do các cô, các chú, các cháu trong các trường học đã cùng nhau vượt qua nhiều khó khăn để hoàn thành tốt nhiệm vụ.
+
+Nhân dịp này, Bác khen ngợi những cố gắng và thành tích mà các cô, các chú và các cháu đã đạt được.
+
+Nhưng đế quốc Mỹ còn ngoan cố. Cách mạng nước ta còn phải khắc phục nhiều khó khăn gian khổ để đạt thắng lợi hoàn toàn. Hiện nay, Đảng và nhân dân giao cho các cô, các chú, các cháu nhiệm vụ lớn hơn trước. Vì vậy, Bác nhắc các cô, các chú và các cháu mấy điều sau đây:
+
+- Thầy và trò phải luôn luôn nâng cao tinh thần yêu Tổ quốc, yêu chủ nghĩa xã hội, tăng cường tình cảm cách mạng đối với công nông, tuyệt đối trung thành với sự nghiệp cách mạng, triệt để tin tưởng vào sự lãnh đạo của Đảng, sẵn sàng nhận bất kỳ nhiệm vụ nào mà Đảng và nhân dân giao cho, luôn luôn cố gắng cho xứng đáng với đồng bào miền Nam anh hùng.
+
+- Dù khó khăn đến đâu cũng phải tiếp tục thi đua dạy tốt và học tốt. Trên nền tảng giáo dục chính trị và lãnh đạo tư tưởng tốt, phải phấn đấu nâng cao chất lượng văn hoá và chuyên môn nhằm thiết thực giải quyết các vấn đề do cách mạng nước ta đề ra và trong một thời gian không xa, đạt những đỉnh cao của khoa học và kỹ thuật.
+
+- Các cô các chú, các cháu phải cùng nhau tổ chức và quản lý đời sống vật chất và tinh thần ở các trường học ngày một tốt hơn, tăng cường bảo đảm sức khoẻ và an toàn.
+
+Nhiệm vụ của cô giáo, thầy giáo là rất quan trọng và rất vẻ vang.
+
+Giáo dục là sự nghiệp của quần chúng. Cần phải phát huy đầy đủ dân chủ xã hội chủ nghĩa, xây dựng quan hệ thật tốt, đoàn kết thật chặt chẽ giữa thầy và thầy, giữa thầy và trò, giữa học trò với nhau, giữa cán bộ các cấp, giữa nhà trường và nhân dân để hoàn thành thắng lợi nhiệm vụ đó.
+
+Giáo dục nhằm đào tạo những người kế tục sự nghiệp cách mạng to lớn của Đảng và nhân dân ta, do đó các ngành, các cấp đảng và chính quyền địa phương phải thật sự quan tâm hơn nữa đến sự nghiệp này, phải chăm sóc nhà trường về mọi mặt, đẩy sự nghiệp giáo dục của ta lên những bước phát triển mới.
+
+Bác mong chờ những thành tích mới của các cô, các chú và các cháu./.
+
+Chào thân ái và quyết thắng
+BÁC HỒ
+
+(Nguồn: Báo Nhân Dân, số 5299, ngày 16-10-1968; Hồ Chí Minh toàn tập, NXB Chính trị Quốc gia, tập 12, tr. 402-404)`,
+    highlights: [
+      'Bức thư cuối cùng của Bác Hồ gửi thầy và trò ngành giáo dục (15/10/1968).',
+      'Khẩu hiệu bất hủ: "Dù khó khăn đến đâu cũng phải tiếp tục thi đua dạy tốt và học tốt".',
+      'Định hướng xây dựng nền giáo dục XHCN toàn diện cả về văn hóa, chuyên môn và đạo đức.',
+      'Khẳng định vị thế vẻ vang và sứ mệnh thiêng liêng của người thầy trong sự nghiệp trồng người.'
+    ]
+  },
+
   {
     id: 'tool-wartime-set',
     code: 'ĐD-03',

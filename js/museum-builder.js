@@ -2737,128 +2737,146 @@ class MuseumBuilder {
 
     treeGroup.add(trunkGroup);
 
-    // 3. TÁN CÂY ĐA TRI ÂN HOÀNG KIM (NÂNG CẤP ĐỒNG BỘ RỰC RỠ VỚI CỘI CÂY TRI THỨC)
-    // Xoay 360 độ êm ái, cấu trúc cành kim loại vàng vươn rộng, lá pha lê kim cương, thẻ ước có dây rủ và hạt lấp lánh
+    // 3. TÁN CÂY ĐA TRI ÂN HOÀNG KIM (UỐN LƯỢN DÁNG ĐẠI THỤ CỔ THỤ TOẢ RỘNG, XUM XUÊ)
+    // Tán vòm cánh cung vươn ngang bán kính 4.2m - 4.4m phủ kín bệ đá trắng, cành đồng cổ hổ phách, hạt ấm 2700K
     const rotatingCanopy = new THREE.Group();
-    rotatingCanopy.position.y = 3.6;
+    rotatingCanopy.position.y = 3.6; // Đặt chuẩn xác trên ngọn thân gỗ mun
 
-    // Vật liệu pha lê phát sáng cho lá bồ đề & quả cầu ngọc
-    const crystalLeafMat = new THREE.MeshStandardMaterial({
-      color: 0xffe270,
-      emissive: 0xd49000,
-      emissiveIntensity: 0.75,
-      roughness: 0.16,
-      metalness: 0.85
+    // 1. CHẤT LIỆU CÀNH NHÁNH: TÔNG ĐỒNG CỔ & GỖ NÂU PHỦ NHŨ HỔ PHÁCH (Nối liền mạch tuyệt đối từ thân cây)
+    const banyanBranchMat = new THREE.MeshStandardMaterial({
+      color: 0x4e351d,
+      roughness: 0.38,
+      metalness: 0.58,
+      emissive: 0x221307,
+      emissiveIntensity: 0.30
     });
 
-    const cyanOrbMat = new THREE.MeshStandardMaterial({
-      color: 0x5eead4,
-      emissive: 0x0088b3,
+    const banyanSubBranchMat = new THREE.MeshStandardMaterial({
+      color: 0x614424,
+      roughness: 0.32,
+      metalness: 0.65,
+      emissive: 0x2d190a,
+      emissiveIntensity: 0.35
+    });
+
+    // 2. VẬT LIỆU PHA LÊ & QUẢ CẦU TRANG TRÍ (Đồng kim loại gương, Pha lê hổ phách ấm, Ngọc bích sẫm)
+    const amberCrystalLeafMat = new THREE.MeshStandardMaterial({
+      color: 0xffca58,
+      emissive: 0x8c4e06,
       emissiveIntensity: 0.85,
-      roughness: 0.12,
-      metalness: 0.75
+      roughness: 0.14,
+      metalness: 0.72
     });
 
-    const goldOrbMat = new THREE.MeshStandardMaterial({
-      color: 0xffd700,
-      emissive: 0x8a6000,
-      emissiveIntensity: 0.40,
-      roughness: 0.08,
+    const mirrorBronzeOrbMat = new THREE.MeshStandardMaterial({
+      color: 0xb8860b,
+      roughness: 0.10,
       metalness: 0.95
     });
 
-    // ==================== A. TÁI CẤU TRÚC HỆ CÀNH VÀNG KIM & LÁ PHA LÊ (28 CÀNH CHÍNH, 56 CÀNH PHỤ, 84 LÁ KIM CƯƠNG) ====================
-    const branchCount = 28;
+    const amberCrystalOrbMat = new THREE.MeshStandardMaterial({
+      color: 0xffa834,
+      emissive: 0x8a3c00,
+      emissiveIntensity: 0.75,
+      roughness: 0.14,
+      metalness: 0.50
+    });
+
+    const deepJadeOrbMat = new THREE.MeshStandardMaterial({
+      color: 0x1b4d3e,
+      emissive: 0x07261d,
+      emissiveIntensity: 0.50,
+      roughness: 0.18,
+      metalness: 0.60
+    });
+
+    // ==================== A. TÁI CẤU TRÚC HỆ CÀNH ĐẠI THỤ CỔ THỤ (24 CÀNH CHÍNH UỐN CÁNH CUNG & 48 CÀNH PHỤ ĐAN XEN) ====================
+    // Uốn bằng CatmullRomCurve3 vươn ngang ra xa (R = 3.8m - 4.4m), đỉnh vòm vồng nhẹ và rủ nhẹ ở đầu cành che mát bệ đá
+    const branchCount = 24;
     for (let i = 0; i < branchCount; i++) {
       const angle = (i / branchCount) * Math.PI * 2;
       const tier = i % 4;
-      const reach = 1.6 + tier * 0.55 + (i % 3) * 0.18; // Vươn rộng từ 1.6m đến 3.8m
-      const branchY = 0.25 + tier * 0.42 + (i % 2) * 0.10;
-      const elevation = 0.82 + tier * 0.08;
+      // Bán kính tỏa phủ trọn vẹn bệ đá trắng bán kính 4.4m
+      const reach = 3.65 + tier * 0.22 + (i % 3) * 0.15; 
+      const apexH = 1.45 + tier * 0.18; // Đỉnh vòm cong cánh cung
+      const tipH = 0.88 + tier * 0.12;  // Đầu cành rủ nhẹ xuống che bóng mát
 
-      // Cành chính bằng đồng mạ vàng điêu khắc vươn xòe bề thế (thay thế hoàn toàn cọc đen cũ)
-      const branch = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.024, 0.052, reach, 8),
-        this.materials.bronzeGold
-      );
-      branch.position.set(
-        Math.cos(angle) * (reach / 2),
-        branchY + reach * 0.25,
-        Math.sin(angle) * (reach / 2)
-      );
-      branch.rotation.z = -Math.cos(angle) * elevation;
-      branch.rotation.x = Math.sin(angle) * elevation;
-      rotatingCanopy.add(branch);
+      const curvePoints = [
+        new THREE.Vector3(Math.cos(angle) * 0.42, 0.05, Math.sin(angle) * 0.42),
+        new THREE.Vector3(Math.cos(angle) * (reach * 0.38), apexH * 0.85, Math.sin(angle) * (reach * 0.38)),
+        new THREE.Vector3(Math.cos(angle) * (reach * 0.75), apexH, Math.sin(angle) * (reach * 0.75)),
+        new THREE.Vector3(Math.cos(angle) * reach, tipH, Math.sin(angle) * reach)
+      ];
 
-      // 2 Cành nhánh phụ chẽ hai bên vươn cao, thanh thoát
-      [-0.24, 0.24].forEach((subOffset, subIdx) => {
-        const subReach = reach * 0.50;
-        const subBranch = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.015, 0.028, subReach, 6),
-          this.materials.brightGold
-        );
+      const branchCurve = new THREE.CatmullRomCurve3(curvePoints);
+      const branchGeo = new THREE.TubeGeometry(branchCurve, 24, 0.052, 8, false);
+      const mainBranch = new THREE.Mesh(branchGeo, banyanBranchMat);
+      rotatingCanopy.add(mainBranch);
+
+      // 2 Cành nhánh phụ đan xen chẽ ra 2 bên ở tầng giữa để che kín khoảng trống, xum xuê dày dặn
+      [-0.26, 0.26].forEach((subOffset, subIdx) => {
         const subAngle = angle + subOffset;
-        const subBaseX = Math.cos(angle) * (reach * 0.62);
-        const subBaseZ = Math.sin(angle) * (reach * 0.62);
-        const subBaseY = branchY + reach * 0.28 + subIdx * 0.10;
+        const subReach = reach * 0.68;
+        const subApexH = apexH * 0.82 + subIdx * 0.12;
+        const subTipH = tipH + 0.18 + subIdx * 0.08;
 
-        subBranch.position.set(
-          subBaseX + Math.cos(subAngle) * (subReach / 2),
-          subBaseY + subReach * 0.22,
-          subBaseZ + Math.sin(subAngle) * (subReach / 2)
-        );
-        subBranch.rotation.z = -Math.cos(subAngle) * (elevation + 0.22);
-        subBranch.rotation.x = Math.sin(subAngle) * (elevation + 0.22);
-        rotatingCanopy.add(subBranch);
+        const subCurve = new THREE.CatmullRomCurve3([
+          new THREE.Vector3(Math.cos(angle) * (reach * 0.42), apexH * 0.78, Math.sin(angle) * (reach * 0.42)),
+          new THREE.Vector3(Math.cos(subAngle) * (subReach * 0.78), subApexH, Math.sin(subAngle) * (subReach * 0.78)),
+          new THREE.Vector3(Math.cos(subAngle) * subReach, subTipH, Math.sin(subAngle) * subReach)
+        ]);
+        const subGeo = new THREE.TubeGeometry(subCurve, 16, 0.028, 6, false);
+        const subMesh = new THREE.Mesh(subGeo, banyanSubBranchMat);
+        rotatingCanopy.add(subMesh);
 
-        // Lá bồ đề hình khối kim cương / pha lê phát sáng (emissive) gắn trên nhánh phụ
-        const subCrystalLeaf = new THREE.Mesh(
-          new THREE.OctahedronGeometry(0.11, 0),
-          crystalLeafMat
+        // Lá bồ đề kim cương pha lê ấm gắn trên ngọn cành phụ
+        const subLeaf = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.12, 0),
+          amberCrystalLeafMat
         );
-        subCrystalLeaf.scale.set(0.85, 1.45, 0.40);
-        subCrystalLeaf.position.set(
-          subBaseX + Math.cos(subAngle) * subReach,
-          subBaseY + subReach * 0.45,
-          subBaseZ + Math.sin(subAngle) * subReach
+        subLeaf.scale.set(0.85, 1.45, 0.40);
+        subLeaf.position.set(
+          Math.cos(subAngle) * subReach,
+          subTipH,
+          Math.sin(subAngle) * subReach
         );
-        rotatingCanopy.add(subCrystalLeaf);
+        rotatingCanopy.add(subLeaf);
       });
 
-      // Mầm lá bồ đề pha lê vàng kim phát sáng rực rỡ trên đầu mỗi cành chính
-      const mainCrystalLeaf = new THREE.Mesh(
-        new THREE.OctahedronGeometry(0.15, 0),
-        crystalLeafMat
+      // Búp lá pha lê kim cương ấm vươn trên đầu cành chính
+      const mainLeaf = new THREE.Mesh(
+        new THREE.OctahedronGeometry(0.16, 0),
+        amberCrystalLeafMat
       );
-      mainCrystalLeaf.scale.set(0.9, 1.55, 0.45);
-      mainCrystalLeaf.position.set(
+      mainLeaf.scale.set(0.9, 1.6, 0.45);
+      mainLeaf.position.set(
         Math.cos(angle) * reach,
-        branchY + reach * 0.52,
+        tipH,
         Math.sin(angle) * reach
       );
-      rotatingCanopy.add(mainCrystalLeaf);
+      rotatingCanopy.add(mainLeaf);
     }
 
     // Đỉnh ngọn cây: Đài Sen & Búp Ngọc Pha Lê phát sáng tại tâm đỉnh
     const crownBase = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.32, 0.20, 0.24, 12),
-      this.materials.brightGold
+      new THREE.CylinderGeometry(0.35, 0.22, 0.25, 12),
+      banyanSubBranchMat
     );
-    crownBase.position.y = 2.45;
+    crownBase.position.y = 1.95;
     rotatingCanopy.add(crownBase);
 
     const topCrown = new THREE.Mesh(
-      new THREE.OctahedronGeometry(0.42, 1),
-      crystalLeafMat
+      new THREE.OctahedronGeometry(0.38, 1),
+      amberCrystalLeafMat
     );
     topCrown.scale.set(0.85, 1.5, 0.85);
-    topCrown.position.y = 2.80;
+    topCrown.position.y = 2.25;
     rotatingCanopy.add(topCrown);
 
     // ==================== B. HỆ THỐNG THẺ ƯỚC CÓ DÂY TREO & TUA RUA RỦ XUỐNG TỪ CÀNH (28 THIỆP TRI ÂN) ====================
+    // Thẻ buông rủ vừa tầm mắt từ cành cong, tuyệt đối không có thẻ nào trôi nổi lộn xộn sát trần
     const tributes = window.INITIAL_TRIBUTES || [];
     const cardCount = 28;
-
     for (let c = 0; c < cardCount; c++) {
       const tributeData = tributes[c % tributes.length] || {
         teacher: 'Thầy Cô Kính Mến',
@@ -2866,19 +2884,19 @@ class MuseumBuilder {
         sender: 'Học sinh cả nước'
       };
 
-      const cAngle = (c * Math.PI * 2) / cardCount + 0.15;
+      const cAngle = (c * Math.PI * 2) / cardCount + 0.12;
       const tier = c % 4;
-      const cRad = 1.6 + tier * 0.48 + (c % 3) * 0.22;
-      const cY = 1.05 + tier * 0.32 - (c % 2) * 0.15;
+      const cRad = 1.85 + tier * 0.45 + (c % 3) * 0.20;
+      const cY = 1.15 + tier * 0.20 - (c % 2) * 0.10;
 
       const cardHolder = new THREE.Group();
       cardHolder.position.set(Math.cos(cAngle) * cRad, cY, Math.sin(cAngle) * cRad);
       cardHolder.rotation.y = -cAngle + Math.PI / 2;
 
       // Dây lụa đỏ treo thẻ lời chúc rủ xuống từ cành
-      const cordH = 0.38 + (c % 3) * 0.12;
+      const cordH = 0.42 + (c % 3) * 0.12;
       const cord = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.008, 0.008, cordH, 8),
+        new THREE.CylinderGeometry(0.007, 0.007, cordH, 8),
         this.materials.redSilk
       );
       cord.position.y = -cordH / 2;
@@ -2887,7 +2905,7 @@ class MuseumBuilder {
       // Nút thắt đồng mạ vàng phía trên thẻ
       const goldKnot = new THREE.Mesh(
         new THREE.OctahedronGeometry(0.045, 0),
-        this.materials.brightGold
+        mirrorBronzeOrbMat
       );
       goldKnot.position.y = -cordH;
       cardHolder.add(goldKnot);
@@ -2938,40 +2956,44 @@ class MuseumBuilder {
       rotatingCanopy.add(cardHolder);
     }
 
-    // ==================== C. QUẢ CẦU TRANG TRÍ: XEN KẼ LAM NGỌC (CYAN) VÀ VÀNG BÓNG PHẢN CHIẾU (48 QUẢ CẦU) ====================
+    // ==================== C. QUẢ CẦU TRANG TRÍ CỔ ĐIỂN: ĐỒNG GƯƠNG, HỔ PHÁCH & NGỌC BÍCH SẪM (48 QUẢ CẦU) ====================
     const sphereCount = 48;
     for (let s = 0; s < sphereCount; s++) {
-      const sAngle = (s * Math.PI * 2) / sphereCount + 0.45;
+      const sAngle = (s * Math.PI * 2) / sphereCount + 0.35;
       const tier = s % 4;
-      const sRad = 1.3 + tier * 0.52 + ((s * 3) % 5) * 0.16;
-      const sBaseY = 1.35 + tier * 0.38 + Math.sin(s * 1.5) * 0.18;
-      const isCyan = s % 2 === 0;
+      const sRad = 1.45 + tier * 0.50 + ((s * 3) % 5) * 0.15;
+      const sBaseY = 1.30 + tier * 0.25 + Math.sin(s * 1.5) * 0.12;
+      const orbType = s % 3; // 0: Đồng gương, 1: Hổ phách, 2: Ngọc bích sẫm
 
       const orbHolder = new THREE.Group();
       orbHolder.position.set(Math.cos(sAngle) * sRad, sBaseY, Math.sin(sAngle) * sRad);
 
-      const threadH = 0.35 + (s % 3) * 0.15;
+      const threadH = 0.35 + (s % 3) * 0.12;
       const thread = new THREE.Mesh(
         new THREE.CylinderGeometry(0.004, 0.004, threadH, 6),
-        new THREE.MeshBasicMaterial({ color: 0xffe89e, transparent: true, opacity: 0.75 })
+        new THREE.MeshBasicMaterial({ color: 0xd4af37, transparent: true, opacity: 0.75 })
       );
       thread.position.y = -threadH / 2;
       orbHolder.add(thread);
 
-      // Quả cầu: xen kẽ Lam ngọc (Cyan) phát sáng và Vàng gương bóng bẩy phản chiếu ánh sáng
-      const orbMesh = isCyan
-        ? new THREE.Mesh(new THREE.IcosahedronGeometry(0.09, 2), cyanOrbMat)
-        : new THREE.Mesh(new THREE.SphereGeometry(0.09, 20, 20), goldOrbMat);
+      // Quả cầu theo 3 tông màu quý phái
+      let selectedMat = mirrorBronzeOrbMat;
+      if (orbType === 1) selectedMat = amberCrystalOrbMat;
+      else if (orbType === 2) selectedMat = deepJadeOrbMat;
+
+      const orbMesh = (orbType === 1)
+        ? new THREE.Mesh(new THREE.IcosahedronGeometry(0.09, 2), selectedMat)
+        : new THREE.Mesh(new THREE.SphereGeometry(0.09, 20, 20), selectedMat);
       orbMesh.position.y = -threadH;
       orbHolder.add(orbMesh);
 
       // Vòng hào quang nhẹ cho quả cầu
       const halo = new THREE.Mesh(
-        new THREE.OctahedronGeometry(0.125, 0),
+        new THREE.OctahedronGeometry(0.12, 0),
         new THREE.MeshBasicMaterial({
-          color: isCyan ? 0xa6f4ff : 0xfff0aa,
+          color: (orbType === 2) ? 0x5eead4 : 0xffd17a,
           transparent: true,
-          opacity: 0.35,
+          opacity: 0.30,
           wireframe: true
         })
       );
@@ -3004,35 +3026,36 @@ class MuseumBuilder {
       rotatingCanopy.add(orbHolder);
     }
 
-    // ==================== D. ĐỒNG BỘ HỆ THỐNG HẠT PHÁT SÁNG (1.800 HẠT STARLIGHT & 500 HẠT XOẮN ỐC NGÂN HÀ) ====================
+    // ==================== D. ĐỒNG BỘ HỆ THỐNG HẠT PHÁT SÁNG VÀNG ẤM / CHAMPAGNE / HỔ PHÁCH 2700K - 3000K ====================
     const starTex = this.createStarGlowTexture();
     const starCount = 1800;
     const starPositions = new Float32Array(starCount * 3);
     const starColors = new Float32Array(starCount * 3);
 
-    const goldShimmerPalette = [
-      new THREE.Color(0xffffff), // Trắng tinh khôi
-      new THREE.Color(0xfff8d0), // Trắng vàng ấm
-      new THREE.Color(0xffe680), // Vàng ánh kim
-      new THREE.Color(0xffd700), // Vàng hoàng gia
-      new THREE.Color(0xffca28)  // Vàng hổ phách
+    // Bảng màu vàng ấm hổ phách hoàng gia (2700K - 3000K) hoàn toàn dịu mắt, không dùng trắng hay vàng chanh
+    const warmAmberPalette = [
+      new THREE.Color(0xfff2cc), // Champagne vàng nhạt ấm
+      new THREE.Color(0xffe28a), // Vàng ấm dịu mắt
+      new THREE.Color(0xffcf55), // Vàng hổ phách
+      new THREE.Color(0xffb338), // Hổ phách mật ong
+      new THREE.Color(0xff981f)  // Hổ phách đậm
     ];
 
     for (let i = 0; i < starCount; i++) {
       const u = Math.random();
       const theta = i * 2.39996 + Math.random() * 0.45;
       const phi = Math.acos(1 - 2 * u) * 0.82;
-      const r = 0.65 + Math.pow(Math.random(), 0.65) * 3.35;
+      const r = 0.75 + Math.pow(Math.random(), 0.65) * 3.65;
 
       const sx = r * Math.sin(phi) * Math.cos(theta);
-      const sy = 1.05 + Math.cos(phi) * (r * 0.72) + (Math.random() - 0.5) * 0.45;
+      const sy = 0.85 + Math.cos(phi) * (r * 0.65) + (Math.random() - 0.5) * 0.40;
       const sz = r * Math.sin(phi) * Math.sin(theta);
 
       starPositions[i * 3] = sx;
-      starPositions[i * 3 + 1] = Math.max(0.4, sy);
+      starPositions[i * 3 + 1] = Math.max(0.3, sy);
       starPositions[i * 3 + 2] = sz;
 
-      const c = goldShimmerPalette[i % goldShimmerPalette.length];
+      const c = warmAmberPalette[i % warmAmberPalette.length];
       starColors[i * 3] = c.r;
       starColors[i * 3 + 1] = c.g;
       starColors[i * 3 + 2] = c.b;
@@ -3043,11 +3066,11 @@ class MuseumBuilder {
     banyanStarGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
 
     this.banyanStarMaterial = new THREE.PointsMaterial({
-      size: 0.19,
+      size: 0.18,
       map: starTex,
       vertexColors: true,
       transparent: true,
-      opacity: 0.90,
+      opacity: 0.88,
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
@@ -3056,24 +3079,18 @@ class MuseumBuilder {
     this.banyanStarPoints.raycast = () => {};
     rotatingCanopy.add(this.banyanStarPoints);
 
-    // DẢI NGÂN HÀ 500 HẠT XOẮN ỐC BAY LƯỢN QUANH TÁN CÂY (SPIRAL STARDUST VORTEX)
+    // DẢI XOẮN ỐC 500 HẠT HỔ PHÁCH BAY LƯỢN QUANH TÁN CÂY (SPIRAL WARM PARTICLES)
     const spiralCount = 500;
     const spiralPositions = new Float32Array(spiralCount * 3);
     const spiralColors = new Float32Array(spiralCount * 3);
     this.banyanParticleData = [];
 
-    const goldPalette = [
-      new THREE.Color(0xffffff),
-      new THREE.Color(0xfff4b8),
-      new THREE.Color(0xffdf6d),
-      new THREE.Color(0xffca28),
-      new THREE.Color(0xffa000)
-    ];
-    const cyanPalette = [
-      new THREE.Color(0xa7f3d0),
-      new THREE.Color(0x5eead4),
-      new THREE.Color(0x2dd4bf),
-      new THREE.Color(0x7dd3fc)
+    const spiralAmberPalette = [
+      new THREE.Color(0xfff5d6),
+      new THREE.Color(0xffe494),
+      new THREE.Color(0xffd15c),
+      new THREE.Color(0xffba3b),
+      new THREE.Color(0xff9a1a)
     ];
 
     for (let i = 0; i < spiralCount; i++) {
@@ -3081,9 +3098,9 @@ class MuseumBuilder {
       const arm = i % 4;
       const baseAngle = (arm * Math.PI * 2) / 4;
       const angle = baseAngle + t * Math.PI * 6;
-      const baseRadius = 0.75 + t * 2.85;
-      const rad = baseRadius + (Math.random() - 0.5) * 0.22;
-      const py = 0.35 + t * 3.0 + (Math.random() - 0.5) * 0.18;
+      const baseRadius = 0.85 + t * 3.20;
+      const rad = baseRadius + (Math.random() - 0.5) * 0.20;
+      const py = 0.25 + t * 2.65 + (Math.random() - 0.5) * 0.15;
 
       spiralPositions[i * 3] = Math.cos(angle) * rad;
       spiralPositions[i * 3 + 1] = py;
@@ -3094,16 +3111,12 @@ class MuseumBuilder {
         arm: arm,
         baseAngle: baseAngle,
         baseRadius: baseRadius,
-        baseY: 0.35,
-        speed: 0.09 + Math.random() * 0.08,
-        radialJitter: (Math.random() - 0.5) * 0.22
+        baseY: 0.25,
+        speed: 0.08 + Math.random() * 0.07,
+        radialJitter: (Math.random() - 0.5) * 0.20
       });
 
-      const isCyan = Math.random() < 0.35;
-      const c = isCyan
-        ? cyanPalette[Math.floor(Math.random() * cyanPalette.length)]
-        : goldPalette[Math.floor(Math.random() * goldPalette.length)];
-
+      const c = spiralAmberPalette[i % spiralAmberPalette.length];
       spiralColors[i * 3] = c.r;
       spiralColors[i * 3 + 1] = c.g;
       spiralColors[i * 3 + 2] = c.b;
@@ -3114,11 +3127,11 @@ class MuseumBuilder {
     this.banyanSpiralGeometry.setAttribute('color', new THREE.BufferAttribute(spiralColors, 3));
 
     const banyanSpiralMat = new THREE.PointsMaterial({
-      size: 0.18,
+      size: 0.17,
       map: starTex,
       vertexColors: true,
       transparent: true,
-      opacity: 0.90,
+      opacity: 0.88,
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
@@ -3127,9 +3140,9 @@ class MuseumBuilder {
     this.banyanSpiralPoints.raycast = () => {};
     rotatingCanopy.add(this.banyanSpiralPoints);
 
-    // ==================== E. ÁNH SÁNG POINTLIGHT VÀNG ẤM DỊU ĐẶT ẨN GIỮA TÁN CÂY ====================
-    const canopyInnerLight = new THREE.PointLight(0xffdf99, 2.8, 18, 1.4);
-    canopyInnerLight.position.set(0, 1.2, 0); // Đặt ẩn giữa tán cây hắt ánh sáng lấp lánh xuống tranh và phòng
+    // ==================== E. ÁNH SÁNG POINTLIGHT VÀNG ẤM HỔ PHÁCH 2700K DỊU MẮT ====================
+    const canopyInnerLight = new THREE.PointLight(0xffbe59, 2.5, 18, 1.4);
+    canopyInnerLight.position.set(0, 1.1, 0); // Đặt ẩn giữa tán cây hắt ánh sáng lấp lánh xuống tranh và phòng
     rotatingCanopy.add(canopyInnerLight);
 
     treeGroup.add(rotatingCanopy);
@@ -6402,9 +6415,15 @@ class MuseumBuilder {
     ctx.textAlign = 'center';
     ctx.fillText('🪷 ✦ 🪷', width / 2, 115);
 
-    // Tiêu đề bảng vàng
+    // Tiêu đề bảng vàng - Tự động điều chỉnh kích thước để không tràn viền
+    let titleFontSize = 40;
+    ctx.font = `bold ${titleFontSize}px "Cinzel", "Times New Roman", serif`;
+    while (ctx.measureText(title.toUpperCase()).width > width - 220 && titleFontSize > 22) {
+      titleFontSize -= 2;
+      ctx.font = `bold ${titleFontSize}px "Cinzel", "Times New Roman", serif`;
+    }
     ctx.fillStyle = '#f5d77f';
-    ctx.font = 'bold 42px "Cinzel", "Times New Roman", serif';
+    ctx.textAlign = 'center';
     ctx.fillText(title.toUpperCase(), width / 2, 185);
 
     // Đường gạch chỉ vàng cách điệu
@@ -6457,9 +6476,18 @@ class MuseumBuilder {
     ctx.fillText('— ' + source, width / 2, height - 120);
 
     if (date) {
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText('[ ✦ Nhấp chuột để mở xem toàn văn Bức thư lịch sử ✦ ]', width / 2, height - 105);
+
       ctx.fillStyle = '#a6b8cc';
-      ctx.font = '30px sans-serif';
-      ctx.fillText(date, width / 2, height - 70);
+      let dateFontSize = 26;
+      ctx.font = `italic ${dateFontSize}px "Times New Roman", sans-serif`;
+      while (ctx.measureText(date).width > width - 180 && dateFontSize > 18) {
+        dateFontSize -= 2;
+        ctx.font = `italic ${dateFontSize}px "Times New Roman", sans-serif`;
+      }
+      ctx.fillText(date, width / 2, height - 58);
     }
 
     const tex = new THREE.CanvasTexture(canvas);
@@ -6478,10 +6506,11 @@ class MuseumBuilder {
       {
         x: -10.92, y: 3.8, z: 18.0, rotY: Math.PI / 2,
         w: 7.6, h: 3.5,
-        title: 'BÁC HỒ VỚI SỰ NGHIỆP TRỒNG NGƯỜI (1958)',
-        quote: '“Vì lợi ích mười năm thì phải trồng cây. Vì lợi ích trăm năm thì phải trồng người.”',
+        title: 'BỨC THƯ CUỐI CÙNG CỦA CHỦ TỊCH HỒ CHÍ MINH GỬI NGÀNH GIÁO DỤC (15/10/1968)',
+        quote: '“Dù khó khăn đến đâu cũng phải tiếp tục thi đua dạy tốt và học tốt.”',
         source: 'Chủ tịch Hồ Chí Minh',
-        date: 'Lớp hướng dẫn giáo viên cấp II, cấp III toàn miền Bắc (13/9/1958)'
+        date: '(Nguồn: Báo Nhân Dân, số 5299, ngày 16-10-1968; Hồ Chí Minh toàn tập, NXB Chính trị Quốc gia, tập 12, tr. 402-404)',
+        artifactId: 'mural-uncle-ho-final-letter'
       },
       {
         x: -10.92, y: 3.8, z: 31.0, rotY: Math.PI / 2,
@@ -6537,6 +6566,13 @@ class MuseumBuilder {
         new THREE.MeshBasicMaterial({ map: tex })
       );
       plaque.position.z = 0.09;
+      if (t.artifactId) {
+        const artObj = (window.ARTIFACTS || []).find((a) => a.id === t.artifactId);
+        if (artObj) {
+          plaque.userData = { artifact: artObj, isUncleHoMural: true };
+          this.interactables.push(plaque);
+        }
+      }
       g.add(plaque);
 
       // Đèn rọi spotlight riêng cho từng bức đại tự
