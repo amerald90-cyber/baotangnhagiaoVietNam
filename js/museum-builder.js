@@ -3940,13 +3940,21 @@ class MuseumBuilder {
     floorBorderMesh.position.set(22.7, 0.006, 0);
     roomArch.add(floorBorderMesh);
 
-    // 3. TRẦN NHÀ HOÀNG GIA & COFFER TRẦN ĐÈN
+    // 3. TRẦN NHÀ HOÀNG GIA & COFFER TRẦN ĐÈN (Hạ thấp 3cm và offset để triệt tiêu hoàn toàn lỗi nhấp nháy Z-fighting)
+    const roomCeilingMat = new THREE.MeshStandardMaterial({
+      color: 0x0b172a,
+      roughness: 0.72,
+      metalness: 0.08,
+      polygonOffset: true,
+      polygonOffsetFactor: -2.0,
+      polygonOffsetUnits: -4.0
+    });
     const roomCeiling = new THREE.Mesh(
       new THREE.PlaneGeometry(23.2, 18.2),
-      this.materials.navyDeep
+      roomCeilingMat
     );
     roomCeiling.rotation.x = Math.PI / 2;
-    roomCeiling.position.set(22.7, wallH, 0);
+    roomCeiling.position.set(22.7, wallH - 0.03, 0);
     roomArch.add(roomCeiling);
 
     // Phào chỉ trần thạch cao viền vàng âm trần
@@ -6638,29 +6646,58 @@ class MuseumBuilder {
       group.add(corner);
     });
 
-    // 3. Bên trong tủ kính: Giá đỡ tài liệu nghiêng bọc nhung đỏ
-    const velvetMat = new THREE.MeshStandardMaterial({
-      color: 0x8a121d,
-      roughness: 0.7,
-      metalness: 0.1
+    // 3. Bên trong tủ kính: Giá đỡ nghiêng bằng gỗ mun sẫm màu & viền đồng kim loại (loại bỏ hoàn toàn viền hồng)
+    const standMat = new THREE.MeshStandardMaterial({
+      color: 0x1a1512, // Gỗ mun sẫm màu sang trọng
+      roughness: 0.45,
+      metalness: 0.15
     });
-    const standW = 0.72;
-    const standH = 0.95;
+    const docW = 0.665;
+    const docH = 0.94; // Tỷ lệ chuẩn xác 0.707 tương ứng tỷ lệ gốc 1445x2048 của bản chụp bức thư 1945
+    const standW = docW + 0.04;
+    const standH = docH + 0.04;
+
     const documentStand = new THREE.Mesh(
-      new THREE.BoxGeometry(standW, standH, 0.06),
-      velvetMat
+      new THREE.BoxGeometry(standW, standH, 0.035),
+      standMat
     );
     documentStand.position.set(-0.35, 1.42, 0);
     documentStand.rotation.x = -0.42;
     group.add(documentStand);
 
-    // Bản chụp Bút tích Bức thư 15/10/1968
-    const letterTex = this.createUncleHoLetterTexture();
-    const letterMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(standW - 0.06, standH - 0.06),
-      new THREE.MeshBasicMaterial({ map: letterTex })
+    // Nẹp viền đồng mạ vàng tinh tế phía sau giá đỡ
+    const standBronzeTrim = new THREE.Mesh(
+      new THREE.BoxGeometry(standW + 0.015, standH + 0.015, 0.02),
+      this.materials.bronzeGold
     );
-    letterMesh.position.set(-0.35, 1.42, 0.035);
+    standBronzeTrim.position.set(-0.35, 1.42, -0.012);
+    standBronzeTrim.rotation.x = -0.42;
+    group.add(standBronzeTrim);
+
+    // Bản chụp Bút tích Bức thư Bác Hồ gửi các em học sinh (Tháng 9/1945) từ tư liệu gốc
+    const textureLoader = this.textureLoader || new THREE.TextureLoader();
+    const realLetterTex = textureLoader.load(
+      'assets/documents/thu_bac_ho_khai_truong_1945.jpg',
+      (tex) => {
+        if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = 16;
+        tex.needsUpdate = true;
+      }
+    );
+    if (THREE.SRGBColorSpace) realLetterTex.colorSpace = THREE.SRGBColorSpace;
+    realLetterTex.anisotropy = 16;
+
+    const letterMat = new THREE.MeshStandardMaterial({
+      map: realLetterTex,
+      roughness: 0.85,
+      metalness: 0.02,
+      side: THREE.DoubleSide
+    });
+    const letterMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(docW, docH),
+      letterMat
+    );
+    letterMesh.position.set(-0.35, 1.42, 0.022);
     letterMesh.rotation.x = -0.42;
     group.add(letterMesh);
 
@@ -6772,7 +6809,7 @@ class MuseumBuilder {
     // Dòng tiêu đề phụ trên cùng
     ctx.fillStyle = '#ffd700';
     ctx.font = 'bold 30px "Cinzel", "Times New Roman", serif';
-    ctx.fillText('🪷   BẢO TÀNG SỐ QUỐC GIA VỀ GIÁO DỤC   🪷', width / 2, 95);
+    ctx.fillText('🪷   HÀNH TRÌNH SỐ VIỆT NAM MY LOVE   🪷', width / 2, 95);
 
     // Đường gạch chỉ vàng cách điệu
     const lineGrad = ctx.createLinearGradient(width / 2 - 500, 0, width / 2 + 500, 0);

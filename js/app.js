@@ -94,6 +94,7 @@ class VietnamTeachersMuseumApp {
     this.initMuseum();
     this.initFloorTargetMarker();
     this.initUI();
+    this.initSecurity();
     this.bindEvents();
     this.loadTributesFromGoogleSheet();
     this.loadMemoriesFromGoogleSheet();
@@ -212,21 +213,82 @@ class VietnamTeachersMuseumApp {
     return s;
   }
 
+  initSecurity() {
+    // 1. Chặn chuột phải (contextmenu) trên toàn bộ website
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      return false;
+    }, { capture: true });
+
+    // 2. Chặn các phím tắt mở Developer Tools, xem mã nguồn trang (Ctrl+U) và lưu trang (Ctrl+S)
+    window.addEventListener('keydown', (e) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+      const key = (e.key || '').toUpperCase();
+      const code = e.code || '';
+
+      // Phím F12
+      if (key === 'F12' || code === 'F12') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+
+      // Tổ hợp Ctrl + Shift + I, Ctrl + Shift + J, Ctrl + Shift + C
+      // hoặc trên Mac: Cmd + Opt + I, Cmd + Opt + J, Cmd + Opt + C
+      if (
+        (ctrlOrCmd && e.shiftKey && ['I', 'J', 'C'].includes(key)) ||
+        (isMac && e.metaKey && e.altKey && ['I', 'J', 'C'].includes(key))
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+
+      // Tổ hợp Ctrl + U (Xem mã nguồn)
+      if (ctrlOrCmd && (key === 'U' || code === 'KeyU')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+
+      // Tổ hợp Ctrl + S (Lưu trang về máy)
+      if (ctrlOrCmd && (key === 'S' || code === 'KeyS')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+
+      // Tổ hợp Ctrl + P (In trang)
+      if (ctrlOrCmd && (key === 'P' || code === 'KeyP')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    }, { capture: true });
+  }
+
   loadSavedMemories() {
     try {
       const raw = localStorage.getItem('vn_museum_memories_v1');
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Lọc bỏ toàn bộ ảnh mẫu chibi / avatar hoạt hình cũ và ảnh dummy 1x1
+          // Lọc bỏ triệt để toàn bộ ảnh mẫu chibi / avatar hoạt hình cũ và thẻ bài test rác
           const filtered = parsed.filter((m) => {
             if (!m) return false;
-            if (typeof m.id === 'string' && /^mem-[1-9]$|^mem-1[0-9]$|^mem-2[0-4]$/.test(m.id)) return false;
-            const p = m.photo || m.photoAfter || '';
-            if (p.startsWith('data:image') && p.length < 500) return false;
-            if (m.teacherName && (m.teacherName.includes('Trần Văn Giàu') || m.teacherName.includes('Đặng Huỳnh Mai'))) {
-              if (m.id && String(m.id).startsWith('mem-')) return false;
-            }
+            const id = String(m.id || '');
+            // Xóa tất cả các bài đăng demo cũ có ID dạng mem-01, mem-04,... hoặc demo-
+            if (/^(mem|demo)-/i.test(id)) return false;
+            // Xóa bài có tên Thầy giáo Nguyễn Văn Căn hoặc hình avatar hoạt hình mẫu
+            const teacherName = String(m.teacherName || '');
+            if (teacherName.includes('Nguyễn Văn Căn') && /^(mem|demo)-/i.test(id)) return false;
+            if (teacherName.includes('Trần Văn Giàu') && /^(mem|demo)-/i.test(id)) return false;
+            if (teacherName.includes('Đặng Huỳnh Mai') && /^(mem|demo)-/i.test(id)) return false;
+            const p = m.photo || m.photoAfter || m.photoBefore || '';
+            // Xóa bất kỳ ảnh dummy < 1500 ký tự hoặc ảnh chibi
+            if (!p || (p.startsWith('data:image') && p.length < 1500)) return false;
+            if (typeof p === 'string' && (p.includes('chibi') || p.includes('cartoon') || p.includes('sample_avatar'))) return false;
             return true;
           });
           const normalized = filtered.map((m) => ({
@@ -239,13 +301,15 @@ class VietnamTeachersMuseumApp {
             senderName: m.senderName || m.studentName || 'Học sinh'
           }));
           window.MEMORY_WALL_DATA = normalized;
+          localStorage.setItem('vn_museum_memories_v1', JSON.stringify(normalized));
           return normalized;
         }
       }
     } catch (e) {
       console.warn('Không đọc được localStorage memories:', e);
     }
-    return window.MEMORY_WALL_DATA || [];
+    window.MEMORY_WALL_DATA = [];
+    return [];
   }
 
   saveMemoriesToLocal() {
@@ -1207,7 +1271,17 @@ class VietnamTeachersMuseumApp {
         </div>
       `;
     }
-    // 3. Nếu là Giai đoạn lịch sử ở Phòng 1 có ảnh tư liệu gốc -> Hiển thị ảnh tư liệu ngay đầu hộp thông tin
+    // 3. Nếu là Hiện vật Thư Bác Hồ gửi các em học sinh (Tháng 9/1945) -> Hiển thị bản chụp tư liệu gốc
+    else if ((art.id === 'art-uncle-ho-letter' || art.code === 'BH-01') && primaryImageBox) {
+      primaryImageBox.style.display = 'block';
+      primaryImageBox.innerHTML = `
+        <div class="primary-doc-photo-card" style="text-align: center; margin-bottom: 24px;">
+          <img src="assets/documents/thu_bac_ho_khai_truong_1945.jpg" alt="${art.title}" style="max-height: 520px; width: auto; max-width: 100%; object-fit: contain; border-radius: 8px; border: 2px solid rgba(212, 175, 55, 0.55); box-shadow: 0 10px 32px rgba(0,0,0,0.6);" />
+          <div class="photo-caption" style="margin-top: 10px; font-style: italic; color: #ffd700; font-size: 14px;">Bản chụp tài liệu nguyên văn: Thư Bác Hồ gửi các em học sinh nhân ngày khai trường đầu tiên của nước Việt Nam Dân chủ Cộng hòa (Tháng 9/1945)</div>
+        </div>
+      `;
+    }
+    // 4. Nếu là Giai đoạn lịch sử ở Phòng 1 có ảnh tư liệu gốc -> Hiển thị ảnh tư liệu ngay đầu hộp thông tin
     else if (art.imageFile && primaryImageBox) {
       const imgSrc =
         (window.MINISTER_IMAGES && window.MINISTER_IMAGES[art.imageFile]) ||

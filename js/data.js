@@ -1183,6 +1183,7 @@ Chiếc đèn dầu đồng đặt trên bục cao vừa đủ soi sáng tấm b
     zoneId: 'room-tools',
     zoneName: 'Hành Lang Lời Bác Dạy & Bộ Đồ Dùng Dạy Học',
     era: 'Tháng 9 năm 1945',
+    imageFile: 'assets/documents/thu_bac_ho_khai_truong_1945.jpg',
     material: 'Bản chụp bút tích nguyên bản, tủ kính pha lê quang học, bệ đá hoa cương và đồng đúc mạ vàng',
     dimensions: 'Bệ trưng bày danh dự 1,8m × 1,2m × 1,65m',
     position: { x: 0, y: 0, z: 25.0 },
