@@ -3396,28 +3396,51 @@ class VietnamTeachersMuseumApp {
   }
 
   clampPositionToMuseumBounds(pos) {
+    // 1. Ngoài quảng trường tiền sảnh (Z > 39.5)
     if (pos.z > 39.5) {
-      // Ngoài quảng trường tiền sảnh
       pos.x = Math.max(-28.0, Math.min(28.0, pos.x));
       pos.z = Math.max(39.0, Math.min(68.0, pos.z));
       pos.y = Math.max(1.6, Math.min(6.5, pos.y));
-    } else if (pos.z < -10.5) {
-      // Bên trong Gian Phòng Dải Tường Cong: Nhà Giáo Việt Nam Qua Các Thời Kỳ (Phía Bắc)
-      // Ưu tiên kiểm tra trước để khi người dùng lăn chuột hay đi lại ở X > 11.2 trong phòng này KHÔNG BAO GIỜ bị vọt ra sảnh!
-      pos.x = Math.max(-15.8, Math.min(15.8, pos.x));
-      pos.z = Math.max(-36.8, Math.min(-11.0, pos.z));
-      pos.y = 1.6; // Khóa tầm mắt chuẩn 1.6m cho trải nghiệm đi dạo chân thực
-    } else if (pos.x > 11.2) {
-      // Bên trong Gian Phòng Triển Lãm 15 Vị Bộ Trưởng (East Wing)
-      pos.x = Math.max(11.5, Math.min(32.8, pos.x));
-      pos.z = Math.max(-7.8, Math.min(7.8, pos.z));
-      pos.y = 1.6;
-    } else {
-      // Bên trong sảnh chính Rotunda Hub
-      pos.x = Math.max(-27.0, Math.min(27.0, pos.x));
-      pos.z = Math.max(-10.8, Math.min(39.5, pos.z));
-      pos.y = Math.max(1.6, Math.min(5.5, pos.y));
+      return;
     }
+
+    // 2. Bên trong Gian Phòng Dải Tường Cong: Nhà Giáo Việt Nam Qua Các Thời Kỳ (Phía Bắc, Z < -10.5)
+    if (pos.z < -10.5) {
+      pos.x = Math.max(-14.5, Math.min(14.5, pos.x));
+      pos.z = Math.max(-36.5, Math.min(-11.0, pos.z));
+      pos.y = 1.6;
+      return;
+    }
+
+    // 3. Bên trong Hành Lang Nam (Lời Bác Dạy & Đồ Dùng Dạy Học, Z từ 10.5 đến 39.5)
+    // Tường hành lang ở X = ±11.2 -> Khóa chặt X trong khoảng [-9.8, 9.8] để tuyệt đối không văng xuyên tường!
+    if (pos.z >= 10.5 && pos.z <= 39.5) {
+      pos.x = Math.max(-9.8, Math.min(9.8, pos.x));
+      pos.z = Math.max(10.5, Math.min(39.5, pos.z));
+      pos.y = 1.6;
+      return;
+    }
+
+    // 4. Bên trong Gian Phòng 15 Vị Bộ Trưởng (Phía Đông, X > 11.0)
+    if (pos.x > 11.0) {
+      pos.x = Math.max(11.2, Math.min(32.5, pos.x));
+      pos.z = Math.max(-7.5, Math.min(7.5, pos.z));
+      pos.y = 1.6;
+      return;
+    }
+
+    // 5. Bên trong Gian Phòng Lịch Sử Giáo Dục (Phía Tây, X < -11.0)
+    if (pos.x < -11.0) {
+      pos.x = Math.max(-32.5, Math.min(-11.2, pos.x));
+      pos.z = Math.max(-7.5, Math.min(7.5, pos.z));
+      pos.y = 1.6;
+      return;
+    }
+
+    // 6. Khu vực Đại Sảnh Trung Tâm Rotunda Hub (Z từ -10.5 đến 10.5, X từ -11.0 đến 11.0)
+    pos.x = Math.max(-10.2, Math.min(10.2, pos.x));
+    pos.z = Math.max(-10.5, Math.min(10.5, pos.z));
+    pos.y = 1.6;
   }
 
   renderMinimap() {
