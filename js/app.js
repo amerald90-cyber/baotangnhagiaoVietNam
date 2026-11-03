@@ -385,7 +385,7 @@ class VietnamTeachersMuseumApp {
           const memoriesFromSheet = [];
           response.table.rows.forEach((r, idx) => {
             const cells = r.c || [];
-            const c = (i) => (cells[i]?.v != null ? String(cells[i].v).trim() : '');
+            const c = (i) => (cells[i]?.f != null ? String(cells[i].f).trim() : (cells[i]?.v != null ? String(cells[i].v).trim() : ''));
             const vTime = c(0);
             const vSender = c(1);
             const vClass = c(2);
@@ -395,11 +395,14 @@ class VietnamTeachersMuseumApp {
             const vBio = c(6);
             const vPhoto = c(7);
 
-            // Bỏ qua dòng tiêu đề nếu có
+            // Bỏ qua dòng tiêu đề hoặc dữ liệu test rác nếu có
             if (
+              !vTeacher ||
               vTime.toLowerCase().includes('thời gian') ||
               vSender.toLowerCase().includes('người gửi') ||
-              vTeacher.toLowerCase().includes('nhà giáo')
+              vTeacher.toLowerCase().includes('nhà giáo') ||
+              vTeacher.toLowerCase().includes('test_') ||
+              vPhoto.toLowerCase().includes('link ảnh')
             ) {
               return;
             }
@@ -413,6 +416,11 @@ class VietnamTeachersMuseumApp {
               } else if (directPhoto.includes('id=')) {
                 const idMatch = directPhoto.match(/id=([a-zA-Z0-9_-]+)/);
                 if (idMatch) directPhoto = 'https://lh3.googleusercontent.com/d/' + idMatch[1];
+              }
+
+              // Fallback an toàn nếu link ảnh trống hoặc không hợp lệ
+              if (!directPhoto || directPhoto.toLowerCase().includes('link') || (!directPhoto.startsWith('http') && !directPhoto.startsWith('data:image'))) {
+                directPhoto = 'assets/teachers/dt_26_nguyen_tat_thanh.jpg';
               }
 
               memoriesFromSheet.push({
@@ -1745,7 +1753,7 @@ class VietnamTeachersMuseumApp {
       return `
         <div class="memory-card-item" onclick="window.app && window.app.openMemoryDetailModalById('${item.id}')">
           <div class="memory-card-thumb-wrap">
-            <img class="memory-card-thumb" src="${photoSrc}" alt="${item.teacherName}" loading="lazy" />
+            <img class="memory-card-thumb" src="${photoSrc}" alt="${item.teacherName}" onerror="this.src='assets/teachers/dt_26_nguyen_tat_thanh.jpg'" loading="lazy" />
             <span class="memory-card-badge">📸 ẢNH TƯ LIỆU</span>
             <div class="memory-card-hover-prompt">
               <span class="memory-card-hover-btn">🔍 Xem Chi Tiết & Tri Ân</span>
@@ -1786,7 +1794,17 @@ class VietnamTeachersMuseumApp {
     const captionEl = document.getElementById('detail-photo-caption');
 
     const photoSrc = item.photo || item.photoAfter || item.photoBefore || '';
-    if (photoEl) photoEl.src = photoSrc;
+    if (photoEl) {
+      const fallbackPhoto = 'assets/teachers/dt_26_nguyen_tat_thanh.jpg';
+      photoEl.onerror = () => {
+        photoEl.src = fallbackPhoto;
+      };
+      if (photoSrc && (photoSrc.startsWith('http') || photoSrc.startsWith('data:image') || photoSrc.startsWith('assets/'))) {
+        photoEl.src = photoSrc;
+      } else {
+        photoEl.src = fallbackPhoto;
+      }
+    }
 
     if (tName) tName.textContent = item.teacherName || 'Thầy Cô Kính Yêu';
     if (tWorkplace) {
