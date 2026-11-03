@@ -38,6 +38,10 @@ class VietnamTeachersMuseumApp {
     this.yaw = 0;
     this.pitch = 0.01;
     this.isDragging = false;
+    this.isDraggingTree = false;
+    this.treeDragTarget = null;
+    this.treeAngularVelocity = 0;
+    this.activeNearTree = null; // 'wishing' hoặc 'banyan'
     this.dragMoved = false;
     this.downMouse = { x: 0, y: 0 };
     this.prevMouse = { x: 0, y: 0 };
@@ -2584,10 +2588,43 @@ class VietnamTeachersMuseumApp {
       if (e.button !== 0) return;
       this.isDragging = true;
       this.dragMoved = false;
+      this.isDraggingTree = false;
+      this.treeDragTarget = null;
       this.downMouse.x = e.clientX;
       this.downMouse.y = e.clientY;
       this.prevMouse.x = e.clientX;
       this.prevMouse.y = e.clientY;
+
+      // Kiểm tra xem chuột có đang nhấn trúng vào khu vực Cây (sảnh ngoài hoặc trong phòng) không
+      try {
+        const mouseNorm = new THREE.Vector2(
+          (e.clientX / window.innerWidth) * 2 - 1,
+          -(e.clientY / window.innerHeight) * 2 + 1
+        );
+        this.raycaster.setFromCamera(mouseNorm, this.camera);
+        const hits = this.raycaster.intersectObjects(this.scene.children, true);
+        if (hits && hits.length > 0) {
+          for (let h of hits) {
+            let o = h.object;
+            while (o) {
+              if (o.userData && (o.userData.isBanyanCard || o.userData.isTributeCard || o.name === 'teachers-banyan-tree-group' || o.userData.artifactId === 'art-wishing-tree')) {
+                // Xác định cây gần nhất để xoay
+                const distToBanyan = this.camera.position.distanceTo(new THREE.Vector3(0, 1.6, -24.3));
+                if (distToBanyan < 14.0 && this.builder && this.builder.banyanCanopyRotatingGroup) {
+                  this.isDraggingTree = true;
+                  this.treeDragTarget = this.builder.banyanCanopyRotatingGroup;
+                } else if (this.builder && this.builder.wishingTreeRotatingGroup) {
+                  this.isDraggingTree = true;
+                  this.treeDragTarget = this.builder.wishingTreeRotatingGroup;
+                }
+                break;
+              }
+              o = o.parent;
+            }
+            if (this.isDraggingTree) break;
+          }
+        }
+      } catch (err) {}
     });
 
     window.addEventListener('pointermove', (e) => {
@@ -2610,6 +2647,14 @@ class VietnamTeachersMuseumApp {
       this.prevMouse.x = e.clientX;
       this.prevMouse.y = e.clientY;
 
+      // NẾU ĐANG KÉO CHUỘT TRÊN CÂY: XOAY CÂY THEO TAY NGƯỜI DÙNG ĐỂ CHỌN THƯ
+      if (this.isDraggingTree && this.treeDragTarget) {
+        const turnSpeed = 0.0095;
+        this.treeDragTarget.rotation.y += dx * turnSpeed;
+        this.treeAngularVelocity = dx * turnSpeed * 0.6;
+        return; // Ưu tiên xoay cây, không xoay camera
+      }
+
       if (this.cameraMode === 'inspect' && this.selectedArtifact) {
         this.orbitAngle -= dx * 0.0065;
         this.orbitHeight = Math.max(1.2, Math.min(4.8, this.orbitHeight + dy * 0.008));
@@ -2630,6 +2675,10 @@ class VietnamTeachersMuseumApp {
     window.addEventListener('pointerup', (e) => {
       if (!this.isDragging) return;
       this.isDragging = false;
+      const wasDraggingTree = this.isDraggingTree;
+      this.isDraggingTree = false;
+
+      // Nếu chỉ là một cú click nhẹ (không kéo) thì mở thiệp hoặc tương tác bình thường
       if (!this.dragMoved) {
         this.handleCanvasClick(e);
       }
@@ -3621,10 +3670,78 @@ class VietnamTeachersMuseumApp {
       this.walkMarker.material.opacity = Math.max(0, this.walkMarkerOpacity);
     }
 
+    // Xử lý quán tính lướt nhẹ khi người dùng buông tay xoay cây
+    if (Math.abs(this.treeAngularVelocity) > 0.0002) {
+      if (this.treeDragTarget) {
+        this.treeDragTarget.rotation.y += this.treeAngularVelocity;
+      }
+      this.treeAngularVelocity *= 0.91;
+    } else {
+      this.treeAngularVelocity = 0;
+    }
+
+    // Tự động kiểm tra khoảng cách đến Cây Tri Thức (sảnh ngoài) và Cây Đa (trong phòng) để hiển thị thanh xoay cây
+    this.updateTreeRotationHUD();
+
     this.builder.update(elapsed, delta);
     this.renderMinimap();
 
     this.renderer.render(this.scene, this.camera);
+  }
+
+  // Cập nhật thanh HUD xoay cây chọn đọc thiệp tri ân (Tự động hiện khi ở gần Cội Cây Tri Thức hoặc Cây Đa)
+  updateTreeRotationHUD() {
+    const hud = document.getElementById('tree-rotation-hud');
+    const hudName = document.getElementById('tree-hud-name');
+    if (!hud || !hudName) return;
+
+    if (this.cameraMode === 'inspect') {
+      hud.classList.add('hidden');
+      return;
+    }
+
+    const camPos = this.camera.position;
+    // Vị trí Cây Đa trong phòng: (0, 1.6, -24.3)
+    const distBanyan = camPos.distanceTo(new THREE.Vector3(0, 1.6, -24.3));
+    // Vị trí Cội Cây Tri Thức sảnh ngoài: (0, 1.6, 0)
+    const distWishing = Math.hypot(camPos.x, camPos.z);
+
+    if (distBanyan < 10.5) {
+      this.activeNearTree = 'banyan';
+      hudName.textContent = 'CÂY ĐA TRI ÂN • GIAN NHÀ GIÁO VIỆT NAM';
+      hud.classList.remove('hidden');
+    } else if (distWishing < 9.5) {
+      this.activeNearTree = 'wishing';
+      hudName.textContent = 'CỘI CÂY TRI THỨC • ĐẠI SẢNH';
+      hud.classList.remove('hidden');
+    } else {
+      this.activeNearTree = null;
+      hud.classList.add('hidden');
+    }
+  }
+
+  // Xoay cây đang đứng gần theo hướng chỉ định (+1: xoay phải, -1: xoay trái)
+  rotateActiveTree(direction = 1) {
+    if (!this.builder) return;
+    const step = (Math.PI / 8) * direction; // ~22.5 độ mỗi lần bấm
+
+    if (this.activeNearTree === 'banyan') {
+      this.builder.rotateTreeCanopy('banyan', step);
+      if (this.builder.banyanCanopyRotatingGroup) {
+        this.treeDragTarget = this.builder.banyanCanopyRotatingGroup;
+        this.treeAngularVelocity = direction * 0.04;
+      }
+    } else {
+      this.builder.rotateTreeCanopy('wishing', step);
+      if (this.builder.wishingTreeRotatingGroup) {
+        this.treeDragTarget = this.builder.wishingTreeRotatingGroup;
+        this.treeAngularVelocity = direction * 0.04;
+      }
+    }
+
+    if (typeof this.playChimeSound === 'function') {
+      this.playChimeSound();
+    }
   }
 }
 

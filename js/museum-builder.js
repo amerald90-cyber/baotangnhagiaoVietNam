@@ -463,6 +463,19 @@ class MuseumBuilder {
   }
 
   // ==================== DỰNG TOÀN BỘ BẢO TÀNG ====================
+  // Xoay cây theo góc chỉ định (angleDelta tính bằng radian)
+  rotateTreeCanopy(treeName, angleDelta) {
+    let targetMesh = null;
+    if (treeName === 'banyan') {
+      targetMesh = this.banyanCanopyRotatingGroup;
+    } else {
+      targetMesh = this.wishingTreeRotatingGroup;
+    }
+    if (targetMesh) {
+      targetMesh.rotation.y += angleDelta;
+    }
+  }
+
   buildMuseum(artifactsData) {
     this.buildArchitecture();
     this.buildGrandExteriorFacade();
@@ -2709,55 +2722,66 @@ class MuseumBuilder {
     canvas.height = 440;
     const ctx = canvas.getContext('2d');
 
-    // Nền giấy da cổ / Vàng hổ phách sẫm chuyển sắc ánh mật ong kim loại
+    // NỀN THIỆP ĐỎ SON KHÁNH TIẾT & HỔ PHÁCH SẪM HOÀNG GIA ĐẬM ĐÀ (RỰC RỠ, NỔI BẬT 100% GIỮA TÁN CÂY)
+    const isRuby = explicitIndex % 2 === 0;
     const bgGrad = ctx.createLinearGradient(0, 0, 320, 440);
-    bgGrad.addColorStop(0, '#f2bf5e');    // Vàng hổ phách sáng
-    bgGrad.addColorStop(0.35, '#c98928'); // Nâu mật ong ánh kim
-    bgGrad.addColorStop(0.75, '#995b12'); // Giấy da sẫm
-    bgGrad.addColorStop(1, '#6b3a07');    // Nâu gỗ hổ phách đậm
+    if (isRuby) {
+      bgGrad.addColorStop(0, '#8b141a');    // Đỏ son thắm khánh tiết
+      bgGrad.addColorStop(0.35, '#6e0e13'); // Đỏ chu sa hoàng triều
+      bgGrad.addColorStop(0.75, '#4f070b'); // Đỏ nhung sẫm
+      bgGrad.addColorStop(1, '#320306');    // Đỏ son sẫm hoàng gia
+    } else {
+      bgGrad.addColorStop(0, '#874507');    // Hổ phách hoàng gia sẫm
+      bgGrad.addColorStop(0.35, '#6b3304'); // Nâu hổ phách ánh kim
+      bgGrad.addColorStop(0.75, '#4a2002'); // Nâu đồng trầm
+      bgGrad.addColorStop(1, '#2d1301');    // Gỗ mun hổ phách sẫm
+    }
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, 320, 440);
 
-    // Vân giấy lụa truyền thống
-    for (let f = 0; f < 90; f++) {
-      ctx.fillStyle = f % 2 === 0 ? 'rgba(50, 25, 5, 0.12)' : 'rgba(255, 235, 170, 0.15)';
-      ctx.fillRect(0, Math.random() * 440, 320, 1 + Math.random() * 3);
+    // Vân lụa dệt vàng cổ truyền tinh xảo
+    for (let f = 0; f < 80; f++) {
+      ctx.fillStyle = f % 2 === 0 ? 'rgba(255, 215, 0, 0.08)' : 'rgba(0, 0, 0, 0.15)';
+      ctx.fillRect(0, Math.random() * 440, 320, 1 + Math.random() * 2.5);
     }
 
-    // Khung viền kim loại kép mạ vàng dập nổi & chỉ chu sa đỏ sẫm
-    ctx.strokeStyle = '#ffd700'; // Vàng kim 24K
+    // Khung viền kép dập nổi thếp vàng 24K hoàng gia
+    ctx.strokeStyle = '#ffd700'; // Vàng kim 24K dập nổi
     ctx.lineWidth = 6;
     ctx.strokeRect(10, 10, 300, 420);
 
-    ctx.strokeStyle = '#4a0a0e'; // Chỉ chu sa sẫm
+    ctx.strokeStyle = isRuby ? '#dfa528' : '#e6b800';
     ctx.lineWidth = 2.5;
     ctx.strokeRect(18, 18, 284, 404);
 
-    // Hoa văn góc cổ truyền
+    // 4 Góc hoa văn thếp vàng kim
     const cornerSize = 18;
     ctx.fillStyle = '#ffd700';
     [[10, 10], [310 - cornerSize, 10], [10, 430 - cornerSize], [310 - cornerSize, 430 - cornerSize]].forEach(([cx, cy]) => {
       ctx.fillRect(cx, cy, cornerSize, cornerSize);
     });
 
-    // 1. Tiêu đề lá thư tri ân
-    ctx.fillStyle = '#4a0a0e';
+    // 1. Tiêu đề lá thư tri ân - Chữ vàng kim 24K dập nổi tỏa sáng
+    ctx.fillStyle = '#ffd700';
     ctx.font = 'bold 15px "Be Vietnam Pro", sans-serif';
     ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 4;
     ctx.fillText('🍃 LÁ THƯ TRI ÂN THẦY CÔ', 160, 52);
+    ctx.shadowBlur = 0;
 
     // Đường gạch chỉ vàng ngăn cách
     ctx.strokeStyle = '#ffd700';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    ctx.moveTo(50, 68);
-    ctx.lineTo(270, 68);
+    ctx.moveTo(48, 68);
+    ctx.lineTo(272, 68);
     ctx.stroke();
 
-    // 2. Kính gửi Thầy Cô (Chữ đen mun / nâu sẫm nét đậm, bóng đổ nhẹ)
-    ctx.fillStyle = '#120b04';
-    ctx.shadowColor = 'rgba(255, 240, 190, 0.45)';
-    ctx.shadowBlur = 4;
+    // 2. Kính gửi Thầy Cô (Chữ vàng kim hoàng gia sáng rực rỡ, bóng đổ sâu)
+    ctx.fillStyle = '#fff3b8';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+    ctx.shadowBlur = 6;
     this.drawFittedText(
       ctx,
       tribute?.teacher || 'Thầy Cô Kính Mến',
@@ -2770,26 +2794,29 @@ class MuseumBuilder {
     );
     ctx.shadowBlur = 0;
 
-    // 3. Nội dung lời tri ân (Màu nâu đen sẫm, font Cormorant Garamond sắc nét)
-    ctx.fillStyle = '#1a0e05';
+    // 3. Nội dung lời tri ân (Màu trắng ngà lụa sáng, tương phản cực nét trên nền đỏ son/hổ phách đậm)
+    ctx.fillStyle = '#fff8eb';
     ctx.font = 'italic 16px "Cormorant Garamond", serif';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+    ctx.shadowBlur = 3;
     const rawMsg = (tribute?.message || 'Tri ân người gieo hạt tri thức cho bao thế hệ học trò Việt Nam.').trim();
-    this.wrapText(ctx, `“${rawMsg.slice(0, 78)}${rawMsg.length > 78 ? '...' : ''}”`, 160, 155, 260, 22);
+    this.wrapText(ctx, `“${rawMsg.slice(0, 84)}${rawMsg.length > 84 ? '...' : ''}”`, 160, 155, 260, 22);
+    ctx.shadowBlur = 0;
 
     // 4. Dải ruy băng ký tên người gửi ở đáy thiệp
-    ctx.fillStyle = '#4a0a0e';
-    ctx.fillRect(28, 360, 264, 46);
+    ctx.fillStyle = isRuby ? '#250204' : '#1f0d01';
+    ctx.fillRect(26, 358, 268, 50);
     ctx.strokeStyle = '#ffd700';
     ctx.lineWidth = 2;
-    ctx.strokeRect(28, 360, 264, 46);
+    ctx.strokeRect(26, 358, 268, 50);
 
-    ctx.fillStyle = '#fff0b8';
+    ctx.fillStyle = '#ffd700';
     this.drawFittedText(
       ctx,
       `— ${tribute?.senderName || tribute?.sender || 'Học sinh cả nước'}`,
       160,
       390,
-      245,
+      250,
       15,
       '"Be Vietnam Pro", sans-serif',
       'bold'
@@ -3303,6 +3330,7 @@ class MuseumBuilder {
     canopyInnerLight.position.set(0, 1.2, 0); // Đặt ẩn giữa tán cây hắt ánh sáng lấp lánh xuống tranh và phòng
     rotatingCanopy.add(canopyInnerLight);
 
+    this.banyanCanopyRotatingGroup = rotatingCanopy;
     treeGroup.add(rotatingCanopy);
 
     // 5. BỤC VIẾT LỜI TRI ÂN & SỔ VÀNG ĐẶT PHÍA TRƯỚC GỐC CÂY (HƯỚNG NAM, ĐÓN KHÁCH VÀO PHÒNG)
@@ -5637,6 +5665,7 @@ class MuseumBuilder {
     rotatingTreeGroup.add(this.starGemsContainer);
 
     this.wishingTreeCanopy = rotatingTreeGroup;
+    this.wishingTreeRotatingGroup = rotatingTreeGroup;
     this.wishCardsContainer = new THREE.Group();
     rotatingTreeGroup.add(this.wishCardsContainer);
     group.add(rotatingTreeGroup);
@@ -6138,48 +6167,72 @@ class MuseumBuilder {
     cardCanvas.height = 460;
     const ctx = cardCanvas.getContext('2d');
 
+    const isRuby = idx % 2 === 0;
     const grad = ctx.createLinearGradient(0, 0, 320, 460);
-    grad.addColorStop(0, '#fff2ba');
-    grad.addColorStop(0.45, '#efd07b');
-    grad.addColorStop(1, '#c89438');
+    if (isRuby) {
+      grad.addColorStop(0, '#8b141a');    // Đỏ son thắm khánh tiết
+      grad.addColorStop(0.40, '#6e0e13'); // Đỏ chu sa sẫm
+      grad.addColorStop(0.75, '#4f070b'); // Đỏ nhung sẫm
+      grad.addColorStop(1, '#320306');    // Đỏ mun hoàng gia
+    } else {
+      grad.addColorStop(0, '#874507');    // Hổ phách hoàng gia sẫm
+      grad.addColorStop(0.40, '#6b3304'); // Nâu hổ phách ánh kim
+      grad.addColorStop(0.75, '#4a2002'); // Nâu đồng trầm
+      grad.addColorStop(1, '#2d1301');    // Gỗ mun hổ phách sẫm
+    }
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 320, 460);
 
-    // Viền son đỏ & chỉ vàng truyền thống
-    ctx.strokeStyle = '#7e1419';
-    ctx.lineWidth = 8;
+    // Vân lụa dệt kim tuyến vàng
+    for (let f = 0; f < 70; f++) {
+      ctx.fillStyle = f % 2 === 0 ? 'rgba(255, 215, 0, 0.08)' : 'rgba(0, 0, 0, 0.15)';
+      ctx.fillRect(0, Math.random() * 460, 320, 1 + Math.random() * 2.5);
+    }
+
+    // Viền kép thếp vàng 24K dập nổi hoàng gia
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 7;
     ctx.strokeRect(12, 12, 296, 436);
 
-    ctx.strokeStyle = '#9e6d1a';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = isRuby ? '#dfa528' : '#e6b800';
+    ctx.lineWidth = 2.5;
     ctx.strokeRect(22, 22, 276, 416);
 
-    // Tiêu đề thiệp
-    ctx.fillStyle = '#7e1419';
+    // Tiêu đề thiệp - Vàng kim 24K dập nổi
+    ctx.fillStyle = '#ffd700';
     ctx.font = 'bold 21px "Cormorant Garamond", serif';
     ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 4;
     ctx.fillText('✦ THIỆP TRI ÂN ✦', 160, 56);
+    ctx.shadowBlur = 0;
 
-    // Tên Thầy/Cô nhận
-    ctx.fillStyle = '#102138';
+    // Tên Thầy/Cô nhận - Vàng kim sáng rực rỡ
+    ctx.fillStyle = '#fff3b8';
     ctx.font = 'bold 17px "Be Vietnam Pro", sans-serif';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+    ctx.shadowBlur = 5;
     this.wrapText(ctx, (tribute?.teacher || 'Kính gửi Thầy Cô').slice(0, 42), 160, 96, 250, 22);
+    ctx.shadowBlur = 0;
 
-    // Đường kẻ hoa văn nhỏ
-    ctx.strokeStyle = 'rgba(126, 20, 25, 0.35)';
+    // Đường kẻ hoa văn vàng
+    ctx.strokeStyle = '#ffd700';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(60, 134);
-    ctx.lineTo(260, 134);
+    ctx.moveTo(56, 134);
+    ctx.lineTo(264, 134);
     ctx.stroke();
 
-    // Trích đoạn lời nhắn
-    ctx.fillStyle = '#1a283d';
+    // Trích đoạn lời nhắn - Trắng ngà lụa sắc nét, tương phản tối đa
+    ctx.fillStyle = '#fff8eb';
     ctx.font = 'italic 17px "Cormorant Garamond", serif';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+    ctx.shadowBlur = 3;
     this.wrapText(ctx, `“${(tribute?.message || '').slice(0, 100)}”`, 160, 164, 250, 22);
+    ctx.shadowBlur = 0;
 
     // Tên học sinh gửi & Lớp - Trường - Tỉnh
-    ctx.fillStyle = '#7e1419';
+    ctx.fillStyle = '#ffd700';
     ctx.font = 'bold 15px "Be Vietnam Pro", sans-serif';
     this.drawFittedText(
       ctx,
@@ -6188,19 +6241,18 @@ class MuseumBuilder {
       368,
       260,
       15,
-      11,
       'bold',
       '"Be Vietnam Pro", sans-serif'
     );
 
     const metaParts = [tribute?.className, tribute?.school, tribute?.province].filter(Boolean);
     if (metaParts.length > 0) {
-      ctx.fillStyle = '#3b2406';
+      ctx.fillStyle = '#ffe8b8';
       ctx.font = '12px "Be Vietnam Pro", sans-serif';
       this.wrapText(ctx, metaParts.join(' • '), 160, 392, 256, 15);
     }
 
-    ctx.fillStyle = '#472d08';
+    ctx.fillStyle = '#ffcc66';
     ctx.font = 'italic 11px "Be Vietnam Pro", sans-serif';
     ctx.fillText('(Bấm vào thiệp để mở xem)', 160, 428);
 

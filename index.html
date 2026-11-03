@@ -906,5 +906,26 @@
     </div>
   </div>
 
+
+  <!-- THANH ĐIỀU KHIỂN XOAY CÂY CHỌN ĐỌC THIỆP TRI ÂN (TỰ ĐỘNG HIỆN KHI Ở GẦN CÂY) -->
+  <div id="tree-rotation-hud" class="tree-rotation-hud hidden">
+    <div class="tree-hud-badge">
+      <span class="tree-hud-sparkle">✨</span>
+      <span id="tree-hud-name">CỘI CÂY TRI THỨC</span>
+      <span class="tree-hud-sparkle">✨</span>
+    </div>
+    <div class="tree-hud-controls">
+      <button type="button" class="btn-tree-turn" onclick="window.app && window.app.rotateActiveTree(-1)" title="Xoay cây sang trái để đón đọc các thiệp tiếp theo">
+        <span>↺</span> XOAY TRÁI
+      </button>
+      <div class="tree-hud-hint">
+        <span>Kéo chuột trên cây hoặc bấm nút để xoay chọn thiệp</span>
+      </div>
+      <button type="button" class="btn-tree-turn" onclick="window.app && window.app.rotateActiveTree(1)" title="Xoay cây sang phải để đón đọc các thiệp tiếp theo">
+        XOAY PHẢI <span>↻</span>
+      </button>
+    </div>
+  </div>
+
 </body>
 </html>
