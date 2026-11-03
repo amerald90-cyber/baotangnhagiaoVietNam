@@ -6167,72 +6167,48 @@ class MuseumBuilder {
     cardCanvas.height = 460;
     const ctx = cardCanvas.getContext('2d');
 
-    const isRuby = idx % 2 === 0;
     const grad = ctx.createLinearGradient(0, 0, 320, 460);
-    if (isRuby) {
-      grad.addColorStop(0, '#8b141a');    // Đỏ son thắm khánh tiết
-      grad.addColorStop(0.40, '#6e0e13'); // Đỏ chu sa sẫm
-      grad.addColorStop(0.75, '#4f070b'); // Đỏ nhung sẫm
-      grad.addColorStop(1, '#320306');    // Đỏ mun hoàng gia
-    } else {
-      grad.addColorStop(0, '#874507');    // Hổ phách hoàng gia sẫm
-      grad.addColorStop(0.40, '#6b3304'); // Nâu hổ phách ánh kim
-      grad.addColorStop(0.75, '#4a2002'); // Nâu đồng trầm
-      grad.addColorStop(1, '#2d1301');    // Gỗ mun hổ phách sẫm
-    }
+    grad.addColorStop(0, '#fff2ba');
+    grad.addColorStop(0.45, '#efd07b');
+    grad.addColorStop(1, '#c89438');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 320, 460);
 
-    // Vân lụa dệt kim tuyến vàng
-    for (let f = 0; f < 70; f++) {
-      ctx.fillStyle = f % 2 === 0 ? 'rgba(255, 215, 0, 0.08)' : 'rgba(0, 0, 0, 0.15)';
-      ctx.fillRect(0, Math.random() * 460, 320, 1 + Math.random() * 2.5);
-    }
-
-    // Viền kép thếp vàng 24K dập nổi hoàng gia
-    ctx.strokeStyle = '#ffd700';
-    ctx.lineWidth = 7;
+    // Viền son đỏ & chỉ vàng truyền thống
+    ctx.strokeStyle = '#7e1419';
+    ctx.lineWidth = 8;
     ctx.strokeRect(12, 12, 296, 436);
 
-    ctx.strokeStyle = isRuby ? '#dfa528' : '#e6b800';
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#9e6d1a';
+    ctx.lineWidth = 2;
     ctx.strokeRect(22, 22, 276, 416);
 
-    // Tiêu đề thiệp - Vàng kim 24K dập nổi
-    ctx.fillStyle = '#ffd700';
+    // Tiêu đề thiệp
+    ctx.fillStyle = '#7e1419';
     ctx.font = 'bold 21px "Cormorant Garamond", serif';
     ctx.textAlign = 'center';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 4;
     ctx.fillText('✦ THIỆP TRI ÂN ✦', 160, 56);
-    ctx.shadowBlur = 0;
 
-    // Tên Thầy/Cô nhận - Vàng kim sáng rực rỡ
-    ctx.fillStyle = '#fff3b8';
+    // Tên Thầy/Cô nhận
+    ctx.fillStyle = '#102138';
     ctx.font = 'bold 17px "Be Vietnam Pro", sans-serif';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-    ctx.shadowBlur = 5;
     this.wrapText(ctx, (tribute?.teacher || 'Kính gửi Thầy Cô').slice(0, 42), 160, 96, 250, 22);
-    ctx.shadowBlur = 0;
 
-    // Đường kẻ hoa văn vàng
-    ctx.strokeStyle = '#ffd700';
+    // Đường kẻ hoa văn nhỏ
+    ctx.strokeStyle = 'rgba(126, 20, 25, 0.35)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(56, 134);
-    ctx.lineTo(264, 134);
+    ctx.moveTo(60, 134);
+    ctx.lineTo(260, 134);
     ctx.stroke();
 
-    // Trích đoạn lời nhắn - Trắng ngà lụa sắc nét, tương phản tối đa
-    ctx.fillStyle = '#fff8eb';
+    // Trích đoạn lời nhắn
+    ctx.fillStyle = '#1a283d';
     ctx.font = 'italic 17px "Cormorant Garamond", serif';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-    ctx.shadowBlur = 3;
     this.wrapText(ctx, `“${(tribute?.message || '').slice(0, 100)}”`, 160, 164, 250, 22);
-    ctx.shadowBlur = 0;
 
     // Tên học sinh gửi & Lớp - Trường - Tỉnh
-    ctx.fillStyle = '#ffd700';
+    ctx.fillStyle = '#7e1419';
     ctx.font = 'bold 15px "Be Vietnam Pro", sans-serif';
     this.drawFittedText(
       ctx,
@@ -6241,18 +6217,19 @@ class MuseumBuilder {
       368,
       260,
       15,
+      11,
       'bold',
       '"Be Vietnam Pro", sans-serif'
     );
 
     const metaParts = [tribute?.className, tribute?.school, tribute?.province].filter(Boolean);
     if (metaParts.length > 0) {
-      ctx.fillStyle = '#ffe8b8';
+      ctx.fillStyle = '#3b2406';
       ctx.font = '12px "Be Vietnam Pro", sans-serif';
       this.wrapText(ctx, metaParts.join(' • '), 160, 392, 256, 15);
     }
 
-    ctx.fillStyle = '#ffcc66';
+    ctx.fillStyle = '#472d08';
     ctx.font = 'italic 11px "Be Vietnam Pro", sans-serif';
     ctx.fillText('(Bấm vào thiệp để mở xem)', 160, 428);
 
