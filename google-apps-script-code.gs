@@ -156,7 +156,16 @@ function getSheetMemories(ss) {
 function saveBase64ImageToDrive(base64Data, filename, mimeType) {
   if (!base64Data) return { url: '', fileId: '' };
   try {
-    var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    var folder = null;
+    try {
+      folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    } catch (eFolder) {
+      Logger.log('Không mở được folder theo ID: ' + eFolder);
+    }
+    if (!folder) {
+      folder = DriveApp.getRootFolder();
+    }
+
     var cleanBase64 = String(base64Data).trim();
     var contentType = mimeType || 'image/jpeg';
 
@@ -167,6 +176,9 @@ function saveBase64ImageToDrive(base64Data, filename, mimeType) {
     } else if (cleanBase64.indexOf(',') !== -1) {
       cleanBase64 = cleanBase64.split(',')[1];
     }
+
+    // Quan trọng: Thay thế khoảng trắng thành '+' (do URL decode biến '+' thành ' ')
+    cleanBase64 = cleanBase64.replace(/\s/g, '+');
 
     var decoded = Utilities.base64Decode(cleanBase64);
     var safeFileName = filename || ('anh_nha_giao_' + Date.now() + '.jpg');

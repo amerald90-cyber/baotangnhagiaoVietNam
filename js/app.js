@@ -71,7 +71,7 @@ class VietnamTeachersMuseumApp {
     // Cấu hình kết nối ngầm lưu trữ lời tri ân của học sinh (ẩn hoàn toàn khỏi giao diện công khai)
     this.googleSheetId = '1NTR--NxzjtvlzQVDhuVNYQ5q71tVJ8i-4DMnW3uMdSg';
     this.sheetWebAppUrl =
-      'https://script.google.com/macros/s/AKfycbxZjP37FpIUi3m9-NTXVyBP_udLrZxdivmQTE7KG_dK3WmxTZxZ3SbAHSskfPdPN9N8/exec';
+      'https://script.google.com/macros/s/AKfycbx6LKL6AeWpq0-16bUCnbzifahJus3LepSPmHMYirICKuEUXTxv99jZaJFbND2oPol4/exec';
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const customUrl = urlParams.get('scriptUrl') || localStorage.getItem('custom_sheet_webapp_url');
@@ -401,7 +401,7 @@ class VietnamTeachersMuseumApp {
               vTime.toLowerCase().includes('thời gian') ||
               vSender.toLowerCase().includes('người gửi') ||
               vTeacher.toLowerCase().includes('nhà giáo') ||
-              vTeacher.toLowerCase().includes('test_') ||
+              vTeacher.toLowerCase().includes('test') ||
               vPhoto.toLowerCase().includes('link ảnh')
             ) {
               return;
