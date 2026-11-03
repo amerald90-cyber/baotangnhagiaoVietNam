@@ -1174,34 +1174,63 @@ Chiếc đèn dầu đồng đặt trên bục cao vừa đủ soi sáng tấm b
     ]
   },
 
-  // --- HIỆN VẬT DANH DỰ TRUNG TÂM HÀNH LANG: BỨC THƯ BÁC HỒ GỬI NGÀNH GIÁO DỤC ---
+  // --- HIỆN VẬT DANH DỰ TRUNG TÂM HÀNH LANG: BỨC THƯ BÁC HỒ GỬI CÁC EM HỌC SINH (THÁNG 9/1945) ---
   {
     id: 'art-uncle-ho-letter',
     code: 'BH-01',
-    title: 'Bức Thư Lịch Sử Của Bác Hồ Gửi Ngành Giáo Dục (15/10/1968)',
-    subtitle: 'Lời căn dặn thiêng liêng: "Dù khó khăn đến đâu cũng phải tiếp tục thi đua Dạy tốt và Học tốt"',
+    title: 'Thư Bác Hồ gửi các em học sinh nhân ngày khai trường đầu tiên của nước Việt Nam Dân chủ Cộng hòa (Tháng 9/1945)',
+    subtitle: 'Lời căn dặn thiêng liêng: "Non sông Việt Nam có trở nên tươi đẹp hay không... chính là nhờ một phần lớn ở công học tập của các em"',
     zoneId: 'room-tools',
     zoneName: 'Hành Lang Lời Bác Dạy & Bộ Đồ Dùng Dạy Học',
-    era: 'Ngày 15 tháng 10 năm 1968',
+    era: 'Tháng 9 năm 1945',
     material: 'Bản chụp bút tích nguyên bản, tủ kính pha lê quang học, bệ đá hoa cương và đồng đúc mạ vàng',
     dimensions: 'Bệ trưng bày danh dự 1,8m × 1,2m × 1,65m',
     position: { x: 0, y: 0, z: 25.0 },
     viewOffset: { x: 0, y: 2.3, z: 29.0 },
     lookAtOffset: { x: 0, y: 1.6, z: 25.0 },
-    summary: 'Bức thư cuối cùng của Chủ tịch Hồ Chí Minh gửi các thầy giáo, cô giáo, cán bộ, công nhân viên và học sinh, sinh viên cả nước nhân dịp khai giảng năm học 1968 – 1969, được xem là bản di chúc và cương lĩnh phát triển giáo dục Việt Nam.',
-    story: `Ngày 15 tháng 10 năm 1968, giữa những năm tháng ác liệt của cuộc kháng chiến chống Mỹ cứu nước, Chủ tịch Hồ Chí Minh đã gửi thư cho cán bộ, giáo viên, nhân viên và học sinh, sinh viên nhân dịp bắt đầu năm học mới. Đây là bức thư cuối cùng Người gửi ngành Giáo dục trước lúc đi xa.
+    summary: 'Bức thư lịch sử thiêng liêng của Chủ tịch Hồ Chí Minh gửi các em học sinh nhân ngày khai trường đầu tiên của nước Việt Nam Dân chủ Cộng hòa (Tháng 9/1945), mở ra kỷ nguyên độc lập và khẳng định sứ mệnh rạng danh non sông của thế hệ trẻ.',
+    story: `Các em học sinh,
 
-Trong bức thư bất hủ này, Bác căn dặn:
-"Nhiệm vụ của cô giáo, thầy giáo là rất quan trọng và rất vẻ vang...
-Dù khó khăn đến đâu cũng phải tiếp tục thi đua Dạy tốt và Học tốt. Trên nền tảng giáo dục chính trị và lãnh đạo tư tưởng tốt, phải phấn đấu nâng cao chất lượng văn hóa và chuyên môn, nhằm thiết thực giải quyết các vấn đề do cách mạng nước ta đề ra và trong một thời gian không xa, đạt những đỉnh cao của khoa học và kỹ thuật."
+Ngày hôm nay là ngày khai trường đầu tiên ở Nước Việt Nam Dân chủ Cộng hòa. Tôi đã tưởng tượng thấy trước mắt cái cảnh nhộn nhịp tưng bừng của ngày tựu trường ở khắp các nơi.
 
-Bức thư của Người không chỉ là nguồn động viên vô bờ bến đối với hàng vạn thầy cô giáo và học sinh lúc bấy giờ, mà đã trở thành kim chỉ nam, cương lĩnh hành động xuyên suốt cho toàn bộ nền giáo dục Việt Nam trong mọi thời kỳ. Phong trào thi đua "Hai tốt" (Dạy tốt – Học tốt) bắt nguồn từ bức thư này đã trở thành ngọn cờ dẫn dắt sự nghiệp trồng người của đất nước suốt hơn nửa thế kỷ qua.`,
-    quote: '“Dù khó khăn đến đâu cũng phải tiếp tục thi đua Dạy tốt và Học tốt.”',
+Các em hết thảy đều vui vẻ vì sau mấy tháng giời nghỉ học, sau bao nhiêu cuộc chuyển biến khác thường, các em lại được gặp thầy gặp bạn.
+
+Nhưng sung sướng hơn nữa, từ giờ phút này giở đi các em bắt đầu được nhận một nền giáo dục hoàn toàn Việt Nam.
+
+Trước đây cha anh các em, và mới năm ngoái cả các em nữa, đã phải chịu nhận một nền học vấn nô lệ, nghĩa là nó chỉ đào tạo nên những kẻ làm tay sai, làm tôi tớ cho một bọn thực dân người Pháp.
+
+Ngày nay các em được cái may mắn hơn cha anh là được hấp thụ một nền giáo dục của một nước độc lập, một nền giáo dục nó sẽ đào tạo các em nên những người công dân hữu ích cho nước Việt Nam, một nền giáo dục làm phát triển hoàn toàn những năng lực sẵn có của các em.
+
+Các em được hưởng sự may mắn đó là nhờ sự hy sinh của biết bao nhiêu đồng bào các em. Vậy các em nghĩ sao? Các em phải làm thế nào để đền bù lại công lao của người khác đã không tiếc thân và tiếc của để chiếm lại nền độc lập cho nước nhà.
+
+Các em hãy nghe lời tôi, lời của một người anh lớn lúc nào cũng ân cần mong mỏi cho các em được giỏi giang.
+
+Trong năm học tới đây, các em hãy cố gắng, siêng năng học tập, ngoan ngoãn, nghe thầy, yêu bạn.
+
+Sau 80 năm giời nô lệ làm cho nước nhà bị yếu hèn, ngày nay chúng ta cần phải xây dựng lại cơ đồ mà tổ tiên đã để lại cho chúng ta, làm sao cho chúng ta theo kịp các nước khác trên hoàn cầu.
+
+Trong công cuộc kiến thiết đó, nước nhà trông mong chờ đợi ở các em rất nhiều.
+
+Non sông Việt Nam có trở nên tươi đẹp hay không, dân tộc Việt Nam có bước tới đài vinh quang để sánh vai với các cường quốc năm châu được hay không, chính là nhờ một phần lớn ở công học tập của các em.
+
+Ðối riêng với các em lớn, tôi khuyên thêm một điều này: chúng ta đã đánh đuổi bọn thực dân, chúng ta đã giành được độc lập. Nhưng giặc Pháp còn lăm le quay lại. Chúng ỷ vào kẻ khác mạnh hơn mà gây sự với ta.
+
+Tất nhiên chúng sẽ bị bại, vì tất cả quốc dân ta đoàn kết chặt chẽ và một lòng chiến đấu cho giang sơn Tổ quốc. Phải sẵn sàng mà chống quân giặc cướp nước, đấy là bổn phận của mỗi công dân.
+
+Các em lớn chưa hẳn đến tuổi phải gánh công việc nặng nhọc ấy, nhưng các em cũng nên, ngoài giờ học ở trường, tham gia vào các Hội cứu quốc để tập luyện thêm cho quen với đời sống chiến sĩ và để giúp đỡ một vài việc nhẹ nhàng trong cuộc phòng thủ đất nước.
+
+Tôi đã thành thực khuyên nhủ các em. Mong rằng những lời của tôi được các em luôn luôn ghi nhớ.
+
+Ngày hôm nay, nhân buổi tựu trường của các em, tôi chỉ biết chúc các em một năm đầy vui vẻ và đầy kết quả tốt đẹp.
+
+Chào các em thân yêu!
+HỒ CHÍ MINH`,
+    quote: '“Non sông Việt Nam có trở nên tươi đẹp hay không, dân tộc Việt Nam có bước tới đài vinh quang để sánh vai với các cường quốc năm châu được hay không, chính là nhờ một phần lớn ở công học tập của các em.”',
     highlights: [
-      'Bức thư cuối cùng Bác Hồ gửi ngành Giáo dục trước lúc Người đi xa (15/10/1968).',
-      'Lời căn dặn lịch sử: "Dù khó khăn đến đâu cũng phải tiếp tục thi đua Dạy tốt và Học tốt".',
-      'Định hướng chiến lược kết hợp hài hòa giữa Đạo đức cách mạng và Đỉnh cao khoa học kỹ thuật.',
-      'Nguồn cội của Phong trào thi đua "Hai Tốt" lan tỏa sâu rộng trong toàn ngành giáo dục.'
+      'Bức thư lịch sử Bác Hồ gửi ngày khai trường đầu tiên của nước Việt Nam Dân chủ Cộng hòa (Tháng 9/1945).',
+      'Lời căn dặn bất hủ: "Non sông Việt Nam có trở nên tươi đẹp hay không... chính là nhờ một phần lớn ở công học tập của các em".',
+      'Định hình nền giáo dục mới hoàn toàn Việt Nam – giáo dục của một nước độc lập, tự do.',
+      'Khơi dậy tinh thần tự hào, ý thức trách nhiệm và khát vọng kiến thiết non sông sánh vai các cường quốc năm châu.'
     ],
     videoData: {
       title: 'Phim tư liệu: Bác Hồ với sự nghiệp Trồng người',

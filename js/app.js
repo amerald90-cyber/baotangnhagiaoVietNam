@@ -218,10 +218,16 @@ class VietnamTeachersMuseumApp {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Lọc bỏ ảnh dummy 1x1 pixel test cũ (< 500 ký tự base64)
+          // Lọc bỏ toàn bộ ảnh mẫu chibi / avatar hoạt hình cũ và ảnh dummy 1x1
           const filtered = parsed.filter((m) => {
+            if (!m) return false;
+            if (typeof m.id === 'string' && /^mem-[1-9]$|^mem-1[0-9]$|^mem-2[0-4]$/.test(m.id)) return false;
             const p = m.photo || m.photoAfter || '';
-            return !(p.startsWith('data:image') && p.length < 500);
+            if (p.startsWith('data:image') && p.length < 500) return false;
+            if (m.teacherName && (m.teacherName.includes('Trần Văn Giàu') || m.teacherName.includes('Đặng Huỳnh Mai'))) {
+              if (m.id && String(m.id).startsWith('mem-')) return false;
+            }
+            return true;
           });
           const normalized = filtered.map((m) => ({
             ...m,
@@ -1767,10 +1773,17 @@ class VietnamTeachersMuseumApp {
 
     if (filtered.length === 0) {
       container.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: #94a3b8;">
-          <div style="font-size: 38px; margin-bottom: 8px;">🔍</div>
-          <div style="font-size: 16px; font-weight: 700; color: #ffd700;">Không tìm thấy ảnh tư liệu phù hợp</div>
-          <p style="font-size: 13px; margin-top: 4px;">Hãy thử tìm từ khóa khác hoặc bấm nút "Đóng Góp Ảnh Nhà Giáo" để bổ sung ngay!</p>
+        <div class="memory-empty-state" style="grid-column: 1 / -1; text-align: center; padding: 56px 20px; background: rgba(10, 25, 45, 0.45); border: 1.5px dashed rgba(255, 215, 0, 0.35); border-radius: 16px; margin: 16px 0;">
+          <div style="font-size: 48px; margin-bottom: 12px;">💌</div>
+          <div style="font-size: 20px; font-weight: 700; color: #ffd700; margin-bottom: 8px; font-family: 'Playfair Display', serif;">
+            Chưa có lời tri ân nào, hãy là người đầu tiên gửi lời chúc!
+          </div>
+          <p style="font-size: 14px; color: #94a3b8; max-width: 520px; margin: 0 auto 24px; line-height: 1.6;">
+            Hãy cùng chung tay xây dựng Bức Tường Ký Ức bằng cách gửi gắm những hình ảnh chân dung và câu chuyện xúc động về Thầy Cô giáo kính yêu của bạn.
+          </p>
+          <button type="button" class="btn-submit-memory" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; font-size: 14px; font-weight: 700;" onclick="window.app && window.app.openMemoryUploadModal()">
+            <span>📸 Đóng Góp Ảnh Nhà Giáo Ngay</span>
+          </button>
         </div>
       `;
       return;

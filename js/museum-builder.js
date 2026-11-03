@@ -691,7 +691,7 @@ class MuseumBuilder {
         x: 0, z: 9.5,
         icon: '⬇', action: 'TIẾN THẲNG • HÀNH LANG DANH DỰ',
         title: 'HÀNH LANG LỜI BÁC DẠY & BỘ ĐỒ DÙNG',
-        subtitle: 'Bức thư Bác Hồ 15/10/1968, 4 lời căn dặn bất hủ & kỷ vật dạy học',
+        subtitle: 'Thư Bác Hồ khai trường Tháng 9/1945, lời căn dặn bất hủ & kỷ vật dạy học',
         targetZoneId: 'room-tools'
       },
 
@@ -875,6 +875,8 @@ class MuseumBuilder {
       if (Math.abs(px) < 1.0) continue;
       // BỎ CỘT TRỰC DIỆN PHÍA ĐÔNG (px > 8.0, pz = 0) để mở toang tầm nhìn vào Cổng vòm 15 Bộ Trưởng!
       if (Math.abs(pz) < 1.0 && px > 8.0) continue;
+      // BỎ CỘT TRỰC DIỆN PHÍA TÂY (px < -8.0, pz = 0) để mở toang tầm nhìn vào Cổng phòng Lịch Sử Giáo Dục!
+      if (Math.abs(pz) < 2.5 && px < -8.0) continue;
       this.createMuseumPillar(archGroup, px, pz, 7.8);
     }
     // Bố trí cặp cột cổng vòm trang trọng ở lối vào phía Nam (x = -4.5 và x = +4.5 tại z = 12.5)
@@ -980,18 +982,14 @@ class MuseumBuilder {
 
     // Cửa chính mở toang đón ánh sáng rực rỡ và khách tham quan (được dựng chi tiết trong buildGrandExteriorFacade)
 
-    // Vách lam gỗ truyền thống kết nối Đại Sảnh
-    this.createWoodenScreen(archGroup, -8.2, -10.2, 4.2, 0);
+    // Vách lam gỗ truyền thống kết nối Đại Sảnh (Đã dỡ bỏ toàn bộ vách lam gỗ chắn lối vào phòng Lịch Sử)
     this.createWoodenScreen(archGroup, 8.2, 10.2, 4.2, 0);
-    this.createWoodenScreen(archGroup, -8.2, 10.2, 4.2, 0);
-    this.createWoodenScreen(archGroup, -10.2, -8.2, 4.2, Math.PI / 2);
-    this.createWoodenScreen(archGroup, -10.2, 8.2, 4.2, Math.PI / 2);
     this.createWoodenScreen(archGroup, 10.2, 8.2, 4.2, Math.PI / 2);
 
-    // Ghế gỗ nghỉ chân tại Đại Sảnh
-    this.createMuseumBench(archGroup, -6.2, -6.2, Math.PI / 4);
+    // Ghế gỗ nghỉ chân tại Đại Sảnh (Bố cục lại nép gọn bên cột song song mép thảm, giải phóng hoàn toàn lối đi thảm xanh)
+    this.createMuseumBench(archGroup, -4.6, 7.2, 0);
     this.createMuseumBench(archGroup, 8.2, -2.6, Math.PI / 2);
-    this.createMuseumBench(archGroup, -6.2, 6.2, -Math.PI / 4);
+    this.createMuseumBench(archGroup, -6.2, -6.2, Math.PI / 4);
     this.createMuseumBench(archGroup, 6.2, 6.2, Math.PI / 4);
 
     this.scene.add(archGroup);
@@ -1243,23 +1241,8 @@ class MuseumBuilder {
     archGoldTrim.position.set(0, portalH + 0.45, -10.6);
     galleryArch.add(archGoldTrim);
 
-    // BIỂN HIỆU ĐỒNG CỔNG VÒM HƯỚNG RA ĐẠI SẢNH (NHÌN TỪ NAM SANG BẮC)
-    const signGroup = new THREE.Group();
-    signGroup.position.set(0, portalH - 0.25, -10.45);
-    const signTex = this.createArchwaySignTextureTeachers();
-    const signPlate = new THREE.Mesh(
-      new THREE.PlaneGeometry(5.8, 1.25),
-      new THREE.MeshBasicMaterial({ map: signTex })
-    );
-    signGroup.add(signPlate);
-
-    const signFrame = new THREE.Mesh(
-      new THREE.BoxGeometry(5.92, 1.35, 0.08),
-      this.materials.bronzeGold
-    );
-    signFrame.position.z = -0.05;
-    signGroup.add(signFrame);
-    galleryArch.add(signGroup);
+    // BIỂN CỔNG VÒM: Đã bỏ biển hiệu thấp gắn xà cửa gỗ để lối vào cao ráo, thông thoáng, chỉ giữ 1 biển treo phía trên cao
+    // (Biển treo cao 6.4m: "GIAN TRƯNG BÀY: NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ" đồng bộ toàn sảnh)
 
     // 2. MẶT SÀN ĐÁ GRANITE CẨM THẠCH XÁM ĐẬM VỚI ĐỘ BÓNG MỜ MỀM MẠI (SOFT REFLECTION)
     const darkGraniteMat = this.createDarkGraniteFloorMaterial();
@@ -3180,11 +3163,10 @@ class MuseumBuilder {
   // =========================================================================
   buildDigitalMemoryWall(parent) {
     const kioskGroup = new THREE.Group();
-    // Đặt tại vị trí trang trọng bên trái sảnh chính: X = -9.2, Y = 1.33, Z = 4.2, xoay góc nhẹ ~1.1 rad hướng về lối vào sảnh
-    // Cách xa cửa vào phòng Lịch sử (Z = 0) hơn 4.2 mét -> Cửa vào và biển hiệu hoàn toàn thông thoáng 100%!
-    // Không bị bất kỳ nan gỗ hay cột nào che khuất tầm nhìn của khách tham quan
-    kioskGroup.position.set(-9.2, 1.33, 4.2);
-    kioskGroup.rotation.y = 1.1;
+    // Bố cục lại nép gọn bên cột song song với mép thảm (X = -8.8, Y = 1.33, Z = 4.8, xoay song song mép lối đi PI/2)
+    // Cách xa lối vào phòng Lịch Sử và hoàn toàn không đè lên điểm tương tác hotspot (X = -9.5, Z = 0)
+    kioskGroup.position.set(-8.8, 1.33, 4.8);
+    kioskGroup.rotation.y = Math.PI / 2;
     kioskGroup.name = 'digital-memory-totem-group';
 
     const totemW = 1.55;
@@ -6451,10 +6433,10 @@ class MuseumBuilder {
     });
   }
 
-  // ==================== TẠO TEXTURE BỨC THƯ BÁC HỒ (15/10/1968) ====================
+  // ==================== TẠO TEXTURE BỨC THƯ BÁC HỒ (THÁNG 9/1945) ====================
   createUncleHoLetterTexture() {
     const width = 1024;
-    const height = 1400;
+    const height = 1500;
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -6466,7 +6448,7 @@ class MuseumBuilder {
 
     // Vân giấy cổ
     ctx.fillStyle = 'rgba(212, 185, 140, 0.18)';
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 45; i++) {
       ctx.fillRect(0, i * 35, width, 2);
     }
 
@@ -6481,91 +6463,110 @@ class MuseumBuilder {
 
     // Quốc hiệu
     ctx.fillStyle = '#8b0000';
-    ctx.font = 'bold 30px "Times New Roman", serif';
+    ctx.font = 'bold 28px "Times New Roman", serif';
     ctx.textAlign = 'center';
-    ctx.fillText('VIỆT NAM DÂN CHỦ CỘNG HÒA', width / 2, 95);
+    ctx.fillText('VIỆT NAM DÂN CHỦ CỘNG HÒA', width / 2, 85);
 
     ctx.fillStyle = '#1a1a1a';
-    ctx.font = 'italic bold 24px "Times New Roman", serif';
-    ctx.fillText('Độc lập - Tự do - Hạnh phúc', width / 2, 135);
+    ctx.font = 'italic bold 22px "Times New Roman", serif';
+    ctx.fillText('Độc lập - Tự do - Hạnh phúc', width / 2, 120);
 
     ctx.strokeStyle = '#8b0000';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(width / 2 - 140, 150);
-    ctx.lineTo(width / 2 + 140, 150);
+    ctx.moveTo(width / 2 - 140, 134);
+    ctx.lineTo(width / 2 + 140, 134);
     ctx.stroke();
 
     // Tiêu đề bức thư
     ctx.fillStyle = '#0a2342';
-    ctx.font = 'bold 28px "Times New Roman", serif';
-    ctx.fillText('THƯ CỦA CHỦ TỊCH HỒ CHÍ MINH', width / 2, 215);
+    ctx.font = 'bold 26px "Times New Roman", serif';
+    ctx.fillText('THƯ CỦA CHỦ TỊCH HỒ CHÍ MINH', width / 2, 182);
 
-    ctx.font = 'bold 20px "Times New Roman", serif';
-    ctx.fillText('Gửi cán bộ, cô giáo, thầy giáo, công nhân viên, học sinh, sinh viên', width / 2, 250);
-    ctx.fillText('nhân dịp đầu năm học 1968 – 1969', width / 2, 280);
+    ctx.font = 'italic bold 18px "Times New Roman", serif';
+    ctx.fillText('Gửi các em học sinh nhân ngày khai trường đầu tiên của nước Việt Nam Dân chủ Cộng hòa', width / 2, 214);
 
     ctx.strokeStyle = '#c89d54';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(width / 2 - 240, 305);
-    ctx.lineTo(width / 2 + 240, 305);
+    ctx.moveTo(width / 2 - 260, 234);
+    ctx.lineTo(width / 2 + 260, 234);
     ctx.stroke();
 
-    // Nội dung bức thư
-    ctx.fillStyle = '#222222';
-    ctx.font = '19px "Times New Roman", serif';
-    ctx.textAlign = 'left';
-
-    const letterLines = [
-      'Gửi các cô, các chú và các cháu,',
-      'Nhân dịp đầu năm học thứ tư chống Mỹ, cứu nước, Bác thân ái gửi lời thăm hỏi',
-      'tất cả các cô, các chú và các cháu.',
-      '',
-      'Trong hoàn cảnh đất nước có chiến tranh, sự nghiệp giáo dục của chúng ta vẫn',
-      'phát triển nhanh hơn bất kỳ thời kỳ nào trước đây. Đó là một thắng lợi to lớn',
-      'của đường lối cách mạng đúng đắn của Đảng ta.',
-      '',
-      'Nhiệm vụ của cô giáo, thầy giáo là rất quan trọng và rất vẻ vang.',
-      'Giáo dục là sự nghiệp của quần chúng. Cần phải phát huy đầy đủ dân chủ xã hội',
-      'chủ nghĩa, xây dựng quan hệ thật tốt giữa thầy và trò, giữa cán bộ và nhân dân.',
-      '',
-      '“DÙ KHÓ KHĂN ĐẾN ĐÂU CŨNG PHẢI TIẾP TỤC THI ĐUA',
-      'DẠY TỐT VÀ HỌC TỐT”',
-      '',
-      'Trên nền tảng giáo dục chính trị và lãnh đạo tư tưởng tốt, phải phấn đấu nâng cao',
-      'chất lượng văn hóa và chuyên môn, nhằm thiết thực giải quyết các vấn đề do cách mạng',
-      'nước ta đề ra và trong một thời gian không xa, đạt những đỉnh cao của khoa học và kỹ thuật.',
-      '',
-      'Bác mong các cô, các chú và các cháu tiếp tục phát huy truyền thống cách mạng',
-      'vẻ vang, đoàn kết chặt chẽ, cùng nhau vượt qua mọi gian khổ để giành thắng lợi mới.',
-      '',
-      'Chúc các cô, các chú và các cháu đạt nhiều thành tích vẻ vang!'
+    // Nội dung nguyên văn bức thư Tháng 9/1945
+    const paragraphs = [
+      'Các em học sinh,',
+      'Ngày hôm nay là ngày khai trường đầu tiên ở Nước Việt Nam Dân chủ Cộng hòa. Tôi đã tưởng tượng thấy trước mắt cái cảnh nhộn nhịp tưng bừng của ngày tựu trường ở khắp các nơi.',
+      'Các em hết thảy đều vui vẻ vì sau mấy tháng giời nghỉ học, sau bao nhiêu cuộc chuyển biến khác thường, các em lại được gặp thầy gặp bạn.',
+      'Nhưng sung sướng hơn nữa, từ giờ phút này giở đi các em bắt đầu được nhận một nền giáo dục hoàn toàn Việt Nam.',
+      'Trước đây cha anh các em, và mới năm ngoái cả các em nữa, đã phải chịu nhận một nền học vấn nô lệ, nghĩa là nó chỉ đào tạo nên những kẻ làm tay sai, làm tôi tớ cho một bọn thực dân người Pháp.',
+      'Ngày nay các em được cái may mắn hơn cha anh là được hấp thụ một nền giáo dục của một nước độc lập, một nền giáo dục nó sẽ đào tạo các em nên những người công dân hữu ích cho nước Việt Nam, một nền giáo dục làm phát triển hoàn toàn những năng lực sẵn có của các em.',
+      'Các em được hưởng sự may mắn đó là nhờ sự hy sinh của biết bao nhiêu đồng bào các em. Vậy các em nghĩ sao? Các em phải làm thế nào để đền bù lại công lao của người khác đã không tiếc thân và tiếc của để chiếm lại nền độc lập cho nước nhà.',
+      'Các em hãy nghe lời tôi, lời của một người anh lớn lúc nào cũng ân cần mong mỏi cho các em được giỏi giang.',
+      'Trong năm học tới đây, các em hãy cố gắng, siêng năng học tập, ngoan ngoãn, nghe thầy, yêu bạn.',
+      'Sau 80 năm giời nô lệ làm cho nước nhà bị yếu hèn, ngày nay chúng ta cần phải xây dựng lại cơ đồ mà tổ tiên đã để lại cho chúng ta, làm sao cho chúng ta theo kịp các nước khác trên hoàn cầu.',
+      'Trong công cuộc kiến thiết đó, nước nhà trông mong chờ đợi ở các em rất nhiều.',
+      'Non sông Việt Nam có trở nên tươi đẹp hay không, dân tộc Việt Nam có bước tới đài vinh quang để sánh vai với các cường quốc năm châu được hay không, chính là nhờ một phần lớn ở công học tập của các em.',
+      'Ðối riêng với các em lớn, tôi khuyên thêm một điều này: chúng ta đã đánh đuổi bọn thực dân, chúng ta đã giành được độc lập. Nhưng giặc Pháp còn lăm le quay lại. Chúng ỷ vào kẻ khác mạnh hơn mà gây sự với ta.',
+      'Tất nhiên chúng sẽ bị bại, vì tất cả quốc dân ta đoàn kết chặt chẽ và một lòng chiến đấu cho giang sơn Tổ quốc. Phải sẵn sàng mà chống quân giặc cướp nước, đấy là bổn phận của mỗi công dân.',
+      'Các em lớn chưa hẳn đến tuổi phải gánh công việc nặng nhọc ấy, nhưng các em cũng nên, ngoài giờ học ở trường, tham gia vào các Hội cứu quốc để tập luyện thêm cho quen với đời sống chiến sĩ và để giúp đỡ một vài việc nhẹ nhàng trong cuộc phòng thủ đất nước.',
+      'Tôi đã thành thực khuyên nhủ các em. Mong rằng những lời của tôi được các em luôn luôn ghi nhớ.',
+      'Ngày hôm nay, nhân buổi tựu trường của các em, tôi chỉ biết chúc các em một năm đầy vui vẻ và đầy kết quả tốt đẹp.'
     ];
 
-    let textY = 350;
-    letterLines.forEach((l) => {
-      if (l.includes('DÙ KHÓ KHĂN')) {
+    let currentY = 265;
+    const startX = 75;
+    const maxTextW = width - 150;
+    const lineHeight = 21;
+
+    ctx.textAlign = 'left';
+
+    paragraphs.forEach((pText) => {
+      const isHighlight = pText.includes('Non sông Việt Nam có trở nên tươi đẹp');
+      if (isHighlight) {
         ctx.fillStyle = '#8b0000';
-        ctx.font = 'bold 23px "Times New Roman", serif';
-        ctx.fillText(l, 85, textY);
-        ctx.font = '19px "Times New Roman", serif';
-        ctx.fillStyle = '#222222';
+        ctx.font = 'bold 16px "Times New Roman", serif';
+      } else if (pText === 'Các em học sinh,') {
+        ctx.fillStyle = '#0a2342';
+        ctx.font = 'bold italic 18px "Times New Roman", serif';
       } else {
-        ctx.fillText(l, 85, textY);
+        ctx.fillStyle = '#222222';
+        ctx.font = '15.5px "Times New Roman", serif';
       }
-      textY += 32;
+
+      const words = pText.split(' ');
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxTextW && n > 0) {
+          ctx.fillText(line, startX, currentY);
+          line = words[n] + ' ';
+          currentY += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, startX, currentY);
+      currentY += lineHeight + 5;
     });
 
-    // Ngày tháng và chữ ký son của Bác
+    // Chào các em thân yêu & Chữ ký son
+    currentY += 8;
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#444444';
-    ctx.font = 'italic 21px "Times New Roman", serif';
-    ctx.fillText('Hà Nội, ngày 15 tháng 10 năm 1968', width - 95, height - 160);
+    ctx.fillStyle = '#0a2342';
+    ctx.font = 'bold italic 18px "Times New Roman", serif';
+    ctx.fillText('Chào các em thân yêu!', width - 85, currentY);
 
+    currentY += 38;
     ctx.fillStyle = '#8b0000';
-    ctx.font = 'bold italic 36px "Brush Script MT", "Times New Roman", cursive';
-    ctx.fillText('Hồ Chí Minh', width - 140, height - 100);
+    ctx.font = 'bold italic 34px "Brush Script MT", "Times New Roman", cursive';
+    ctx.fillText('HỒ CHÍ MINH', width - 85, currentY);
+
+    currentY += 26;
+    ctx.fillStyle = '#555555';
+    ctx.font = 'italic 16px "Times New Roman", serif';
+    ctx.fillText('Hà Nội, Tháng 9 năm 1945', width - 85, currentY);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.anisotropy = 16;
@@ -6576,7 +6577,7 @@ class MuseumBuilder {
     return tex;
   }
 
-  // ==================== DỰNG HIỆN VẬT BỨC THƯ BÁC HỒ (15/10/1968) 3D ====================
+  // ==================== DỰNG HIỆN VẬT BỨC THƯ BÁC HỒ (THÁNG 9/1945) 3D ====================
   buildUncleHoLetterExhibit3D(group) {
     // 1. Bệ tam cấp danh dự bằng đá hoa cương đen & gỗ gụ viền vàng
     const baseStone = new THREE.Mesh(
@@ -6685,10 +6686,10 @@ class MuseumBuilder {
     bustHead.position.set(0.48, 1.68, 0);
     group.add(bustHead);
 
-    // Bảng đồng khắc khẩu hiệu: "DÙ KHÓ KHĂN ĐẾN ĐÂU CŨNG PHẢI TIẾP TỤC THI ĐUA DẠY TỐT VÀ HỌC TỐT"
+    // Bảng đồng khắc khẩu hiệu bất hủ: "NON SÔNG VIỆT NAM CÓ TRỞ NÊN TƯƠI ĐẸP HAY KHÔNG..."
     const sloganTex = this.createTextPlaqueTexture({
-      title: '“DÙ KHÓ KHĂN ĐẾN ĐÂU CŨNG PHẢI TIẾP TỤC THI ĐUA DẠY TỐT VÀ HỌC TỐT”',
-      subtitle: 'Lời căn dặn thiêng liêng của Chủ tịch Hồ Chí Minh (15/10/1968)',
+      title: '“NON SÔNG VIỆT NAM CÓ TRỞ NÊN TƯƠI ĐẸP HAY KHÔNG...”',
+      subtitle: 'Thư Bác Hồ gửi các em học sinh nhân ngày khai trường đầu tiên (Tháng 9/1945)',
       quote: '',
       width: 1536,
       height: 384
@@ -6882,7 +6883,7 @@ class MuseumBuilder {
       { num: '02', title: 'LỊCH SỬ PHÁT TRIỂN GIÁO DỤC', sub: 'Quốc Tử Giám (1076) đến Thời kỳ Đổi Mới' },
       { num: '03', title: 'NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ', sub: 'Hành trình tôn vinh 46 bậc danh sư từ thế kỷ XI đến nay' },
       { num: '04', title: '15 BỘ TRƯỞNG BỘ GIÁO DỤC', sub: 'Hình ảnh thực tế & dấu ấn qua các nhiệm kỳ' },
-      { num: '05', title: 'HÀNH LANG LỜI BÁC & HIỆN VẬT', sub: 'Thư Bác Hồ 15/10/1968 & Bộ đồ dùng dạy học' }
+      { num: '05', title: 'HÀNH LANG LỜI BÁC & HIỆN VẬT', sub: 'Thư Bác Hồ khai trường 1945 & Bộ đồ dùng dạy học' }
     ];
 
     rooms.forEach((r, idx) => {
