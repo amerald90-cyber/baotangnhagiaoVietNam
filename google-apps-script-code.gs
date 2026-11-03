@@ -1,36 +1,49 @@
 /**
  * =========================================================================================
- * BẢO TÀNG SỐ NHÀ GIÁO VIỆT NAM — GOOGLE APPS SCRIPT ĐỒNG BỘ 2 TAB & LƯU ẢNH DRIVE TỰ ĐỘNG
+ * BẢO TÀNG SỐ NHÀ GIÁO VIỆT NAM — HỆ THỐNG ĐỒNG BỘ 2 TAB & LƯU ẢNH VÀO GOOGLE DRIVE (v2.0)
  * 
  * 1. Google Spreadsheet ID: 1NTR--NxzjtvlzQVDhuVNYQ5q71tVJ8i-4DMnW3uMdSg
- *    - Tab 1: "Trang tính1" (gid: 0): Lưu Lời chúc & Thiệp trên Cội Cây Tri Ân (7 cột)
- *    - Tab 2: "ảnh" (gid: 99743454): Lưu Ảnh tư liệu & Bài đăng Bức Tường Ký Ức (8 cột)
+ *    - Tab 1: "Trang tính1" (ID: 0): Lưu Lời chúc & Thiệp trên Cội Cây Tri Ân (7 cột)
+ *    - Tab 2: "ảnh·" (ID: 99743454): Lưu Ảnh tư liệu & Bài đăng Bức Tường Ký Ức (8 cột)
  * 
- * 2. Thư mục Google Drive Lưu Trữ Ảnh Tự Động: 1fhjd8d7Ilf8FhHYTrxvjJJdMaE1q0ZBH
+ * 2. Thư mục Google Drive Lưu Ảnh Tự Động: 1fhjd8d7Ilf8FhHYTrxvjJJdMaE1q0ZBH
  *    (Link Drive: https://drive.google.com/drive/folders/1fhjd8d7Ilf8FhHYTrxvjJJdMaE1q0ZBH)
  * =========================================================================================
  * 
- * HƯỚNG DẪN 3 BƯỚC CẬP NHẬT RẤT NHANH (GIỮ NGUYÊN ĐƯỜNG LINK WEB APP CŨ):
+ * HƯỚNG DẪN 3 BƯỚC CẬP NHẬT CHUẨN XÁC 100% (GIỮ NGUYÊN ĐƯỜNG LINK WEB APP CŨ):
  * 
- * BƯỚC 1: Mở Google Sheet "cây tri ân":
- *         https://docs.google.com/spreadsheets/d/1NTR--NxzjtvlzQVDhuVNYQ5q71tVJ8i-4DMnW3uMdSg/edit
+ * ✦ BƯỚC 1: DÁN CODE MỚI & LƯU
+ *    - Mở Google Sheet "cây tri ân" -> Tiện ích mở rộng -> Apps Script.
+ *    - Xóa toàn bộ mã cũ trong file Code.gs, dán toàn bộ đoạn code này vào.
+ *    - Bấm LƯU (Ctrl + S).
  * 
- * BƯỚC 2: Vào menu "Tiện ích mở rộng" (Extensions) -> chọn "Apps Script".
- *         Xóa toàn bộ mã cũ trong file Code.gs, dán toàn bộ mã này vào và bấm LƯU (Ctrl + S).
+ * ✦ BƯỚC 2: CHẠY HÀM KIỂM TRA ĐỂ CẤP QUYỀN GOOGLE DRIVE (CỰC KỲ QUAN TRỌNG)
+ *    - Trên thanh công cụ trên cùng, tại menu thả xuống bên cạnh nút "Gỡ lỗi", chọn hàm:
+ *      👉 kiemTraVaCapQuyen
+ *    - Bấm nút "Chạy" (Run) ▶️.
+ *    - Google sẽ hiện bảng "Cần có sự ủy quyền" (Authorization Required):
+ *      1. Bấm "Xem lại quyền" (Review permissions).
+ *      2. Chọn tài khoản Google của bạn.
+ *      3. Bấm vào chữ "Nâng cao" (Advanced) ở góc dưới.
+ *      4. Bấm "Đi tới ... (không an toàn)" / "Go to ... (unsafe)".
+ *      5. Bấm "Cho phép" (Allow).
+ *    - Sau khi cấp quyền, hàm sẽ chạy và xuất thông báo "🎉 CHÚC MỪNG! HỆ THỐNG ĐÃ CẤP QUYỀN THÀNH CÔNG!"
+ *      và bạn sẽ thấy ngay 1 dòng test xuất hiện trong tab "ảnh" của Google Sheet!
  * 
- * BƯỚC 3: Bấm nút "Triển khai" (Deploy) màu xanh ở góc trên bên phải:
- *         -> Chọn "Quản lý các tùy chọn triển khai" (Manage deployments).
- *         -> Bấm vào biểu tượng CÂY BÚT ✏️ (Chỉnh sửa) ở góc phải bản triển khai hiện tại.
- *         -> Tại dòng "Phiên bản" (Version): Chọn "Phiên bản mới" (New version).
- *         -> Đảm bảo: "Thực thi dưới dạng" = "Tôi" (Me), "Ai có quyền truy cập" = "Bất kỳ ai" (Anyone).
- *         -> Bấm "Triển khai" (Deploy) -> Xong 100%!
+ * ✦ BƯỚC 3: CẬP NHẬT PHIÊN BẢN MỚI CHO WEB APP
+ *    - Bấm nút "Triển khai" (Deploy) màu xanh ở góc trên bên phải.
+ *    - Chọn "Quản lý các tùy chọn triển khai" (Manage deployments).
+ *    - Bấm biểu tượng CÂY BÚT ✏️ (Chỉnh sửa) ở góc phải bản triển khai hiện tại.
+ *    - Tại dòng "Phiên bản" (Version): Bấm chọn 👉 "Phiên bản mới" (New version).
+ *    - Kiểm tra: "Thực thi dưới dạng" = "Tôi" (Me); "Ai có quyền truy cập" = "Bất kỳ ai" (Anyone).
+ *    - Bấm nút "Triển khai" (Deploy) ➔ XONG 100%!
  * =========================================================================================
  */
 
 var SPREADSHEET_ID = '1NTR--NxzjtvlzQVDhuVNYQ5q71tVJ8i-4DMnW3uMdSg';
 var DRIVE_FOLDER_ID = '1fhjd8d7Ilf8FhHYTrxvjJJdMaE1q0ZBH';
-var TAB_TRIBUTES = 'Trang tính1'; // Cây tri ân (gid: 0)
-var TAB_MEMORIES = 'ảnh';         // Bức tường ký ức (gid: 99743454)
+var TAB_TRIBUTES_ID = 0;         // Tab 1: Trang tính1
+var TAB_MEMORIES_ID = 99743454;  // Tab 2: ảnh
 
 // -----------------------------------------------------------------------------------------
 // HÀM CHUẨN HÓA VĂN BẢN TIẾNG VIỆT
@@ -67,18 +80,17 @@ function formatSentenceVN(str) {
 // 1. TÌM VÀ TRẢ VỀ TAB "Trang tính1" (CÂY TRI ÂN - 7 CỘT)
 // -----------------------------------------------------------------------------------------
 function getSheetTributes(ss) {
-  var sheet = ss.getSheetByName(TAB_TRIBUTES);
-  if (!sheet) sheet = ss.getSheetByName('cây tri ân');
-  if (!sheet) {
-    var allSheets = ss.getSheets();
-    for (var i = 0; i < allSheets.length; i++) {
-      if (allSheets[i].getSheetId() === 0) {
-        sheet = allSheets[i];
-        break;
-      }
+  var allSheets = ss.getSheets();
+  // 1. Tìm theo sheetId 0 (chuẩn xác vĩnh viễn)
+  for (var i = 0; i < allSheets.length; i++) {
+    if (allSheets[i].getSheetId() === TAB_TRIBUTES_ID) {
+      return allSheets[i];
     }
   }
-  if (!sheet) sheet = ss.getSheets()[0];
+  // 2. Tìm theo tên "Trang tính1" hoặc "cây tri ân"
+  var sheet = ss.getSheetByName('Trang tính1');
+  if (!sheet) sheet = ss.getSheetByName('cây tri ân');
+  if (!sheet) sheet = allSheets[0];
 
   // Nếu sheet hoàn toàn trống thì tạo tiêu đề 7 cột
   if (sheet.getLastRow() === 0) {
@@ -100,42 +112,42 @@ function getSheetTributes(ss) {
 // 2. TÌM VÀ TRẢ VỀ TAB "ảnh" (BỨC TƯỜNG KÝ ỨC - 8 CỘT)
 // -----------------------------------------------------------------------------------------
 function getSheetMemories(ss) {
-  var sheet = ss.getSheetByName(TAB_MEMORIES);
-  if (!sheet) sheet = ss.getSheetByName('Trang tính2');
-  if (!sheet) sheet = ss.getSheetByName('Bức tường ký ức');
-  if (!sheet) {
-    var allSheets = ss.getSheets();
-    for (var i = 0; i < allSheets.length; i++) {
-      if (allSheets[i].getSheetId() === 99743454) {
-        sheet = allSheets[i];
-        break;
-      }
-    }
-  }
-  if (!sheet) {
-    var sheets = ss.getSheets();
-    if (sheets.length > 1) {
-      sheet = sheets[1]; // Chọn tab thứ 2
-    } else {
-      sheet = ss.insertSheet(TAB_MEMORIES);
+  var allSheets = ss.getSheets();
+
+  // 1. Tìm theo sheetId 99743454 (chuẩn xác 100% không phụ thuộc tên tab!)
+  for (var i = 0; i < allSheets.length; i++) {
+    if (allSheets[i].getSheetId() === TAB_MEMORIES_ID) {
+      return allSheets[i];
     }
   }
 
-  // Nếu sheet hoàn toàn trống thì tạo tiêu đề 8 cột chuẩn
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow([
-      'Thời gian',
-      'Người gửi',
-      'Lớp',
-      'Trường',
-      'Tỉnh/Thành phố',
-      'Nhà giáo',
-      'Kính gửi Thầy/Cô',
-      'Link ảnh'
-    ]);
-    sheet.getRange(1, 1, 1, 8).setFontWeight('bold').setBackground('#fce4d6');
+  // 2. Tìm theo tên tab có chứa chữ "ảnh" hoặc "tính 2" hoặc "ký ức"
+  for (var j = 0; j < allSheets.length; j++) {
+    var name = allSheets[j].getName().toLowerCase();
+    if (name.indexOf('ảnh') !== -1 || name.indexOf('anh') !== -1 || name.indexOf('tính2') !== -1 || name.indexOf('ký ức') !== -1) {
+      return allSheets[j];
+    }
   }
-  return sheet;
+
+  // 3. Chọn tab thứ 2 (index 1) nếu có
+  if (allSheets.length > 1) {
+    return allSheets[1];
+  }
+
+  // 4. Nếu chưa có tab thứ 2, tự động tạo mới
+  var newSheet = ss.insertSheet('ảnh');
+  newSheet.appendRow([
+    'Thời gian',
+    'Người gửi',
+    'Lớp',
+    'Trường',
+    'Tỉnh/Thành phố',
+    'Nhà giáo',
+    'Kính gửi Thầy/Cô',
+    'Link ảnh'
+  ]);
+  newSheet.getRange(1, 1, 1, 8).setFontWeight('bold').setBackground('#fce4d6');
+  return newSheet;
 }
 
 // -----------------------------------------------------------------------------------------
@@ -165,11 +177,11 @@ function saveBase64ImageToDrive(base64Data, filename, mimeType) {
     try {
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     } catch (eShare) {
-      Logger.log('Quyền chia sẻ file Drive: ' + eShare);
+      Logger.log('Quyền chia sẻ: ' + eShare);
     }
 
     var fileId = file.getId();
-    // Link trực tiếp tốt nhất hiển thị trên mọi website không bị chặn cookie/CORS
+    // Link trực tiếp tối ưu nhất hiển thị trên mọi website không bị chặn cookie/CORS
     var directUrl = 'https://lh3.googleusercontent.com/d/' + fileId;
     return { url: directUrl, fileId: fileId, viewUrl: file.getUrl() };
   } catch (err) {
@@ -229,6 +241,7 @@ function appendMemoryWall(payload) {
   return {
     ok: true,
     tab: sheet.getName(),
+    tabId: sheet.getSheetId(),
     row: sheet.getLastRow(),
     photoUrl: photoUrl,
     fileId: fileId,
@@ -282,6 +295,7 @@ function appendTribute(payload) {
   return {
     ok: true,
     tab: sheet.getName(),
+    tabId: sheet.getSheetId(),
     row: sheet.getLastRow(),
     data: {
       createdAt: createdAt,
@@ -296,18 +310,17 @@ function appendTribute(payload) {
 }
 
 // -----------------------------------------------------------------------------------------
-// 6. ĐỌC DỮ LIỆU THEO TÊN TAB
+// 6. ĐỌC DỮ LIỆU THEO TÊN TAB HOẶC ID TAB
 // -----------------------------------------------------------------------------------------
-function getSheetRows(tabName) {
+function getSheetRows(tabKey) {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  var sheet = ss.getSheetByName(tabName);
-  if (!sheet) {
-    if (tabName === TAB_MEMORIES || tabName === 'ảnh' || tabName === 'Trang tính2') {
-      sheet = getSheetMemories(ss);
-    } else {
-      sheet = getSheetTributes(ss);
-    }
+  var sheet = null;
+  if (tabKey === 'memories' || tabKey === 'ảnh' || tabKey === 'Trang tính2') {
+    sheet = getSheetMemories(ss);
+  } else {
+    sheet = getSheetTributes(ss);
   }
+
   if (!sheet || sheet.getLastRow() <= 1) return [];
 
   var data = sheet.getDataRange().getValues();
@@ -328,19 +341,19 @@ function doGet(e) {
 
     // Lấy dữ liệu Bức Tường Ký Ức (tab "ảnh")
     if (action === 'getMemories') {
-      var memRows = getSheetRows(TAB_MEMORIES);
-      return ContentService.createTextOutput(JSON.stringify({ ok: true, tab: TAB_MEMORIES, data: memRows }))
+      var memRows = getSheetRows('memories');
+      return ContentService.createTextOutput(JSON.stringify({ ok: true, tab: 'ảnh', data: memRows }))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
     // Lấy dữ liệu Cây Tri Ân (tab "Trang tính1")
     if (action === 'getTributes') {
-      var tribRows = getSheetRows(TAB_TRIBUTES);
-      return ContentService.createTextOutput(JSON.stringify({ ok: true, tab: TAB_TRIBUTES, data: tribRows }))
+      var tribRows = getSheetRows('tributes');
+      return ContentService.createTextOutput(JSON.stringify({ ok: true, tab: 'Trang tính1', data: tribRows }))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    // Thêm vào Bức tường ký ức qua GET (nếu cần test)
+    // Thêm vào Bức tường ký ức qua GET
     if (action === 'addMemory') {
       var memRes = appendMemoryWall(params);
       return ContentService.createTextOutput(JSON.stringify(memRes))
@@ -361,11 +374,13 @@ function doGet(e) {
 
     return ContentService.createTextOutput(JSON.stringify({
       ok: true,
-      message: 'Bảo Tàng Số Nhà Giáo Việt Nam — Kết Nối Google Sheet 2 Tab ("Trang tính1" & "ảnh") & Google Drive Thành Công!',
+      status: 'ONLINE',
+      version: '2.0.0',
+      message: 'Bảo Tàng Số Nhà Giáo Việt Nam — Hệ thống kết nối Google Sheet (2 Tab độc lập) & Google Drive hoạt động hoàn hảo!',
       spreadsheetId: SPREADSHEET_ID,
       driveFolderId: DRIVE_FOLDER_ID,
-      tab1_CaiTriAn: tSheet.getName() + ' (' + Math.max(0, tSheet.getLastRow() - 1) + ' lời tri ân)',
-      tab2_BucTuongKyUc: mSheet.getName() + ' (' + Math.max(0, mSheet.getLastRow() - 1) + ' ảnh tư liệu)'
+      tab1_CaiTriAn: tSheet.getName() + ' (ID: ' + tSheet.getSheetId() + ', ' + Math.max(0, tSheet.getLastRow() - 1) + ' lời tri ân)',
+      tab2_BucTuongKyUc: mSheet.getName() + ' (ID: ' + mSheet.getSheetId() + ', ' + Math.max(0, mSheet.getLastRow() - 1) + ' tư liệu ảnh)'
     })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
@@ -375,7 +390,7 @@ function doGet(e) {
 }
 
 // -----------------------------------------------------------------------------------------
-// 8. CỔNG TIẾP NHẬN POST (doPost) — TIẾP NHẬN ẢNH VÀ DỮ LIỆU LỚN
+// 8. CỔNG TIẾP NHẬN POST (doPost) — TIẾP NHẬN ẢNH VÀ DỮ LIỆU FORM
 // -----------------------------------------------------------------------------------------
 function doPost(e) {
   try {
@@ -392,8 +407,8 @@ function doPost(e) {
 
     var action = payload.action || '';
 
-    // Nếu là bài đăng Bức Tường Ký Ức (action === 'addMemory' hoặc có base64 hoặc có thông tin nhà giáo)
-    if (action === 'addMemory' || payload.base64 || payload.teacherBio || (payload.teacherName && !payload.message)) {
+    // Nếu là bài đăng Bức Tường Ký Ức (action === 'addMemory' hoặc có base64 hoặc có photoUrl hoặc có teacherBio)
+    if (action === 'addMemory' || payload.base64 || payload.photoUrl || payload.teacherBio || (payload.teacherName && !payload.message)) {
       var memRes = appendMemoryWall(payload);
       return ContentService.createTextOutput(JSON.stringify(memRes))
         .setMimeType(ContentService.MimeType.JSON);
@@ -408,4 +423,47 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// -----------------------------------------------------------------------------------------
+// 9. HÀM KIỂM TRA & CẤP QUYỀN TRUY CẬP (CHẠY 1 LẦN TRÊN TRÌNH SOẠN THẢO APPS SCRIPT)
+// -----------------------------------------------------------------------------------------
+function kiemTraVaCapQuyen() {
+  Logger.log('--- BẮT ĐẦU KIỂM TRA HỆ THỐNG BẢO TÀNG NHÀ GIÁO ---');
+  
+  // 1. Kiểm tra Google Sheet
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet1 = getSheetTributes(ss);
+  var sheet2 = getSheetMemories(ss);
+  Logger.log('✅ 1. Kết nối Tab 1 (Cội Cây Tri Ân): ' + sheet1.getName() + ' [GID: ' + sheet1.getSheetId() + ']');
+  Logger.log('✅ 2. Kết nối Tab 2 (Bức Tường Ký Ức): ' + sheet2.getName() + ' [GID: ' + sheet2.getSheetId() + ']');
+  
+  // 2. Kiểm tra Google Drive Folder
+  var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+  Logger.log('✅ 3. Kết nối Thư mục Google Drive: ' + folder.getName() + ' [ID: ' + folder.getId() + ']');
+  
+  // 3. Thử tạo 1 file ảnh nhỏ vào Drive
+  var testBlob = Utilities.newBlob('He thong Bao tang Nha giao Viet Nam', 'text/plain', 'test_ket_noi.txt');
+  var testFile = folder.createFile(testBlob);
+  testFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  Logger.log('✅ 4. Quyền lưu file Drive hoạt động tốt! File test ID: ' + testFile.getId());
+  testFile.setTrashed(true); // Dọn dẹp file test
+  
+  // 4. Ghi thử 1 dòng chuẩn vào Tab ảnh (Tab 2)
+  var testRow = [
+    Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy HH:mm:ss'),
+    'Hệ Thống Kiểm Tra',
+    'Chuyên Gia',
+    'Bảo Tàng Số',
+    'Việt Nam',
+    'Thầy Cô Kính Yêu',
+    'Kết nối thành công giữa Google Drive và Tab Ảnh của Google Sheet!',
+    'https://drive.google.com/drive/folders/' + DRIVE_FOLDER_ID
+  ];
+  sheet2.appendRow(testRow);
+  Logger.log('✅ 5. Đã ghi thử 1 dòng vào Tab ' + sheet2.getName() + ' thành công!');
+  
+  Logger.log('-----------------------------------------------------------');
+  Logger.log('🎉 CHÚC MỪNG! GOOGLE DRIVE VÀ GOOGLE SHEET ĐÃ ĐƯỢC CẤP QUYỀN 100%!');
+  Logger.log('👉 Bây giờ bạn chỉ cần bấm "Triển khai" -> "Quản lý các tùy chọn triển khai" -> Bút chì ✏️ -> "Phiên bản mới" -> "Triển khai" là xong!');
 }

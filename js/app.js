@@ -72,6 +72,13 @@ class VietnamTeachersMuseumApp {
     this.googleSheetId = '1NTR--NxzjtvlzQVDhuVNYQ5q71tVJ8i-4DMnW3uMdSg';
     this.sheetWebAppUrl =
       'https://script.google.com/macros/s/AKfycbxZjP37FpIUi3m9-NTXVyBP_udLrZxdivmQTE7KG_dK3WmxTZxZ3SbAHSskfPdPN9N8/exec';
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const customUrl = urlParams.get('scriptUrl') || localStorage.getItem('custom_sheet_webapp_url');
+      if (customUrl) {
+        this.sheetWebAppUrl = customUrl;
+      }
+    } catch (e) {}
 
     this.tributes = this.loadSavedTributes();
     this.memories = this.loadSavedMemories();
