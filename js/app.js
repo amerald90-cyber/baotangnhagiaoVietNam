@@ -365,7 +365,7 @@ class VietnamTeachersMuseumApp {
     }
   }
 
-  // Đọc trực tiếp dữ liệu từ Google Sheet Tab "Trang tính2" bằng GViz JSONP
+  // Đọc trực tiếp dữ liệu từ Google Sheet Tab "ảnh" (gid: 99743454) bằng GViz JSONP
   loadMemoriesFromGoogleSheet() {
     try {
       const cbName = 'handleGVizMemoriesTab2_' + Date.now();
@@ -450,17 +450,17 @@ class VietnamTeachersMuseumApp {
             }
           }
         } catch (err) {
-          console.warn('Lỗi phân tích GViz Trang tính2:', err);
+          console.warn('Lỗi phân tích GViz tab ảnh:', err);
         }
       };
 
       const script = document.createElement('script');
-      const encodedSheet = encodeURIComponent('Trang tính2');
-      script.src = `https://docs.google.com/spreadsheets/d/${this.googleSheetId}/gviz/tq?sheet=${encodedSheet}&tqx=responseHandler:${cbName}&_=${Date.now()}`;
+      // Tab "ảnh" có gid=99743454 (đọc chính xác 100% không bị phụ thuộc tên tab)
+      script.src = `https://docs.google.com/spreadsheets/d/${this.googleSheetId}/gviz/tq?gid=99743454&tqx=responseHandler:${cbName}&_=${Date.now()}`;
       script.async = true;
       document.body.appendChild(script);
     } catch (e) {
-      console.warn('Không thể tải dữ liệu Trang tính2:', e);
+      console.warn('Không thể tải dữ liệu tab ảnh:', e);
     }
   }
 
@@ -1818,16 +1818,59 @@ class VietnamTeachersMuseumApp {
 
     const reader = new FileReader();
     reader.onload = (e) => {
+      const originalDataUrl = e.target.result;
       const preview = document.getElementById(previewId);
-      if (preview) {
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-      }
       const labelPhoto = document.getElementById('label-photo');
-      if (labelPhoto) {
-        labelPhoto.textContent = `✅ Đã chọn ảnh: ${file.name}`;
-        labelPhoto.style.color = '#ffd700';
-      }
+
+      // Tự động tối ưu dung lượng ảnh qua Canvas (tối đa 1200px, JPEG 0.85) để tải siêu nhanh lên Drive
+      const img = new Image();
+      img.onload = () => {
+        try {
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1200;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+          if (preview) {
+            preview.src = compressedDataUrl;
+            preview.style.display = 'block';
+          }
+        } catch (cErr) {
+          if (preview) {
+            preview.src = originalDataUrl;
+            preview.style.display = 'block';
+          }
+        }
+        if (labelPhoto) {
+          labelPhoto.textContent = `✅ Đã chọn ảnh: ${file.name}`;
+          labelPhoto.style.color = '#ffd700';
+        }
+      };
+      img.onerror = () => {
+        if (preview) {
+          preview.src = originalDataUrl;
+          preview.style.display = 'block';
+        }
+        if (labelPhoto) {
+          labelPhoto.textContent = `✅ Đã chọn ảnh: ${file.name}`;
+          labelPhoto.style.color = '#ffd700';
+        }
+      };
+      img.src = originalDataUrl;
     };
     reader.readAsDataURL(file);
   }
@@ -1961,7 +2004,7 @@ class VietnamTeachersMuseumApp {
       senderCity: senderCity
     };
 
-    // Gửi ngầm tới Google Drive Folder và Tab "Trang tính2"
+    // Gửi ngầm tới Google Drive Folder và Tab "ảnh" (gid: 99743454)
     this.pushMemoryToGoogleSheet(drivePayload).finally(() => {
       if (submitBtn) {
         submitBtn.disabled = false;
