@@ -40,7 +40,7 @@
       <p class="welcome-desc">
         Không gian Bảo tàng 3D gồm <b>Đại Sảnh Trung Tâm</b> (Đài Biểu Tượng Khuê Văn Các – Ngọn Đuốc Tri Thức) và <b>5 Không Gian Chuyên Đề</b>:
         <br />• <b>Lịch Sử Phát Triển Giáo Dục Việt Nam</b> qua các thời kỳ (1076 – Nay)
-        <br />• <b>15 Nhà Giáo Nổi Tiếng & Ưu Tú Nhất</b> lịch sử Việt Nam
+        <br />• <b>Những Người Thầy Trong Sử Việt</b> (40 bậc danh sư & nhà giáo tiêu biểu)
         <br />• <b>Bộ trưởng Bộ Giáo dục Việt Nam qua các thời kỳ</b> (1945 – Nay)
         <br />• <b>Không Gian Bộ Đồ Dùng & Hiện Vật Dạy Học</b>
         <br />• <b>Điện Tri Ân – Cội Cây Tri Thức 3D</b> (Gian phòng riêng trang trọng với Lá Vàng thông điệp & Bàn Giấy Bút ở gốc cây)
@@ -207,7 +207,7 @@
           <span class="tool-icon">🏛</span>
           <span class="tool-info">
             <strong>Danh Mục Tư Liệu & Chân Dung</strong>
-            <small>Tra cứu nhanh Bộ trưởng Bộ GD, 15 Nhà giáo & Hiện vật</small>
+            <small>Tra cứu nhanh Bộ trưởng Bộ GD, Những Người Thầy Trong Sử Việt & Hiện vật</small>
           </span>
         </button>
 
@@ -662,6 +662,15 @@
               <p class="section-text" id="teacher-modal-legacy"></p>
             </div>
 
+            <!-- KHỐI 4: CÂU NÓI / TƯ TƯỞNG TIÊU BIỂU (quote - từ Google Sheet) -->
+            <div class="minister-section-card block-quote" id="teacher-modal-quote-card" style="display: none;">
+              <div class="section-title">
+                <span class="title-icon">💬</span>
+                <span>CÂU NÓI & TƯ TƯỞNG TIÊU BIỂU</span>
+              </div>
+              <p class="section-text" id="teacher-modal-quote" style="font-style: italic; color: #fde68a;"></p>
+            </div>
+
             <!-- NGUỒN TÀI LIỆU LỊCH SỬ -->
             <div class="teacher-source-footnote" id="teacher-modal-source"></div>
           </div>
@@ -671,7 +680,7 @@
             <button type="button" class="minister-nav-btn prev" id="teacher-btn-prev" onclick="window.app && window.app.navigateTeacher(-1)">
               <span>←</span> Vị trước
             </button>
-            <div class="minister-stepper" id="teacher-modal-stepper">1 / 46</div>
+            <div class="minister-stepper" id="teacher-modal-stepper">1 / 40</div>
             <button type="button" class="minister-nav-btn next" id="teacher-btn-next" onclick="window.app && window.app.navigateTeacher(1)">
               Vị tiếp theo <span>→</span>
             </button>

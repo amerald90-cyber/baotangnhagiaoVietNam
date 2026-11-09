@@ -907,8 +907,8 @@ class MuseumBuilder {
       {
         x: 0, z: -9.5,
         icon: '⬆', action: 'TIẾN THẲNG • VÁCH CONG UỐN LƯỢN',
-        title: 'NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ',
-        subtitle: 'Hành trình tôn vinh 46 bậc danh sư từ thế kỷ XI đến nay',
+        title: 'NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT',
+        subtitle: 'Hành trình tôn vinh 40 bậc danh sư trong lịch sử dân tộc',
         targetZoneId: 'room-educators'
       },
       {
@@ -922,7 +922,7 @@ class MuseumBuilder {
       {
         x: -4.8, z: -3.8,
         icon: '↖', action: 'LỐI VÀO BÊN HÔNG TRÁI',
-        title: 'NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ',
+        title: 'NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT',
         subtitle: 'Bấm để bước vòng qua cây tiến thẳng vào trung tâm Gian Nhà Giáo',
         targetZoneId: 'room-educators',
         customPos: { x: 0, y: 1.8, z: -16.0 },
@@ -931,7 +931,7 @@ class MuseumBuilder {
       {
         x: 4.8, z: -3.8,
         icon: '↗', action: 'LỐI VÀO BÊN HÔNG PHẢI',
-        title: 'NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ',
+        title: 'NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT',
         subtitle: 'Bấm để bước vòng qua cây tiến thẳng vào trung tâm Gian Nhà Giáo',
         targetZoneId: 'room-educators',
         customPos: { x: 0, y: 1.8, z: -16.0 },
@@ -1410,7 +1410,7 @@ class MuseumBuilder {
     // Biển cổng vòm tại Đại Sảnh dẫn vào các phòng & Cổng sảnh đón khách
     const portals = [
       { x: -10.2, z: 0, rotY: Math.PI / 2, label: 'LỊCH SỬ PHÁT TRIỂN GIÁO DỤC VIỆT NAM' },
-      { x: 0, z: -10.2, rotY: 0, label: 'GIAN TRƯNG BÀY: NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ' },
+      { x: 0, z: -10.2, rotY: 0, label: 'NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT' },
       // Biển cổng vòm chính đón khách từ đại sảnh (z = 10.2): mang tên BẢO TÀNG NHÀ GIÁO VIỆT NAM cả 2 mặt
       { x: 0, z: 10.2, rotY: Math.PI, label: 'BẢO TÀNG NHÀ GIÁO VIỆT NAM', isGrandWelcome: true }
     ];
@@ -1734,12 +1734,12 @@ class MuseumBuilder {
     ctx.fillStyle = '#ffd700';
     ctx.font = 'bold 64px "Cinzel", "Cormorant Garamond", Georgia, serif';
     ctx.letterSpacing = '3px';
-    ctx.fillText('NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ', 1024, 230);
+    ctx.fillText('NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT', 1024, 230);
     ctx.shadowBlur = 0;
 
     ctx.fillStyle = '#f1f5f9';
     ctx.font = 'italic 34px "Be Vietnam Pro", serif';
-    ctx.fillText('Hành trình tôn vinh 46 bậc danh sư và nhà giáo tiêu biểu từ thế kỷ XI đến nay', 1024, 345);
+    ctx.fillText('Hành trình tôn vinh 40 bậc danh sư và nhà giáo tiêu biểu trong lịch sử dân tộc', 1024, 345);
 
     ctx.fillStyle = '#cbd5e1';
     ctx.font = '24px "Be Vietnam Pro", sans-serif';
@@ -1868,50 +1868,16 @@ class MuseumBuilder {
       return { x: surfX, z: surfZ, rotY, wallX: x, wallZ: z, nx, nz };
     };
 
-    // 2. CỘT NẸP TRỤ ĐỒNG CHUYỂN TIẾP PHÂN ĐOẠN KIẾN TRÚC GIỮA 3 GIAI ĐOẠN
-    // Chuyển tiếp tinh tế, sang trọng, xóa bỏ cảm giác ghép mảng thô cứng
-    const pilasterTransitions = [
-      { dist: 23.0, title: 'GIAI ĐOẠN II: YÊU NƯỚC & KHÁNG CHIẾN' },
-      { dist: 66.0, title: 'GIAI ĐOẠN III: ĐỔI MỚI & HỘI NHẬP' }
-    ];
-    pilasterTransitions.forEach((pt) => {
-      const pTf = getPointAtDist(pt.dist);
-      this.createWallPilaster(galleryGroup, pTf.wallX, pTf.wallZ, pTf.rotY, pt.title);
-    });
+    // Lưu thông tin hình học dải tường để hỗ trợ cập nhật linh hoạt từ Google Sheet
+    this.teachersGetPointAtDist = getPointAtDist;
+    this.teachersTotalCurveLength = totalCurveLength;
+    this.teachersWallColor = galleryWallColor;
+    this.teachersDynamicGroup = new THREE.Group();
+    this.teachersDynamicGroup.name = 'teachers-dynamic-frames-group';
+    galleryGroup.add(this.teachersDynamicGroup);
 
-    // 3. BỐ TRÍ CÂN ĐỐI ĐÚNG 26 TRANH CHÂN DUNG THEO 3 GIAI ĐOẠN (BỎ HOÀN TOÀN PANO ĐEN)
-    // - Giai đoạn 1 (Phong kiến): 07 tranh (ID 1 - 7), dist: 2.8m -> 20.2m (bước ~2.90m)
-    // - Giai đoạn 2 (Yêu nước & Kháng chiến): 15 tranh (ID 8 - 22), dist: 25.4m -> 63.6m (bước ~2.73m)
-    // - Giai đoạn 3 (Đổi mới & Hội nhập): 04 tranh (ID 23 - 26, số 23 là Cố Thủ tướng Phạm Văn Đồng), dist: 68.2m -> 75.7m (bước ~2.50m)
-    const stage1Teachers = rawTeachers.filter((t) => t.id >= 1 && t.id <= 7);
-    const stage2Teachers = rawTeachers.filter((t) => t.id >= 8 && t.id <= 22);
-    const stage3Teachers = rawTeachers.filter((t) => t.id >= 23 && t.id <= 26);
-
-    // Giai đoạn 1 (7 tranh)
-    stage1Teachers.forEach((teacher, idx) => {
-      const frameDist = 2.8 + idx * 2.90;
-      const frameTf = getPointAtDist(frameDist);
-      this.createTeacherFloatFrame(galleryGroup, teacher, frameTf, galleryWallColor);
-
-      // Mái ngói vảy cá cổ truyền thống "VẠN THẾ SƯ BIỂU" đua từ đỉnh tường trên đầu Thầy Chu Văn An (ID 1)
-      if (teacher.id === 1) {
-        this.createAncientTileRoofModule(galleryGroup, frameTf.wallX, frameTf.wallZ, frameTf.rotY);
-      }
-    });
-
-    // Giai đoạn 2 (15 tranh)
-    stage2Teachers.forEach((teacher, idx) => {
-      const frameDist = 25.4 + idx * 2.73;
-      const frameTf = getPointAtDist(frameDist);
-      this.createTeacherFloatFrame(galleryGroup, teacher, frameTf, galleryWallColor);
-    });
-
-    // Giai đoạn 3 (4 tranh, trong đó ID 23 là Cố Thủ tướng Phạm Văn Đồng)
-    stage3Teachers.forEach((teacher, idx) => {
-      const frameDist = 68.2 + idx * 2.50;
-      const frameTf = getPointAtDist(frameDist);
-      this.createTeacherFloatFrame(galleryGroup, teacher, frameTf, galleryWallColor);
-    });
+    // 2 & 3. BỐ TRÍ ĐỘNG TOÀN BỘ TRANH CHÂN DUNG THEO ĐÚNG THỨ TỰ DANH SÁCH / GOOGLE SHEET
+    this.rebuildTeachersGalleryFrames(rawTeachers);
 
     // 4. HỆ THỐNG MŨI TÊN CHỈ HƯỚNG PHÁT SÁNG TRÊN SÀN (GIỮ NGUYÊN SÀN ĐÁ CẨM THẠCH NGUYÊN BẢN)
 
@@ -1966,6 +1932,70 @@ class MuseumBuilder {
 
   // ==================== THANH NẸP CHỈ KIM LOẠI / CHỈ ĐỒNG VÀNG MỜ (BRASS TRIM) ====================
   // Làm ranh giới phân định 3 giai đoạn lịch sử nhẹ nhàng, tinh tế và thanh lịch
+  // ==================== DỰNG & CẬP NHẬT ĐỘNG KHUNG TRANH NHÀ GIÁO TỪ GOOGLE SHEET ====================
+  // Nhà giáo nào có STT nhỏ hơn / nằm ở dòng trên trong Google Sheet sẽ hiển thị trước (từ trái sang phải dọc tường chữ S)
+  rebuildTeachersGalleryFrames(teachersList) {
+    if (!this.teachersDynamicGroup || !this.teachersGetPointAtDist) return;
+    const list = Array.isArray(teachersList) && teachersList.length > 0
+      ? teachersList
+      : (window.teachersData || []);
+    if (!list.length) return;
+
+    // Xóa các khung tranh cũ khỏi nhóm động và danh sách tương tác
+    while (this.teachersDynamicGroup.children.length > 0) {
+      this.teachersDynamicGroup.remove(this.teachersDynamicGroup.children[0]);
+    }
+    this.interactables = this.interactables.filter(obj => !(obj.userData && obj.userData.isTeacherFrame));
+
+    const totalLen = this.teachersTotalCurveLength || 78.5;
+    const startMargin = 2.35;
+    const endMargin = 2.35;
+    const usableLen = Math.max(20, totalLen - startMargin - endMargin);
+
+    // Xác định các vị trí chuyển tiếp giai đoạn (nếu có) để đặt trụ đồng ngăn cách
+    const transitionAfterIndices = [];
+    for (let i = 0; i < list.length - 1; i++) {
+      const curStage = list[i].stageNum || 1;
+      const nextStage = list[i + 1].stageNum || curStage;
+      if (nextStage !== curStage && transitionAfterIndices.length < 4) {
+        transitionAfterIndices.push({
+          afterIdx: i,
+          nextStage: nextStage,
+          title: nextStage === 2
+            ? 'GIAI ĐOẠN II: YÊU NƯỚC & KHÁNG CHIẾN'
+            : (nextStage === 3 ? 'GIAI ĐOẠN III: ĐỔI MỚI & HỘI NHẬP' : 'GIAI ĐOẠN I: THỜI KỲ PHONG KIẾN')
+        });
+      }
+    }
+
+    const extraGapPerTransition = list.length > 30 ? 0.68 : 1.1;
+    const totalTransitionGaps = transitionAfterIndices.length * extraGapPerTransition;
+    const step = list.length > 1
+      ? (usableLen - totalTransitionGaps) / (list.length - 1)
+      : 0;
+
+    let currentDist = startMargin;
+    list.forEach((teacher, idx) => {
+      const frameTf = this.teachersGetPointAtDist(currentDist);
+      this.createTeacherFloatFrame(this.teachersDynamicGroup, teacher, frameTf, this.teachersWallColor || '#f5f0e6');
+
+      // Mái ngói vảy cá cổ truyền thống trên đầu vị Danh sư đầu tiên (STT 1 / đầu danh sách)
+      if (idx === 0) {
+        this.createAncientTileRoofModule(this.teachersDynamicGroup, frameTf.wallX, frameTf.wallZ, frameTf.rotY);
+      }
+
+      const trans = transitionAfterIndices.find(t => t.afterIdx === idx);
+      if (trans) {
+        const pilasterDist = currentDist + (step + extraGapPerTransition) * 0.5;
+        const pTf = this.teachersGetPointAtDist(pilasterDist);
+        this.createWallPilaster(this.teachersDynamicGroup, pTf.wallX, pTf.wallZ, pTf.rotY, trans.title);
+        currentDist += step + extraGapPerTransition;
+      } else {
+        currentDist += step;
+      }
+    });
+  }
+
   createWallPilaster(parent, x, z, rotY, stageTitle) {
     const pilasterG = new THREE.Group();
     pilasterG.position.set(x, 1.9, z);
@@ -2613,14 +2643,21 @@ class MuseumBuilder {
     portraitTex.anisotropy = 16;
 
     // Nạp ảnh thật từ base64 ưu tiên tuyệt đối (chống CORS / file:/// error)
+    const normName = String(teacher.name || '').trim().toLowerCase();
+    const imgFile = String(teacher.img || '').split('/').pop();
     const base64Src = (window.TEACHER_IMAGES && (
-      window.TEACHER_IMAGES[teacher.id] ||
+      window.TEACHER_IMAGES[teacher.img] ||
+      window.TEACHER_IMAGES[imgFile] ||
       window.TEACHER_IMAGES[teacher.name] ||
-      window.TEACHER_IMAGES[teacher.img]
+      window.TEACHER_IMAGES[normName] ||
+      window.TEACHER_IMAGES[teacher.id]
     )) || teacher.img;
 
     if (base64Src) {
       const imgObj = new Image();
+      if (String(base64Src).startsWith('http')) {
+        imgObj.crossOrigin = 'anonymous';
+      }
       imgObj.onload = () => {
         drawCard(imgObj);
         portraitTex.needsUpdate = true;
@@ -7494,7 +7531,7 @@ class MuseumBuilder {
     const rooms = [
       { num: '01', title: 'ĐẠI SẢNH & CỘI CÂY TRI THỨC 3D', sub: 'Khuê Văn Các & Cây Lời Chúc Ngàn Sao' },
       { num: '02', title: 'LỊCH SỬ PHÁT TRIỂN GIÁO DỤC', sub: 'Quốc Tử Giám (1076) đến Thời kỳ Đổi Mới' },
-      { num: '03', title: 'NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ', sub: 'Hành trình tôn vinh 46 bậc danh sư từ thế kỷ XI đến nay' },
+      { num: '03', title: 'NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT', sub: 'Hành trình tôn vinh 40 bậc danh sư trong lịch sử dân tộc' },
       { num: '04', title: '15 BỘ TRƯỞNG BỘ GIÁO DỤC', sub: 'Hình ảnh thực tế & dấu ấn qua các nhiệm kỳ' },
       { num: '05', title: 'HÀNH LANG LỜI BÁC & HIỆN VẬT', sub: 'Thư Bác Hồ khai trường 1945 & Bộ đồ dùng dạy học' }
     ];

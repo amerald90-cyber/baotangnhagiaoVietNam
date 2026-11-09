@@ -196,9 +196,9 @@ const MUSEUM_ZONES = [
   },
   {
     id: 'room-educators',
-    name: 'Nhà Giáo Việt Nam Qua Các Thời Kỳ',
-    subtitle: 'Hành trình tôn vinh 46 bậc danh sư và nhà giáo tiêu biểu từ thế kỷ XI đến nay',
-    description: 'Không gian mở vách cong uốn lượn (Curved Promenade) với 5 dải màu thời kỳ, giếng trời ánh sáng và bục hiện vật cổ vật tôn vinh 46 bậc danh sư và nhà giáo tiêu biểu từ thế kỷ XI đến nay.',
+    name: 'Những Người Thầy Trong Sử Việt',
+    subtitle: 'Hành trình tôn vinh 40 bậc danh sư và nhà giáo tiêu biểu trong lịch sử dân tộc',
+    description: 'Không gian mở vách cong uốn lượn (Curved Promenade) với 3 giai đoạn lịch sử, giếng trời ánh sáng và bục hiện vật cổ vật tôn vinh 40 bậc danh sư và nhà giáo tiêu biểu trong sử Việt.',
     cameraPos: { x: 0, y: 1.6, z: -14.5 },
     lookAt: { x: -4.5, y: 1.6, z: -18.5 },
     center: { x: 0, z: -24 }
@@ -1018,14 +1018,14 @@ Hệ thống trường lớp và quy mô giáo dục phát triển nhanh, thực
     ]
   },
 
-  // --- PHÒNG 2: GIAN TRƯNG BÀY NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ ---
+  // --- PHÒNG 2: GIAN TRƯNG BÀY NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT ---
   {
     id: 'exhibit-15-educators',
-    code: 'NG-46',
-    title: 'Gian Trưng Bày: Nhà Giáo Việt Nam Qua Các Thời Kỳ',
-    subtitle: 'Hành trình tôn vinh 46 bậc danh sư và nhà giáo tiêu biểu từ thế kỷ XI đến nay',
+    code: 'NG-40',
+    title: 'Gian Trưng Bày: Những Người Thầy Trong Sử Việt',
+    subtitle: 'Hành trình tôn vinh 40 bậc danh sư và nhà giáo tiêu biểu trong lịch sử dân tộc',
     zoneId: 'room-educators',
-    zoneName: 'Nhà Giáo Việt Nam Qua Các Thời Kỳ',
+    zoneName: 'Những Người Thầy Trong Sử Việt',
     era: 'Thế kỷ XI – Thế kỷ XXI',
     material: 'Vách cong uốn lượn nghệ thuật 5 thời kỳ & Khung nổi viền kim loại vàng thanh mảnh',
     dimensions: 'Gian trưng bày vách cong uốn lượn 5 chuyên đề lịch sử',

@@ -102,6 +102,7 @@ class VietnamTeachersMuseumApp {
     this.bindEvents();
     this.loadTributesFromGoogleSheet();
     this.loadMemoriesFromGoogleSheet();
+    this.loadTeachersFromGoogleSheet();
     this.animate();
 
     // Hỗ trợ liên kết trực tiếp & kiểm thử tiện lợi (ví dụ: ?zone=room-teacher-heart)
@@ -598,6 +599,177 @@ class VietnamTeachersMuseumApp {
     }
   }
 
+  // Đọc trực tiếp danh sách Nhà giáo từ Google Sheet Tab "nhà giáo" (gid: 295730908)
+  // Nhà giáo nào có STT nhỏ hơn / nằm ở dòng trên sẽ hiển thị trước trên vách cong 3D (từ trái sang phải)
+  loadTeachersFromGoogleSheet() {
+    try {
+      const cbName = 'handleGVizTeachersTab3_' + Date.now();
+      window[cbName] = (response) => {
+        try {
+          delete window[cbName];
+          if (!response || response.status !== 'ok' || !response.table || !Array.isArray(response.table.rows)) {
+            return;
+          }
+
+          const defaults = window.DEFAULT_TEACHERS_DATA || window.teachersData || [];
+          const defaultByName = new Map();
+          const defaultById = new Map();
+          defaults.forEach((d) => {
+            if (d.name) defaultByName.set(d.name.trim().toLowerCase(), d);
+            if (d.id != null) defaultById.set(Number(d.id), d);
+          });
+
+          const parsedRows = [];
+          response.table.rows.forEach((r, rowIdx) => {
+            const cells = r.c || [];
+            const c = (i) => (cells[i]?.f != null ? String(cells[i].f).trim() : (cells[i]?.v != null ? String(cells[i].v).trim() : ''));
+            const vStt = c(0);
+            const vName = c(1);
+            const vYears = c(2);
+            const vPeriod = c(3);
+            const vTitle = c(4);
+            const vBio = c(5);
+            const vQuote = c(6);
+            const vImg = c(7);
+
+            // Bỏ qua dòng tiêu đề hoặc dòng trống
+            const lowerStt = vStt.toLowerCase();
+            const lowerName = vName.toLowerCase();
+            if (!vName || lowerStt === 'stt' || lowerName === 'tên nhà giáo' || lowerName === 'họ và tên') {
+              return;
+            }
+
+            const numStt = parseInt(vStt, 10);
+            const orderKey = !isNaN(numStt) ? numStt : (rowIdx + 1);
+
+            // Tìm bản ghi mặc định tương ứng (theo tên hoặc theo STT) để bổ sung thông tin nếu ô trên Sheet để trống
+            let matchedDefault = defaultByName.get(lowerName);
+            if (!matchedDefault) {
+              for (const [k, d] of defaultByName.entries()) {
+                if (k.includes(lowerName) || lowerName.includes(k)) {
+                  matchedDefault = d;
+                  break;
+                }
+              }
+            }
+            if (!matchedDefault && !isNaN(numStt)) {
+              matchedDefault = defaultById.get(numStt);
+            }
+
+            // Phân loại Giai đoạn (1, 2, 3) từ cột D ("Giai đoạn")
+            const lowerPeriod = vPeriod.toLowerCase();
+            let stageNum = matchedDefault?.stageNum || 1;
+            let periodCode = matchedDefault?.period || 'phong_kien';
+            let subTheme = vPeriod || matchedDefault?.subTheme || 'Giai đoạn I: Thời kỳ Phong kiến';
+
+            if (lowerPeriod.includes('iii') || lowerPeriod.includes('3') || lowerPeriod.includes('đổi mới') || lowerPeriod.includes('hội nhập') || lowerPeriod.includes('hiện đại')) {
+              stageNum = 3;
+              periodCode = 'doi_moi_hoi_nhap';
+              if (!vPeriod) subTheme = 'Giai đoạn III: Thời kỳ Đổi mới & Hội nhập';
+            } else if (lowerPeriod.includes('ii') || lowerPeriod.includes('2') || lowerPeriod.includes('kháng chiến') || lowerPeriod.includes('yêu nước') || lowerPeriod.includes('duy tân')) {
+              stageNum = 2;
+              periodCode = 'yeu_nuoc_khang_chien';
+              if (!vPeriod) subTheme = 'Giai đoạn II: Thời kỳ Yêu nước & Kháng chiến';
+            } else if (lowerPeriod.includes('i') || lowerPeriod.includes('1') || lowerPeriod.includes('phong kiến')) {
+              stageNum = 1;
+              periodCode = 'phong_kien';
+              if (!vPeriod) subTheme = 'Giai đoạn I: Thời kỳ Phong kiến';
+            }
+
+            // Tách nội dung cột F ("Đóng góp / Tiểu sử") thành 3 phần của Modal (career, reforms, legacy)
+            let career = matchedDefault?.career || '';
+            let reforms = matchedDefault?.reforms || '';
+            let legacy = matchedDefault?.legacy || '';
+
+            if (vBio) {
+              if (vBio.includes('【Tiểu sử & Sự nghiệp】') || vBio.includes('【Đóng góp giáo dục】')) {
+                const p1 = vBio.split('【Đóng góp giáo dục】');
+                career = (p1[0] || '').replace('【Tiểu sử & Sự nghiệp】', '').trim() || career;
+                if (p1[1]) {
+                  const p2 = p1[1].split('【Di sản & Tôn vinh】');
+                  reforms = (p2[0] || '').trim() || reforms;
+                  if (p2[1]) {
+                    legacy = p2[1].trim() || legacy;
+                  }
+                }
+              } else {
+                // Người dùng nhập văn bản tự do vào cột "Đóng góp / Tiểu sử"
+                const blocks = vBio.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+                if (blocks.length >= 3) {
+                  career = blocks[0];
+                  reforms = blocks.slice(1, blocks.length - 1).join('\n');
+                  legacy = blocks[blocks.length - 1];
+                } else if (blocks.length === 2) {
+                  career = blocks[0];
+                  reforms = blocks[1];
+                } else {
+                  reforms = vBio;
+                  if (!career) career = vBio;
+                }
+              }
+            }
+
+            // Chuẩn hóa Link ảnh (hỗ trợ cả Google Drive share link, link web và đường dẫn nội bộ)
+            let resolvedImg = vImg || matchedDefault?.img || '';
+            if (resolvedImg.includes('drive.google.com/file/d/')) {
+              const idMatch = resolvedImg.match(/\/d\/([a-zA-Z0-9_-]+)/);
+              if (idMatch) resolvedImg = 'https://lh3.googleusercontent.com/d/' + idMatch[1];
+            } else if (resolvedImg.includes('drive.google.com') && resolvedImg.includes('id=')) {
+              const idMatch = resolvedImg.match(/id=([a-zA-Z0-9_-]+)/);
+              if (idMatch) resolvedImg = 'https://lh3.googleusercontent.com/d/' + idMatch[1];
+            }
+
+            parsedRows.push({
+              orderKey,
+              rowIdx,
+              teacher: {
+                id: orderKey,
+                name: vName,
+                years: vYears || matchedDefault?.years || '',
+                period: periodCode,
+                stageNum: stageNum,
+                subTheme: subTheme,
+                title: vTitle || matchedDefault?.title || 'Bậc Danh sư & Nhà giáo tiêu biểu trong Sử Việt',
+                img: resolvedImg,
+                career: career || 'Bậc danh sư tiêu biểu trong lịch sử giáo dục Việt Nam.',
+                reforms: reforms || career || 'Đóng góp to lớn cho sự nghiệp trồng người và bồi dưỡng nhân tài đất nước.',
+                legacy: legacy || vTitle || 'Được các thế hệ học trò và lịch sử dân tộc trân trọng tôn vinh.',
+                quote: vQuote || matchedDefault?.quote || ''
+              }
+            });
+          });
+
+          if (parsedRows.length > 0) {
+            // Sắp xếp theo STT tăng dần (ai đứng trước trong Sheet sẽ hiển thị trước từ trái qua phải)
+            parsedRows.sort((a, b) => (a.orderKey - b.orderKey) || (a.rowIdx - b.rowIdx));
+            const finalTeachers = parsedRows.map((item, idx) => ({
+              ...item.teacher,
+              id: idx + 1,
+              stt: item.orderKey
+            }));
+
+            window.teachersData = finalTeachers;
+            if (this.builder && typeof this.builder.rebuildTeachersGalleryFrames === 'function') {
+              this.builder.rebuildTeachersGalleryFrames(finalTeachers);
+            }
+            if (typeof this.populateCatalogDrawer === 'function') {
+              this.populateCatalogDrawer();
+            }
+          }
+        } catch (err) {
+          console.warn('Lỗi phân tích GViz tab nhà giáo:', err);
+        }
+      };
+
+      const script = document.createElement('script');
+      script.src = `https://docs.google.com/spreadsheets/d/${this.googleSheetId}/gviz/tq?gid=295730908&tqx=responseHandler:${cbName}&_=${Date.now()}`;
+      script.async = true;
+      document.body.appendChild(script);
+    } catch (e) {
+      console.warn('Không thể tải dữ liệu tab nhà giáo:', e);
+    }
+  }
+
   initMuseum() {
     this.builder = new window.MuseumBuilder(this.scene);
     this.builder.buildMuseum(window.ARTIFACTS);
@@ -749,7 +921,8 @@ class VietnamTeachersMuseumApp {
       )
       .join('');
 
-    const educatorsSection = (window.teachersData || window.FIFTEEN_EDUCATORS || [])
+    const teachersArr = window.teachersData || window.FIFTEEN_EDUCATORS || [];
+    const educatorsSection = teachersArr
       .map(
         (t) => `
       <div class="catalog-card" data-teacher-id="${t.id}">
@@ -764,7 +937,7 @@ class VietnamTeachersMuseumApp {
     catalogList.innerHTML = `
       <div class="catalog-group-heading">✦ CÁC KHÔNG GIAN & HIỆN VẬT CHÍNH</div>
       ${mainSection}
-      <div class="catalog-group-heading" style="margin-top:14px;">✦ NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ (46 DANH SƯ & THẦY CÔ)</div>
+      <div class="catalog-group-heading" style="margin-top:14px;">✦ NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT (${teachersArr.length} DANH SƯ & NHÀ GIÁO)</div>
       ${educatorsSection}
       <div class="catalog-group-heading" style="margin-top:14px;">✦ 15 BỘ TRƯỞNG BỘ GIÁO DỤC VIỆT NAM</div>
       ${ministersSection}
@@ -941,7 +1114,7 @@ class VietnamTeachersMuseumApp {
         buttons = [
           { icon: '🏛️', label: 'Quảng Trường & Mặt Tiền', zoneId: 'zone-exterior' },
           { icon: '⬅', label: 'Lịch Sử Giáo Dục (Tây)', zoneId: 'room-history' },
-          { icon: '⬆', label: '15 Nhà Giáo & Hành Lang (Bắc)', zoneId: 'room-educators' },
+          { icon: '⬆', label: 'Những Người Thầy Trong Sử Việt (Bắc)', zoneId: 'room-educators' },
           { icon: '➡', label: 'Bộ trưởng Bộ GD', zoneId: 'room-ministers' },
           { icon: '⬇', label: 'Đồ Dùng Dạy Học (Nam)', zoneId: 'room-tools' }
         ];
@@ -963,7 +1136,7 @@ class VietnamTeachersMuseumApp {
             pos: { x: -14.0, y: 3.0, z: -33.5 },
             lookAt: { x: -22.0, y: 2.2, z: -35.5 }
           },
-          { icon: '⬇', label: 'Về Phòng 15 Nhà Giáo', zoneId: 'room-educators' },
+          { icon: '⬇', label: 'Về Phòng Những Người Thầy Trong Sử Việt', zoneId: 'room-educators' },
           {
             icon: '➡',
             label: 'Rẽ Phải: Cánh Đông (Trái Tim, Bút Vàng, Nhà Giáo & STEM)',
@@ -1558,9 +1731,19 @@ class VietnamTeachersMuseumApp {
     // 1. Phóng to ảnh chân dung nhà giáo
     const imgEl = document.getElementById('teacher-modal-img');
     if (imgEl && t.img) {
-      const base64Src = (window.TEACHER_IMAGES && (window.TEACHER_IMAGES[t.id] || window.TEACHER_IMAGES[t.name])) || null;
+      const normName = String(t.name || '').trim().toLowerCase();
+      const imgFile = String(t.img || '').split('/').pop();
+      const base64Src = (window.TEACHER_IMAGES && (
+        window.TEACHER_IMAGES[t.img] ||
+        window.TEACHER_IMAGES[imgFile] ||
+        window.TEACHER_IMAGES[t.name] ||
+        window.TEACHER_IMAGES[normName] ||
+        window.TEACHER_IMAGES[t.id]
+      )) || null;
       if (base64Src) {
         imgEl.src = base64Src;
+      } else if (String(t.img).startsWith('http') || String(t.img).startsWith('data:image')) {
+        imgEl.src = t.img;
       } else {
         const cleanImgPath = t.img.replace(/\\/g, '/');
         const filenameOnly = cleanImgPath.split('/').pop();
@@ -1625,6 +1808,18 @@ class VietnamTeachersMuseumApp {
     // 🏅 Khối 3: Danh hiệu & Di sản lịch sử
     const legacyEl = document.getElementById('teacher-modal-legacy');
     if (legacyEl) legacyEl.textContent = t.legacy || '';
+
+    // 💬 Khối 4: Câu nói / Tư tưởng tiêu biểu (từ Google Sheet)
+    const quoteCardEl = document.getElementById('teacher-modal-quote-card');
+    const quoteTextEl = document.getElementById('teacher-modal-quote');
+    if (quoteCardEl && quoteTextEl) {
+      if (t.quote && String(t.quote).trim()) {
+        quoteTextEl.textContent = `“${String(t.quote).trim().replace(/^[“"']|[”"']$/g, '')}”`;
+        quoteCardEl.style.display = 'block';
+      } else {
+        quoteCardEl.style.display = 'none';
+      }
+    }
 
     // Nguồn tư liệu
     const sourceEl = document.getElementById('teacher-modal-source');
