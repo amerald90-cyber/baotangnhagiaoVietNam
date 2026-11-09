@@ -757,79 +757,161 @@ class MuseumBuilder {
       side: THREE.DoubleSide
     });
 
-    // Mạng lưới điểm bước chân điều hướng dày đặc dọc hành lang và các phòng
+    // Mạng lưới điểm bước chân điều hướng dày đặc dọc hành lang, vòng quanh cây/hiện vật và áp sát tường các phòng
     const waypoints = [
-      // 1. DỌC HÀNH LANG NAM (HÀNH LANG LỜI BÁC DẠY & ĐỒ DÙNG): Từ z = 10 đến z = 36
+      // =====================================================================
+      // 1. HÀNH LANG NAM (LỜI BÁC DẠY & BỘ ĐỒ DÙNG): Trục giữa + Vòng qua Tủ Thư Bác Hồ + Sát 2 bên tường
+      // =====================================================================
+      // Trục giữa (đoạn không vướng tủ kính Bức thư Bác Hồ tại z = 25)
       { x: 0, z: 12.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 18.0 } },
       { x: 0, z: 15.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 21.0 } },
-      { x: 0, z: 18.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 24.0 } },
-      { x: 0, z: 21.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 27.0 } },
-      { x: 0, z: 24.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 30.0 } },
-      { x: 0, z: 27.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 33.0 } },
-      { x: 0, z: 30.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 36.0 } },
-      { x: 0, z: 33.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 38.0 } },
-
-      // Chiều quay ngược lại về sảnh chính
-      { x: 0, z: 28.0, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: 20.0 } },
+      { x: 0, z: 18.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 22.0 } },
+      { x: 0, z: 30.5, rotY: 0, lookAt: { x: 0, y: 1.6, z: 36.0 } },
+      { x: 0, z: 33.5, rotY: 0, lookAt: { x: 0, y: 1.6, z: 38.0 } },
       { x: 0, z: 19.0, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: 10.0 } },
       { x: 0, z: 11.0, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: 0.0 } },
 
-      // 2. KHU VỰC ĐẠI SẢNH TRUNG TÂM ROTUNDA (z: -5 đến 8)
-      { x: 0, z: 6.0, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: 0.0 } },
-      { x: 0, z: 3.2, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -3.0 } },
-      { x: 0, z: -4.5, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -12.0 } },
+      // Nhánh vòng qua bên TRÁI (Tây) & bên PHẢI (Đông) Tủ kính Bức thư Bác Hồ (z = 20.5 -> 29.5)
+      { x: -2.8, z: 20.5, rotY: Math.PI, lookAt: { x: -2.8, y: 1.6, z: 13.0 } },
+      { x: -3.2, z: 23.0, rotY: Math.PI, lookAt: { x: -2.8, y: 1.6, z: 16.0 } },
+      { x: -3.2, z: 25.0, rotY: Math.PI / 2, lookAt: { x: 0.0, y: 1.4, z: 25.0 } }, // Đứng bên hông ngắm Bức thư Bác Hồ
+      { x: -3.2, z: 27.0, rotY: Math.PI, lookAt: { x: -2.8, y: 1.6, z: 20.0 } },
+      { x: -2.8, z: 29.5, rotY: Math.PI, lookAt: { x: -2.8, y: 1.6, z: 22.0 } },
 
-      // 3. TIẾN VÀO GIAN NHÀ GIÁO VIỆT NAM QUA CÁC THỜI KỲ (BẮC WING)
+      { x: 2.8, z: 20.5, rotY: Math.PI, lookAt: { x: 2.8, y: 1.6, z: 13.0 } },
+      { x: 3.2, z: 23.0, rotY: Math.PI, lookAt: { x: 2.8, y: 1.6, z: 16.0 } },
+      { x: 3.2, z: 25.0, rotY: -Math.PI / 2, lookAt: { x: 0.0, y: 1.4, z: 25.0 } }, // Đứng bên hông phải ngắm Bức thư Bác Hồ
+      { x: 3.2, z: 27.0, rotY: Math.PI, lookAt: { x: 2.8, y: 1.6, z: 20.0 } },
+      { x: 2.8, z: 29.5, rotY: Math.PI, lookAt: { x: 2.8, y: 1.6, z: 22.0 } },
+
+      // Dải Hotspot sát Tường Trái (Tường Tây hành lang: Bảng Lời Bác dạy & Tủ hiện vật, x = -6.8)
+      { x: -6.8, z: 14.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 14.0 } },
+      { x: -6.8, z: 18.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 18.0 } },
+      { x: -6.8, z: 22.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 22.0 } },
+      { x: -6.8, z: 26.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 26.0 } },
+      { x: -6.8, z: 30.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 30.0 } },
+      { x: -6.8, z: 34.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 34.0 } },
+
+      // Dải Hotspot sát Tường Phải (Tường Đông hành lang & Bức Tường Ký Ức, x = +6.8)
+      { x: 6.8, z: 14.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 14.0 } },
+      { x: 6.8, z: 18.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 18.0 } },
+      { x: 6.8, z: 22.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 22.0 } },
+      { x: 6.8, z: 26.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 26.0 } },
+      { x: 6.8, z: 30.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 30.0 } },
+      { x: 6.8, z: 34.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 34.0 } },
+
+      // =====================================================================
+      // 2. VÒNG QUANH CỘI CÂY TRI THỨC TẠI ĐẠI SẢNH TRUNG TÂM (X = 0, Z = 0)
+      // Giúp đi vòng qua gốc cây & Đài Khuê Văn Các (z = -5.8) mượt mà từ mọi hướng
+      // =====================================================================
+      { x: 0, z: 6.2, rotY: Math.PI, lookAt: { x: 0, y: 2.2, z: 0.0 } },
+      { x: -3.6, z: 5.0, rotY: Math.PI, lookAt: { x: -4.8, y: 1.8, z: -2.0 } },
+      { x: 3.6, z: 5.0, rotY: Math.PI, lookAt: { x: 4.8, y: 1.8, z: -2.0 } },
+      { x: -5.2, z: 2.2, rotY: Math.PI, lookAt: { x: -5.2, y: 1.8, z: -5.0 } },
+      { x: 5.2, z: 2.2, rotY: Math.PI, lookAt: { x: 5.2, y: 1.8, z: -5.0 } },
+      { x: -5.2, z: -1.8, rotY: Math.PI, lookAt: { x: -4.0, y: 1.8, z: -9.5 } },
+      { x: 5.2, z: -1.8, rotY: Math.PI, lookAt: { x: 4.0, y: 1.8, z: -9.5 } },
+      { x: -4.2, z: -5.8, rotY: Math.PI, lookAt: { x: 0, y: 1.8, z: -14.0 } }, // Lách bên trái Đài Khuê Văn Các
+      { x: 4.2, z: -5.8, rotY: Math.PI, lookAt: { x: 0, y: 1.8, z: -14.0 } },  // Lách bên phải Đài Khuê Văn Các
+      { x: -3.2, z: -8.5, rotY: Math.PI, lookAt: { x: -3.2, y: 1.8, z: -16.0 } },
+      { x: 3.2, z: -8.5, rotY: Math.PI, lookAt: { x: 3.2, y: 1.8, z: -16.0 } },
+
+      // =====================================================================
+      // 3. GIAN PHÒNG "NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT" (BẮC WING)
+      // Vòng quanh Cây Đa Tri Ân (0, -24.3) + Áp sát dải tường cong chữ S
+      // =====================================================================
       { x: 0, z: -8.5, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -16.0 } },
       { x: 0, z: -12.5, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -20.0 } },
-      { x: 0, z: -16.5, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -24.3 } },
-      { x: 0, z: -19.5, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -24.3 } }, // Trước bục Sổ Vàng
+      { x: 0, z: -16.0, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -24.3 } },
+      { x: 0, z: -19.2, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -24.3 } },
 
-      // Vòng quanh Cây Đa Tri Ân trong phòng
-      { x: -3.5, z: -24.3, rotY: -Math.PI / 2, lookAt: { x: -8.0, y: 1.6, z: -24.3 } }, // Nhánh Tây ngắm tranh
-      { x: 3.5, z: -24.3, rotY: Math.PI / 2, lookAt: { x: 8.0, y: 1.6, z: -24.3 } },   // Nhánh Đông ngắm tranh
-      { x: 0, z: -29.0, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -35.0 } },           // Phía sau cây Đa
-      { x: 0, z: -33.5, rotY: 0, lookAt: { x: 0, y: 1.6, z: -24.3 } },                 // Cuối phòng ngắm ngược lại cây
+      // 8 điểm vòng tròn bao quanh Cây Đa Tri Ân (bán kính R = 4.8m quanh tâm 0, -24.3)
+      { x: -3.6, z: -20.8, rotY: -Math.PI * 0.75, lookAt: { x: -9.5, y: 1.7, z: -20.8 } },
+      { x: -4.8, z: -24.3, rotY: -Math.PI / 2, lookAt: { x: -12.0, y: 1.7, z: -24.3 } },
+      { x: -3.6, z: -27.8, rotY: -Math.PI * 0.25, lookAt: { x: -9.5, y: 1.7, z: -31.5 } },
+      { x: 0, z: -29.2, rotY: Math.PI, lookAt: { x: 0, y: 1.7, z: -34.2 } },
+      { x: 3.6, z: -27.8, rotY: Math.PI * 0.25, lookAt: { x: 9.5, y: 1.7, z: -31.5 } },
+      { x: 4.8, z: -24.3, rotY: Math.PI / 2, lookAt: { x: 12.0, y: 1.7, z: -24.3 } },
+      { x: 3.6, z: -20.8, rotY: Math.PI * 0.75, lookAt: { x: 9.5, y: 1.7, z: -20.8 } },
+      { x: 0, z: -32.0, rotY: 0, lookAt: { x: 0, y: 1.8, z: -24.3 } },
 
-      // 4. MẠNG LƯỚI MŨI TÊN NHỎ ĐIỀU HƯỚNG DÀY ĐẶC TRONG PHÒNG BỘ TRƯỞNG (ĐÔNG WING)
-      // Lối vào từ Đại Sảnh
+      // =====================================================================
+      // 4. PHÒNG BỘ TRƯỞNG BỘ GIÁO DỤC QUA CÁC THỜI KỲ (ĐÔNG WING)
+      // Vòng quanh Bục Quả Cầu Vàng (22.5, 0) + Sát tường Bắc, Nam, Đông
+      // =====================================================================
       { x: 3.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 10.0, y: 1.6, z: 0 } },
       { x: 7.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 14.0, y: 1.6, z: 0 } },
-      { x: 11.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 18.0, y: 1.6, z: 0 } }, // Cửa phòng
-
-      // Trục trung tâm xuyên suốt phòng
+      { x: 11.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 18.0, y: 1.6, z: 0 } },
       { x: 14.8, z: 0, rotY: Math.PI / 2, lookAt: { x: 21.0, y: 1.6, z: 0 } },
-      { x: 18.0, z: 0, rotY: Math.PI / 2, lookAt: { x: 22.5, y: 1.6, z: 0 } },
-      { x: 21.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 26.5, y: 1.6, z: 0 } }, // Ngang bục Quả Cầu Vàng
-      { x: 25.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 30.0, y: 1.6, z: 0 } },
-      { x: 29.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 34.0, y: 1.6, z: 0 } },
-      { x: 32.0, z: 0, rotY: Math.PI / 2, lookAt: { x: 34.5, y: 1.6, z: 0 } }, // Sát tường cuối
+      { x: 17.8, z: 0, rotY: Math.PI / 2, lookAt: { x: 22.5, y: 1.6, z: 0 } },
+      // Vòng qua 2 bên Bục Quả Cầu Vàng (tâm 22.5, 0)
+      { x: 20.0, z: -3.6, rotY: Math.PI / 2, lookAt: { x: 26.0, y: 1.6, z: -3.6 } },
+      { x: 22.5, z: -4.2, rotY: Math.PI / 2, lookAt: { x: 28.0, y: 1.6, z: -3.6 } },
+      { x: 25.0, z: -3.6, rotY: Math.PI / 2, lookAt: { x: 30.0, y: 1.6, z: -2.0 } },
+      { x: 20.0, z: 3.6, rotY: Math.PI / 2, lookAt: { x: 26.0, y: 1.6, z: 3.6 } },
+      { x: 22.5, z: 4.2, rotY: Math.PI / 2, lookAt: { x: 28.0, y: 1.6, z: 3.6 } },
+      { x: 25.0, z: 3.6, rotY: Math.PI / 2, lookAt: { x: 30.0, y: 1.6, z: 2.0 } },
+      { x: 27.2, z: 0, rotY: Math.PI / 2, lookAt: { x: 33.8, y: 2.2, z: 0 } },
+      { x: 30.8, z: 0, rotY: Math.PI / 2, lookAt: { x: 34.0, y: 2.4, z: 0 } },
 
-      // Dãy hành lang phía Bắc (ngắm chi tiết các chân dung Bộ trưởng tường Bắc)
-      { x: 16.0, z: -3.0, rotY: -Math.PI / 2, lookAt: { x: 16.0, y: 1.6, z: -6.5 } },
-      { x: 20.0, z: -3.0, rotY: -Math.PI / 2, lookAt: { x: 20.0, y: 1.6, z: -6.5 } },
-      { x: 24.0, z: -3.0, rotY: -Math.PI / 2, lookAt: { x: 24.0, y: 1.6, z: -6.5 } },
-      { x: 28.0, z: -3.0, rotY: -Math.PI / 2, lookAt: { x: 28.0, y: 1.6, z: -6.5 } },
+      // Dãy Hotspot sát Tường Bắc (ngắm trực diện 8 chân dung Bộ trưởng 1 -> 8)
+      { x: 13.6, z: -5.4, rotY: Math.PI, lookAt: { x: 13.6, y: 2.4, z: -8.7 } },
+      { x: 16.3, z: -5.4, rotY: Math.PI, lookAt: { x: 16.3, y: 2.4, z: -8.7 } },
+      { x: 19.0, z: -5.4, rotY: Math.PI, lookAt: { x: 19.0, y: 2.4, z: -8.7 } },
+      { x: 21.7, z: -5.4, rotY: Math.PI, lookAt: { x: 21.7, y: 2.4, z: -8.7 } },
+      { x: 24.4, z: -5.4, rotY: Math.PI, lookAt: { x: 24.4, y: 2.4, z: -8.7 } },
+      { x: 27.1, z: -5.4, rotY: Math.PI, lookAt: { x: 27.1, y: 2.4, z: -8.7 } },
+      { x: 29.8, z: -5.4, rotY: Math.PI, lookAt: { x: 29.8, y: 2.4, z: -8.7 } },
+      { x: 32.5, z: -5.4, rotY: Math.PI, lookAt: { x: 32.5, y: 2.4, z: -8.7 } },
 
-      // Dãy hành lang phía Nam (ngắm chi tiết các chân dung Bộ trưởng tường Nam)
-      { x: 16.0, z: 3.0, rotY: Math.PI / 2, lookAt: { x: 16.0, y: 1.6, z: 6.5 } },
-      { x: 20.0, z: 3.0, rotY: Math.PI / 2, lookAt: { x: 20.0, y: 1.6, z: 6.5 } },
-      { x: 24.0, z: 3.0, rotY: Math.PI / 2, lookAt: { x: 24.0, y: 1.6, z: 6.5 } },
-      { x: 28.0, z: 3.0, rotY: Math.PI / 2, lookAt: { x: 28.0, y: 1.6, z: 6.5 } },
+      // Dãy Hotspot sát Tường Nam (ngắm trực diện 7 chân dung Bộ trưởng 9 -> 15)
+      { x: 14.5, z: 5.4, rotY: 0, lookAt: { x: 14.5, y: 2.4, z: 8.7 } },
+      { x: 17.5, z: 5.4, rotY: 0, lookAt: { x: 17.5, y: 2.4, z: 8.7 } },
+      { x: 20.5, z: 5.4, rotY: 0, lookAt: { x: 20.5, y: 2.4, z: 8.7 } },
+      { x: 23.5, z: 5.4, rotY: 0, lookAt: { x: 23.5, y: 2.4, z: 8.7 } },
+      { x: 26.5, z: 5.4, rotY: 0, lookAt: { x: 26.5, y: 2.4, z: 8.7 } },
+      { x: 29.5, z: 5.4, rotY: 0, lookAt: { x: 29.5, y: 2.4, z: 8.7 } },
+      { x: 32.5, z: 5.4, rotY: 0, lookAt: { x: 32.5, y: 2.4, z: 8.7 } },
 
       // Chiều quay ngược lại hướng về Đại Sảnh
-      { x: 30.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: 22.0, y: 1.6, z: 0 } },
-      { x: 24.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: 16.0, y: 1.6, z: 0 } },
-      { x: 17.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: 10.0, y: 1.6, z: 0 } },
+      { x: 29.5, z: 0, rotY: -Math.PI / 2, lookAt: { x: 22.0, y: 1.6, z: 0 } },
+      { x: 16.5, z: 0, rotY: -Math.PI / 2, lookAt: { x: 9.0, y: 1.6, z: 0 } },
       { x: 10.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: 0.0, y: 1.6, z: 0 } },
 
-      // 5. TIẾN VÀO PHÒNG LỊCH SỬ GIÁO DỤC (TÂY WING)
+      // =====================================================================
+      // 5. PHÒNG LỊCH SỬ GIÁO DỤC VIỆT NAM (TÂY WING)
+      // Trục giữa + Dải Hotspot sát tường Bắc, Nam, Tây
+      // =====================================================================
       { x: -3.5, z: 0, rotY: -Math.PI / 2, lookAt: { x: -10.0, y: 1.6, z: 0 } },
       { x: -8.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: -16.0, y: 1.6, z: 0 } },
       { x: -14.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: -22.0, y: 1.6, z: 0 } },
-      { x: -20.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: -28.0, y: 1.6, z: 0 } },
-      { x: -26.0, z: 0, rotY: Math.PI / 2, lookAt: { x: -16.0, y: 1.6, z: 0 } }  // Quay lại
+      { x: -20.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: -27.5, y: 2.0, z: 0 } },
+      { x: -24.5, z: 0, rotY: Math.PI / 2, lookAt: { x: -14.0, y: 1.6, z: 0 } },
+      // Sát tường Bắc & tường Nam phòng Lịch sử
+      { x: -15.5, z: -6.2, rotY: Math.PI, lookAt: { x: -15.5, y: 2.2, z: -10.5 } },
+      { x: -20.5, z: -6.2, rotY: Math.PI, lookAt: { x: -20.5, y: 2.2, z: -10.5 } },
+      { x: -24.5, z: -5.5, rotY: -Math.PI / 2, lookAt: { x: -27.8, y: 2.2, z: -5.5 } },
+      { x: -15.5, z: 6.2, rotY: 0, lookAt: { x: -15.5, y: 2.2, z: 10.5 } },
+      { x: -20.5, z: 6.2, rotY: 0, lookAt: { x: -20.5, y: 2.2, z: 10.5 } },
+      { x: -24.5, z: 5.5, rotY: -Math.PI / 2, lookAt: { x: -27.8, y: 2.2, z: 5.5 } }
     ];
+
+    // Tự động sinh thêm 18 điểm Hotspot bám dọc sát dải tường cong chữ S trong phòng Những Người Thầy Trong Sử Việt
+    if (typeof this.teachersGetPointAtDist === 'function') {
+      const totalLen = this.teachersTotalCurveLength || 78.5;
+      for (let d = 3.2; d <= totalLen - 3.2; d += 4.2) {
+        const pt = this.teachersGetPointAtDist(d);
+        const standX = pt.wallX + pt.nx * 3.1;
+        const standZ = pt.wallZ + pt.nz * 3.1;
+        const lookWallAngle = Math.atan2(-pt.nx, -pt.nz);
+        waypoints.push({
+          x: standX,
+          z: standZ,
+          rotY: lookWallAngle,
+          lookAt: { x: pt.wallX, y: 1.75, z: pt.wallZ }
+        });
+      }
+    }
 
     waypoints.forEach((wp) => {
       const g = new THREE.Group();
@@ -2658,9 +2740,16 @@ class MuseumBuilder {
       if (String(base64Src).startsWith('http')) {
         imgObj.crossOrigin = 'anonymous';
       }
+      let triedProxy = false;
       imgObj.onload = () => {
         drawCard(imgObj);
         portraitTex.needsUpdate = true;
+      };
+      imgObj.onerror = () => {
+        if (!triedProxy && String(base64Src).startsWith('http')) {
+          triedProxy = true;
+          imgObj.src = 'https://wsrv.nl/?url=' + encodeURIComponent(base64Src) + '&output=jpg';
+        }
       };
       imgObj.src = base64Src;
       if (imgObj.complete && imgObj.naturalWidth > 0) {
@@ -4531,33 +4620,86 @@ class MuseumBuilder {
     floorBorderMesh.position.set(22.7, 0.006, 0);
     roomArch.add(floorBorderMesh);
 
-    // 3. TRẦN NHÀ HOÀNG GIA & COFFER TRẦN ĐÈN (Hạ thấp 3cm và offset để triệt tiêu hoàn toàn lỗi nhấp nháy Z-fighting)
-    const roomCeilingMat = new THREE.MeshStandardMaterial({
-      color: 0x0b172a,
-      roughness: 0.72,
-      metalness: 0.08,
-      polygonOffset: true,
-      polygonOffsetFactor: -2.0,
-      polygonOffsetUnits: -4.0
-    });
-    const roomCeiling = new THREE.Mesh(
-      new THREE.PlaneGeometry(23.2, 18.2),
-      roomCeilingMat
-    );
-    roomCeiling.rotation.x = Math.PI / 2;
-    roomCeiling.position.set(22.7, wallH - 0.03, 0);
-    roomArch.add(roomCeiling);
+    // 3. HỆ TRẦN MÁI VÒM HOÀNG GIA SANG TRỌNG (GRAND VAULTED CEILING) - ĐỒNG BỘ KIẾN TRÚC BẢO TÀNG
+    const minRoomLenX = 23.2; // X từ 11.1 đến 34.3 (tâm X = 22.7)
+    const minRoomWidZ = 18.0; // Z từ -9.0 đến +9.0 (tâm Z = 0)
+    const vaultSegsX = 48;
+    const vaultSegsZ = 64;
+    const minVaultGeo = new THREE.PlaneGeometry(minRoomLenX, minRoomWidZ, vaultSegsX, vaultSegsZ);
+    minVaultGeo.rotateX(-Math.PI / 2);
 
-    // Phào chỉ trần thạch cao viền vàng âm trần
+    // Uốn cong hình học thành mái vòm Parabol dọc trục Đông - Tây: Y(z) = 7.72 - (z / 9.0)^2 * 2.22
+    // Đỉnh vòm cao 7.72m (nằm gọn dưới trần tổng 7.80m nên tuyệt đối không bao giờ nhấp nháy Z-fighting)
+    const mvPos = minVaultGeo.attributes.position;
+    for (let i = 0; i < mvPos.count; i++) {
+      const vz = mvPos.getZ(i);
+      const vy = 7.72 - Math.pow(vz / 9.0, 2) * 2.22;
+      mvPos.setY(i, vy);
+    }
+    minVaultGeo.computeVertexNormals();
+
+    const minVaultMat = new THREE.MeshStandardMaterial({
+      color: 0xf5efe6, // Màu thạch cao hoàng gia trắng kem ấm sang trọng, tôn nổi bật vách Navy & khung vàng
+      roughness: 0.62,
+      metalness: 0.06,
+      side: THREE.DoubleSide
+    });
+    const minVaultMesh = new THREE.Mesh(minVaultGeo, minVaultMat);
+    minVaultMesh.position.set(22.7, 0, 0);
+    minVaultMesh.receiveShadow = true;
+    roomArch.add(minVaultMesh);
+
+    // 7 SƯỜN VÒM CONG KIẾN TRÚC (ARCHITECTURAL VAULT RIBS) MẠ VÀNG KIM CHẠY QUA VÒM TRẦN
+    const minRibMat = new THREE.MeshStandardMaterial({
+      color: 0xc5a059,
+      roughness: 0.32,
+      metalness: 0.86
+    });
+    const minRibXList = [12.0, 15.5, 19.1, 22.7, 26.3, 29.9, 33.5];
+    minRibXList.forEach((rx) => {
+      const pts = [];
+      for (let sz = -9.0; sz <= 9.0; sz += 0.3) {
+        const sy = 7.69 - Math.pow(sz / 9.0, 2) * 2.22;
+        pts.push(new THREE.Vector3(rx, sy, sz));
+      }
+      const ribCurve = new THREE.CatmullRomCurve3(pts);
+      const ribGeo = new THREE.TubeGeometry(ribCurve, 48, 0.075, 8, false);
+      const ribMesh = new THREE.Mesh(ribGeo, minRibMat);
+      roomArch.add(ribMesh);
+    });
+
+    // Thanh sống vòm trung tâm mạ vàng chạy dọc đỉnh vòm (Z = 0) và 2 đường phào chân vòm (Z = ±8.9)
+    const crownBeam = new THREE.Mesh(
+      new THREE.BoxGeometry(23.0, 0.10, 0.16),
+      minRibMat
+    );
+    crownBeam.position.set(22.7, 7.69, 0);
+    roomArch.add(crownBeam);
+
     const ceilingTrim = new THREE.Mesh(
       new THREE.BoxGeometry(23.0, 0.22, 0.22),
       this.materials.bronzeGold
     );
-    ceilingTrim.position.set(22.7, wallH - 0.11, -8.9);
+    ceilingTrim.position.set(22.7, 5.50, -8.9);
     roomArch.add(ceilingTrim);
     const ceilingTrimS = ceilingTrim.clone();
     ceilingTrimS.position.z = 8.9;
     roomArch.add(ceilingTrimS);
+
+    // Hệ đèn Downlight âm trần vòm phát sáng vàng ấm tỏa đều khắp Phòng Bộ Trưởng
+    const minDownlightMat = new THREE.MeshBasicMaterial({ color: 0xfff0c4 });
+    const minLightX = [13.8, 17.3, 20.9, 24.5, 28.1, 31.7];
+    const minLightZ = [-5.8, -2.2, 2.2, 5.8];
+    minLightX.forEach((lx) => {
+      minLightZ.forEach((lz) => {
+        const ly = 7.66 - Math.pow(lz / 9.0, 2) * 2.22;
+        const slopeAngle = Math.atan((2 * 2.22 * lz) / 81.0);
+        const lamp = new THREE.Mesh(new THREE.CircleGeometry(0.22, 16), minDownlightMat);
+        lamp.rotation.x = Math.PI / 2 + slopeAngle;
+        lamp.position.set(lx, ly, lz);
+        roomArch.add(lamp);
+      });
+    });
 
     // 4. VÁCH SƠN MÀU XANH NAVY ĐẬM (ROYAL BLUE #16243B) CÓ PHÀO CHỈ GỖ SANG TRỌNG
     // Tường Bắc (Z = -9.0, X: 11.2 -> 34.2)
