@@ -2724,34 +2724,62 @@ class MuseumBuilder {
     if (THREE.SRGBColorSpace) portraitTex.colorSpace = THREE.SRGBColorSpace;
     portraitTex.anisotropy = 16;
 
-    // Nạp ảnh thật từ base64 ưu tiên tuyệt đối (chống CORS / file:/// error)
+    // Nạp ảnh thật (ưu tiên tuyệt đối link ảnh mới trên Sheet, kết hợp kho Base64 chống lỗi CORS)
+    const rawImg = String(teacher.img || '').trim();
     const normName = String(teacher.name || '').trim().toLowerCase();
-    const imgFile = String(teacher.img || '').split('/').pop();
-    const base64Src = (window.TEACHER_IMAGES && (
-      window.TEACHER_IMAGES[teacher.img] ||
-      window.TEACHER_IMAGES[imgFile] ||
-      window.TEACHER_IMAGES[teacher.name] ||
-      window.TEACHER_IMAGES[normName] ||
-      window.TEACHER_IMAGES[teacher.id]
-    )) || teacher.img;
+    const imgFile = rawImg.split('/').pop();
+    const isCustomWebUrl = Boolean(teacher.hasCustomImgUrl || rawImg.startsWith('http://') || rawImg.startsWith('https://') || rawImg.startsWith('data:image'));
 
-    if (base64Src) {
-      const imgObj = new Image();
-      if (String(base64Src).startsWith('http')) {
-        imgObj.crossOrigin = 'anonymous';
+    const fallbackByName = (window.TEACHER_IMAGES && (
+      window.TEACHER_IMAGES[teacher.name] ||
+      window.TEACHER_IMAGES[normName]
+    )) || null;
+
+    const exactCachedSrc = (window.TEACHER_IMAGES && (
+      (rawImg && window.TEACHER_IMAGES[rawImg]) ||
+      (teacher.driveFileId && window.TEACHER_IMAGES[teacher.driveFileId]) ||
+      (!isCustomWebUrl && imgFile && window.TEACHER_IMAGES[imgFile]) ||
+      (!isCustomWebUrl && imgFile && window.TEACHER_IMAGES[imgFile.toLowerCase()])
+    )) || null;
+
+    const candidates = [];
+    if (exactCachedSrc) {
+      candidates.push(exactCachedSrc);
+    } else if (isCustomWebUrl && rawImg) {
+      candidates.push(rawImg);
+      if (teacher.driveFileId) {
+        candidates.push(`https://drive.google.com/thumbnail?id=${teacher.driveFileId}&sz=w1000`);
       }
-      let triedProxy = false;
+      candidates.push('https://wsrv.nl/?url=' + encodeURIComponent(rawImg) + '&output=jpg');
+      if (fallbackByName) candidates.push(fallbackByName);
+    } else if (fallbackByName) {
+      candidates.push(fallbackByName);
+    } else if (rawImg) {
+      candidates.push(rawImg);
+    }
+
+    if (candidates.length > 0) {
+      const imgObj = new Image();
+      let candidateIdx = 0;
+      const tryNextCandidate = () => {
+        if (candidateIdx >= candidates.length) return;
+        const nextSrc = String(candidates[candidateIdx++]);
+        if (nextSrc.startsWith('http')) {
+          imgObj.crossOrigin = 'anonymous';
+        } else {
+          imgObj.removeAttribute('crossorigin');
+        }
+        imgObj.src = nextSrc;
+      };
+
       imgObj.onload = () => {
         drawCard(imgObj);
         portraitTex.needsUpdate = true;
       };
       imgObj.onerror = () => {
-        if (!triedProxy && String(base64Src).startsWith('http')) {
-          triedProxy = true;
-          imgObj.src = 'https://wsrv.nl/?url=' + encodeURIComponent(base64Src) + '&output=jpg';
-        }
+        tryNextCandidate();
       };
-      imgObj.src = base64Src;
+      tryNextCandidate();
       if (imgObj.complete && imgObj.naturalWidth > 0) {
         drawCard(imgObj);
         portraitTex.needsUpdate = true;

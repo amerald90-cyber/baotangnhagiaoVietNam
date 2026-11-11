@@ -642,7 +642,7 @@ class VietnamTeachersMuseumApp {
             const numStt = parseInt(vStt, 10);
             const orderKey = !isNaN(numStt) ? numStt : (rowIdx + 1);
 
-            // Tìm bản ghi mặc định tương ứng (theo tên hoặc theo STT) để bổ sung thông tin nếu ô trên Sheet để trống
+            // Tìm bản ghi mặc định tương ứng THEO TÊN để bổ sung thông tin nếu ô trên Sheet để trống
             let matchedDefault = defaultByName.get(lowerName);
             if (!matchedDefault) {
               for (const [k, d] of defaultByName.entries()) {
@@ -652,15 +652,14 @@ class VietnamTeachersMuseumApp {
                 }
               }
             }
-            if (!matchedDefault && !isNaN(numStt)) {
-              matchedDefault = defaultById.get(numStt);
-            }
+            const rowDefault = !isNaN(numStt) ? defaultById.get(numStt) : null;
+            const isReplacedTeacher = !matchedDefault && rowDefault && rowDefault.name.trim().toLowerCase() !== lowerName;
 
             // Phân loại Giai đoạn (1, 2, 3) từ cột D ("Giai đoạn")
             const lowerPeriod = vPeriod.toLowerCase();
-            let stageNum = matchedDefault?.stageNum || 1;
-            let periodCode = matchedDefault?.period || 'phong_kien';
-            let subTheme = vPeriod || matchedDefault?.subTheme || 'Giai đoạn I: Thời kỳ Phong kiến';
+            let stageNum = matchedDefault?.stageNum || rowDefault?.stageNum || 1;
+            let periodCode = matchedDefault?.period || rowDefault?.period || 'phong_kien';
+            let subTheme = vPeriod || matchedDefault?.subTheme || rowDefault?.subTheme || 'Giai đoạn I: Thời kỳ Phong kiến';
 
             if (lowerPeriod.includes('iii') || lowerPeriod.includes('3') || lowerPeriod.includes('đổi mới') || lowerPeriod.includes('hội nhập') || lowerPeriod.includes('hiện đại')) {
               stageNum = 3;
@@ -682,9 +681,9 @@ class VietnamTeachersMuseumApp {
             let legacy = matchedDefault?.legacy || '';
 
             if (vBio) {
-              if (vBio.includes('【Tiểu sử & Sự nghiệp】') || vBio.includes('【Đóng góp giáo dục】')) {
+              if (vBio.includes('【Tiểu sử & Sự nghiệp】') || vBio.includes('【Đóng góp giáo dục】') || vBio.includes('Tiểu sử & Sự nghiệp】')) {
                 const p1 = vBio.split('【Đóng góp giáo dục】');
-                career = (p1[0] || '').replace('【Tiểu sử & Sự nghiệp】', '').trim() || career;
+                career = (p1[0] || '').replace(/【?Tiểu sử\s*&\s*Sự nghiệp】?/g, '').trim() || career;
                 if (p1[1]) {
                   const p2 = p1[1].split('【Di sản & Tôn vinh】');
                   reforms = (p2[0] || '').trim() || reforms;
@@ -709,14 +708,41 @@ class VietnamTeachersMuseumApp {
               }
             }
 
-            // Chuẩn hóa Link ảnh (hỗ trợ cả Google Drive share link, link web và đường dẫn nội bộ)
-            let resolvedImg = vImg || matchedDefault?.img || '';
+            // Chuẩn hóa Link ảnh (ưu tiên tuyệt đối link ảnh mới trên Sheet; xử lý cả link file Drive, link thư mục Drive và khi thay nhà giáo mới)
+            let rawSheetImg = vImg;
+            if (isReplacedTeacher && rowDefault && rawSheetImg === rowDefault.img) {
+              // Người dùng đã đổi tên sang nhà giáo mới nhưng chưa xóa đường dẫn ảnh cũ ở cột H
+              rawSheetImg = '';
+            }
+            if (rawSheetImg.includes('drive.google.com/drive/folders/') || rawSheetImg.includes('drive.google.com/drive/u/')) {
+              // Người dùng dán link cả thư mục Google Drive -> tự động ánh xạ theo tên nhà giáo trong kho ảnh
+              rawSheetImg = '';
+            }
+
+            let resolvedImg = rawSheetImg || matchedDefault?.img || '';
+            let driveFileId = '';
+            let hasCustomImgUrl = false;
+
             if (resolvedImg.includes('drive.google.com/file/d/')) {
               const idMatch = resolvedImg.match(/\/d\/([a-zA-Z0-9_-]+)/);
-              if (idMatch) resolvedImg = 'https://lh3.googleusercontent.com/d/' + idMatch[1];
+              if (idMatch) {
+                driveFileId = idMatch[1];
+                resolvedImg = 'https://lh3.googleusercontent.com/d/' + driveFileId;
+                hasCustomImgUrl = true;
+              }
             } else if (resolvedImg.includes('drive.google.com') && resolvedImg.includes('id=')) {
               const idMatch = resolvedImg.match(/id=([a-zA-Z0-9_-]+)/);
-              if (idMatch) resolvedImg = 'https://lh3.googleusercontent.com/d/' + idMatch[1];
+              if (idMatch) {
+                driveFileId = idMatch[1];
+                resolvedImg = 'https://lh3.googleusercontent.com/d/' + driveFileId;
+                hasCustomImgUrl = true;
+              }
+            } else if (resolvedImg.includes('lh3.googleusercontent.com/d/')) {
+              const idMatch = resolvedImg.match(/\/d\/([a-zA-Z0-9_-]+)/);
+              if (idMatch) driveFileId = idMatch[1];
+              hasCustomImgUrl = true;
+            } else if (resolvedImg.startsWith('http://') || resolvedImg.startsWith('https://') || resolvedImg.startsWith('data:image')) {
+              hasCustomImgUrl = true;
             }
 
             parsedRows.push({
@@ -731,6 +757,8 @@ class VietnamTeachersMuseumApp {
                 subTheme: subTheme,
                 title: vTitle || matchedDefault?.title || 'Bậc Danh sư & Nhà giáo tiêu biểu trong Sử Việt',
                 img: resolvedImg,
+                driveFileId: driveFileId,
+                hasCustomImgUrl: hasCustomImgUrl,
                 career: career || 'Bậc danh sư tiêu biểu trong lịch sử giáo dục Việt Nam.',
                 reforms: reforms || career || 'Đóng góp to lớn cho sự nghiệp trồng người và bồi dưỡng nhân tài đất nước.',
                 legacy: legacy || vTitle || 'Được các thế hệ học trò và lịch sử dân tộc trân trọng tôn vinh.',
@@ -762,7 +790,8 @@ class VietnamTeachersMuseumApp {
       };
 
       const script = document.createElement('script');
-      script.src = `https://docs.google.com/spreadsheets/d/${this.googleSheetId}/gviz/tq?gid=295730908&tqx=responseHandler:${cbName}&_=${Date.now()}`;
+      const cacheBustTq = encodeURIComponent("select * label A 'STT_" + Date.now() + "'");
+      script.src = `https://docs.google.com/spreadsheets/d/${this.googleSheetId}/gviz/tq?gid=295730908&headers=1&tq=${cacheBustTq}&tqx=responseHandler:${cbName}&_=${Date.now()}`;
       script.async = true;
       document.body.appendChild(script);
     } catch (e) {
@@ -1728,24 +1757,48 @@ class VietnamTeachersMuseumApp {
     const modal = document.getElementById('teacher-detail-modal');
     if (!modal) return;
 
-    // 1. Phóng to ảnh chân dung nhà giáo
+    // 1. Phóng to ảnh chân dung nhà giáo (ưu tiên tuyệt đối link ảnh mới trên Sheet)
     const imgEl = document.getElementById('teacher-modal-img');
-    if (imgEl && t.img) {
+    if (imgEl) {
+      const rawImg = String(t.img || '').trim();
       const normName = String(t.name || '').trim().toLowerCase();
-      const imgFile = String(t.img || '').split('/').pop();
-      const base64Src = (window.TEACHER_IMAGES && (
-        window.TEACHER_IMAGES[t.img] ||
-        window.TEACHER_IMAGES[imgFile] ||
+      const imgFile = rawImg.split('/').pop();
+      const isCustomWebUrl = Boolean(t.hasCustomImgUrl || rawImg.startsWith('http://') || rawImg.startsWith('https://') || rawImg.startsWith('data:image'));
+
+      const fallbackByName = (window.TEACHER_IMAGES && (
         window.TEACHER_IMAGES[t.name] ||
-        window.TEACHER_IMAGES[normName] ||
-        window.TEACHER_IMAGES[t.id]
+        window.TEACHER_IMAGES[normName]
       )) || null;
-      if (base64Src) {
-        imgEl.src = base64Src;
-      } else if (String(t.img).startsWith('http') || String(t.img).startsWith('data:image')) {
-        imgEl.src = t.img;
-      } else {
-        const cleanImgPath = t.img.replace(/\\/g, '/');
+
+      const exactCachedSrc = (window.TEACHER_IMAGES && (
+        (rawImg && window.TEACHER_IMAGES[rawImg]) ||
+        (t.driveFileId && window.TEACHER_IMAGES[t.driveFileId]) ||
+        (!isCustomWebUrl && imgFile && window.TEACHER_IMAGES[imgFile]) ||
+        (!isCustomWebUrl && imgFile && window.TEACHER_IMAGES[imgFile.toLowerCase()])
+      )) || null;
+
+      if (exactCachedSrc) {
+        imgEl.onerror = null;
+        imgEl.src = exactCachedSrc;
+      } else if (isCustomWebUrl && rawImg) {
+        const candidates = [rawImg];
+        if (t.driveFileId) {
+          candidates.push(`https://drive.google.com/thumbnail?id=${t.driveFileId}&sz=w1000`);
+        }
+        candidates.push(`https://wsrv.nl/?url=${encodeURIComponent(rawImg)}&output=jpg`);
+        if (fallbackByName) candidates.push(fallbackByName);
+
+        const tryUrl = (idx) => {
+          if (idx >= candidates.length) return;
+          imgEl.onerror = () => tryUrl(idx + 1);
+          imgEl.src = candidates[idx];
+        };
+        tryUrl(0);
+      } else if (fallbackByName) {
+        imgEl.onerror = null;
+        imgEl.src = fallbackByName;
+      } else if (rawImg) {
+        const cleanImgPath = rawImg.replace(/\\/g, '/');
         const filenameOnly = cleanImgPath.split('/').pop();
         const possiblePaths = [
           cleanImgPath,
