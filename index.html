@@ -915,8 +915,63 @@
     </div>
   </div>
 
+  <!-- ==================== MODAL SÁCH LẬT 3D: LỊCH SỬ RA ĐỜI NGÀY NHÀ GIÁO VIỆT NAM 20/11 ==================== -->
+  <div id="history-2011-book-modal" class="book2011-modal-backdrop hidden" aria-label="Sách lật Lịch sử Ngày Nhà giáo Việt Nam 20/11">
+    <div class="book2011-modal-shell">
+      <!-- Thanh tiêu đề & tab chương sách phía trên -->
+      <div class="book2011-top-bar">
+        <div class="book2011-top-title">
+          <span class="book2011-sparkle-icon">📖✨</span>
+          <div>
+            <div class="book2011-kicker">ẤN PHẨM LỊCH SỬ TƯƠNG TÁC • PHÒNG CÁC GIAI ĐOẠN GIÁO DỤC</div>
+            <h3>Sách Lật Tìm Hiểu: Lịch Sử Ra Đời Ngày Nhà Giáo Việt Nam 20.11</h3>
+          </div>
+        </div>
+        <div class="book2011-chapter-tabs" id="book2011-chapter-tabs">
+          <button type="button" class="book2011-tab-btn active" data-spread="0">I. Cội nguồn & FISE (1946–1954)</button>
+          <button type="button" class="book2011-tab-btn" data-spread="1">II. Quốc tế Hiến chương & QĐ 167-HĐBT (1958–1982)</button>
+          <button type="button" class="book2011-tab-btn" data-spread="2">III. Ý nghĩa Lịch sử & Tri ân Thầy Cô 20.11</button>
+        </div>
+        <button type="button" id="btn-close-book2011" class="book2011-close-btn" title="Đóng sách (Esc)">✕</button>
+      </div>
 
+      <!-- Khung Sách Mở 2 Trang (Open 2-Page Hardcover Flipbook) -->
+      <div class="book2011-stage">
+        <div class="book2011-hardcover" id="book2011-hardcover">
+          <div class="book2011-spine-shadow"></div>
+          <div class="book2011-ribbon-bookmark"></div>
 
+          <!-- TRANG TRÁI -->
+          <div class="book2011-page book2011-page-left" id="book2011-page-left">
+            <!-- Render động từ JS -->
+          </div>
+
+          <!-- TRANG PHẢI -->
+          <div class="book2011-page book2011-page-right" id="book2011-page-right">
+            <!-- Render động từ JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Thanh điều khiển lật trang & sao chép tư liệu phía dưới -->
+      <div class="book2011-footer-bar">
+        <button type="button" id="btn-book2011-prev" class="book2011-nav-btn">
+          <span>◀ Lật trang trước</span>
+        </button>
+
+        <div class="book2011-footer-center">
+          <span id="book2011-page-indicator" class="book2011-page-indicator">Trang 1 – 2 / 6</span>
+          <button type="button" id="btn-book2011-copy" class="book2011-copy-btn" title="Sao chép toàn văn tư liệu Lịch sử Ngày Nhà giáo Việt Nam 20/11">
+            📋 Sao chép toàn văn tư liệu (Ctrl+C)
+          </button>
+        </div>
+
+        <button type="button" id="btn-book2011-next" class="book2011-nav-btn">
+          <span>Lật trang tiếp ▶</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

@@ -4593,5 +4593,432 @@ input, textarea, [contenteditable="true"] {
   user-select: none;
 }
 
+/* ==================== MODAL SÁCH LẬT 3D: LỊCH SỬ NGÀY NHÀ GIÁO VIỆT NAM 20/11 ==================== */
+.book2011-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 4800;
+  background: radial-gradient(circle at center, rgba(12, 24, 48, 0.86) 0%, rgba(4, 10, 22, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.book2011-modal-backdrop.hidden {
+  display: none !important;
+}
+
+.book2011-modal-shell {
+  width: min(1160px, 96vw);
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.book2011-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: linear-gradient(90deg, rgba(16, 30, 56, 0.96), rgba(32, 18, 28, 0.96));
+  border: 1.5px solid rgba(255, 215, 0, 0.55);
+  border-radius: 14px;
+  padding: 10px 18px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), 0 0 24px rgba(255, 215, 0, 0.18);
+  flex-wrap: wrap;
+}
+
+.book2011-top-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.book2011-sparkle-icon {
+  font-size: 28px;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+}
+
+.book2011-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #ffd700;
+  text-transform: uppercase;
+}
+
+.book2011-top-title h3 {
+  margin: 2px 0 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff8e7;
+}
+
+.book2011-chapter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.book2011-tab-btn {
+  padding: 7px 13px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 215, 0, 0.38);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.book2011-tab-btn:hover {
+  border-color: #ffd700;
+  color: #fff;
+  background: rgba(255, 215, 0, 0.16);
+}
+
+.book2011-tab-btn.active {
+  background: linear-gradient(135deg, #d4a017, #ffd700);
+  color: #091526;
+  border-color: #fff3b0;
+  font-weight: 800;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
+}
+
+.book2011-close-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 215, 0, 0.55);
+  background: rgba(120, 20, 30, 0.85);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.book2011-close-btn:hover {
+  background: #dc2626;
+  transform: scale(1.08);
+}
+
+.book2011-stage {
+  perspective: 1800px;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.book2011-hardcover {
+  position: relative;
+  width: 100%;
+  min-height: 510px;
+  max-height: 68vh;
+  background: linear-gradient(135deg, #580f18 0%, #3b080e 50%, #580f18 100%);
+  border: 4px solid #d4a338;
+  border-radius: 18px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, 0.85),
+    0 0 42px rgba(255, 215, 0, 0.25),
+    inset 0 0 18px rgba(255, 215, 0, 0.35);
+  transform-style: preserve-3d;
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.book2011-hardcover.flipping-next {
+  animation: bookFlipNextAnim 0.42s ease;
+}
+
+.book2011-hardcover.flipping-prev {
+  animation: bookFlipPrevAnim 0.42s ease;
+}
+
+@keyframes bookFlipNextAnim {
+  0% { transform: rotateY(0deg) scale(1); }
+  45% { transform: rotateY(-7deg) scale(0.985); }
+  100% { transform: rotateY(0deg) scale(1); }
+}
+
+@keyframes bookFlipPrevAnim {
+  0% { transform: rotateY(0deg) scale(1); }
+  45% { transform: rotateY(7deg) scale(0.985); }
+  100% { transform: rotateY(0deg) scale(1); }
+}
+
+.book2011-spine-shadow {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 50%;
+  width: 36px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    90deg,
+    rgba(60, 35, 5, 0) 0%,
+    rgba(60, 35, 5, 0.28) 38%,
+    rgba(30, 15, 2, 0.55) 50%,
+    rgba(60, 35, 5, 0.28) 62%,
+    rgba(60, 35, 5, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+.book2011-ribbon-bookmark {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 14px;
+  height: 58px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #b91c1c, #ef4444);
+  border: 1px solid #ffd700;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+  z-index: 6;
+  pointer-events: none;
+}
+
+.book2011-page {
+  background: linear-gradient(180deg, #fffdf7 0%, #fbf2dc 55%, #f4e4be 100%);
+  color: #1e293b;
+  padding: 26px 32px 22px;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1.5px solid #c99a3e;
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+.book2011-page-left {
+  border-radius: 10px 0 0 10px;
+  padding-right: 36px;
+  box-shadow: inset -18px 0 28px rgba(110, 75, 18, 0.14);
+}
+
+.book2011-page-right {
+  border-radius: 0 10px 10px 0;
+  padding-left: 36px;
+  box-shadow: inset 18px 0 28px rgba(110, 75, 18, 0.14);
+}
+
+.book2011-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px double #c59334;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+
+.book2011-page-kicker {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #8b1e24;
+  text-transform: uppercase;
+}
+
+.book2011-page-num-top {
+  font-size: 12px;
+  font-weight: 700;
+  color: #855812;
+}
+
+.book2011-page-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 25px;
+  font-weight: 700;
+  color: #0f2544;
+  margin: 0 0 12px;
+  line-height: 1.25;
+}
+
+.book2011-lead-box {
+  background: linear-gradient(135deg, rgba(139, 30, 36, 0.1), rgba(212, 163, 56, 0.18));
+  border-left: 4px solid #8b1e24;
+  border-radius: 6px;
+  padding: 12px 15px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #111827;
+  font-weight: 600;
+}
+
+.book2011-paragraph {
+  font-size: 14.8px;
+  line-height: 1.72;
+  color: #1f2937;
+  margin: 0 0 12px;
+  text-align: justify;
+}
+
+.book2011-paragraph strong {
+  color: #7f1d1d;
+}
+
+.book2011-timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 6px 0 12px;
+}
+
+.book2011-timeline-item {
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(180, 130, 40, 0.45);
+  border-left: 4px solid #b47b1c;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.book2011-timeline-year {
+  font-size: 13px;
+  font-weight: 800;
+  color: #8b1e24;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.book2011-timeline-desc {
+  font-size: 14.2px;
+  line-height: 1.6;
+  color: #1e293b;
+  margin: 0;
+}
+
+.book2011-decree-card {
+  background: linear-gradient(135deg, #fff9e6 0%, #f7e3b5 100%);
+  border: 2px solid #b47b1c;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 10px 0 12px;
+  box-shadow: 0 4px 14px rgba(120, 80, 15, 0.12);
+}
+
+.book2011-decree-badge {
+  display: inline-block;
+  background: #8b1e24;
+  color: #fff8dc;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+}
+
+.book2011-page-footer {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(180, 130, 40, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #785212;
+  font-style: italic;
+}
+
+.book2011-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(10, 20, 38, 0.94);
+  border: 1.5px solid rgba(255, 215, 0, 0.45);
+  border-radius: 14px;
+  padding: 10px 18px;
+  flex-wrap: wrap;
+}
+
+.book2011-footer-center {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.book2011-page-indicator {
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffd700;
+  letter-spacing: 0.05em;
+}
+
+.book2011-nav-btn {
+  padding: 9px 18px;
+  border-radius: 24px;
+  border: 1.5px solid #ffd700;
+  background: linear-gradient(135deg, #162c4e, #0d1b33);
+  color: #fff6d6;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.book2011-nav-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d4a017, #ffd700);
+  color: #091526;
+  transform: translateY(-1px);
+}
+
+.book2011-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.book2011-copy-btn {
+  padding: 7px 15px;
+  border-radius: 20px;
+  border: 1px solid rgba(52, 211, 153, 0.65);
+  background: rgba(16, 185, 129, 0.16);
+  color: #a7f3d0;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.book2011-copy-btn:hover {
+  background: rgba(16, 185, 129, 0.32);
+  color: #fff;
+}
+
+@media (max-width: 920px) {
+  .book2011-hardcover {
+    grid-template-columns: 1fr;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  .book2011-spine-shadow,
+  .book2011-ribbon-bookmark {
+    display: none;
+  }
+  .book2011-page-left,
+  .book2011-page-right {
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 10px;
+  }
+}
+
+
 
 

@@ -1212,6 +1212,13 @@ class VietnamTeachersMuseumApp {
         ];
         break;
 
+      case 'room-history':
+        buttons = [
+          { icon: '📖', label: 'Mở Sách Lật Lịch Sử Ngày 20/11', openBook2011: true },
+          { icon: '🪷', label: 'Về Đại Sảnh & Cội Cây Tri Thức', zoneId: 'grand-hall' }
+        ];
+        break;
+
       default:
         buttons = [
           { icon: '🪷', label: 'Về Đại Sảnh & Cội Cây Tri Thức', zoneId: 'grand-hall' }
@@ -1222,13 +1229,21 @@ class VietnamTeachersMuseumApp {
     container.innerHTML = buttons
       .map(
         (b) => `
-      <button type="button" class="turn-hud-btn" data-turn-zone="${b.zoneId}" ${b.pos ? `data-turn-pos='${JSON.stringify(b.pos)}'` : ''} ${b.lookAt ? `data-turn-look='${JSON.stringify(b.lookAt)}'` : ''}>
+      <button type="button" class="turn-hud-btn" ${b.openBook2011 ? 'data-open-book2011="1"' : `data-turn-zone="${b.zoneId}"`} ${b.pos ? `data-turn-pos='${JSON.stringify(b.pos)}'` : ''} ${b.lookAt ? `data-turn-look='${JSON.stringify(b.lookAt)}'` : ''}>
         <span class="turn-icon">${b.icon}</span>
         <span class="turn-text">${b.label}</span>
       </button>
     `
       )
       .join('');
+
+    container.querySelectorAll('[data-open-book2011]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        this.audio.playClickChime();
+        this.stopGuidedTour();
+        this.openBook2011Modal(0);
+      });
+    });
 
     container.querySelectorAll('[data-turn-zone]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -2965,12 +2980,26 @@ class VietnamTeachersMuseumApp {
         }
       }
       if (e.code === 'Escape') {
+        this.closeBook2011Modal();
         this.closeArtifactModal();
         this.closeTributeCardViewer();
         this.closeWishingTreeModal();
         this.closeTributeSearchModal();
         this.closeMuseumMenu();
         document.getElementById('catalog-drawer')?.classList.remove('open');
+      }
+      const bookModal = document.getElementById('history-2011-book-modal');
+      if (bookModal && !bookModal.classList.contains('hidden')) {
+        if (e.code === 'ArrowRight') {
+          e.preventDefault();
+          this.stepBook2011Spread(1);
+          return;
+        }
+        if (e.code === 'ArrowLeft') {
+          e.preventDefault();
+          this.stepBook2011Spread(-1);
+          return;
+        }
       }
     });
 
@@ -3241,6 +3270,31 @@ class VietnamTeachersMuseumApp {
       this.handleAddTribute(e);
     });
 
+    // ==================== SỰ KIỆN SÁCH LẬT 3D: LỊCH SỬ NGÀY NHÀ GIÁO VIỆT NAM 20/11 ====================
+    document.getElementById('btn-close-book2011')?.addEventListener('click', () => {
+      this.audio.playClickChime();
+      this.closeBook2011Modal();
+    });
+    document.getElementById('btn-book2011-prev')?.addEventListener('click', () => {
+      this.audio.playClickChime();
+      this.stepBook2011Spread(-1);
+    });
+    document.getElementById('btn-book2011-next')?.addEventListener('click', () => {
+      this.audio.playClickChime();
+      this.stepBook2011Spread(1);
+    });
+    document.getElementById('btn-book2011-copy')?.addEventListener('click', () => {
+      this.audio.playClickChime();
+      this.copyBook2011FullText();
+    });
+    document.querySelectorAll('#book2011-chapter-tabs .book2011-tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        this.audio.playClickChime();
+        const sp = parseInt(btn.getAttribute('data-spread') || '0', 10);
+        this.renderBook2011Spread(sp, sp > (this.book2011SpreadIndex || 0) ? 'next' : 'prev');
+      });
+    });
+
     // ==================== SỰ KIỆN ĐẠI HÀNH LANG ÁNH SÁNG & TRÁI TIM NGƯỜI THẦY ====================
   }
 
@@ -3292,7 +3346,8 @@ class VietnamTeachersMuseumApp {
     while (curr) {
       if (
         curr.userData &&
-        (curr.userData.isWriteTributeDesk ||
+        (curr.userData.isBook2011 ||
+          curr.userData.isWriteTributeDesk ||
           curr.userData.isTributeCard ||
           curr.userData.artifact ||
           curr.userData.targetZoneId)
@@ -3308,6 +3363,15 @@ class VietnamTeachersMuseumApp {
   // Ưu tiên TUYỆT ĐỐI cho Lá Vàng, Thiệp Lụa, Trái Tim Pha Lê, Bàn Giấy Bút, Bàn Trái Tim và Bàn Vinh Danh
   findBestHit(hits) {
     if (!hits || hits.length === 0) return null;
+
+    // 00. Ưu tiên Cuốn Sách Vàng Lấp Lánh Lịch Sử Ngày Nhà Giáo Việt Nam 20/11
+    for (let i = 0; i < hits.length; i++) {
+      if (hits[i].object && hits[i].object.isPoints) continue;
+      const data = this.findHitData(hits[i].object);
+      if (data && data.isBook2011) {
+        return { hit: hits[i], data };
+      }
+    }
 
     // 0a. Ưu tiên Bức Tường Ký Ức Số / Digital Totem Kiosk: Mở Thư viện Ký ức
     for (let i = 0; i < hits.length; i++) {
@@ -3397,6 +3461,23 @@ class VietnamTeachersMuseumApp {
     const best = this.findBestHit(hits);
     if (best && best.data) {
       const data = best.data;
+
+      // 00. Nếu rê chuột vào Cuốn Sách Vàng Lấp Lánh Lịch Sử Ngày Nhà Giáo Việt Nam 20/11
+      if (data.isBook2011) {
+        this.renderer.domElement.style.cursor = 'pointer';
+        if (tooltip) {
+          tooltip.className = 'minister-hover-tooltip';
+          tooltip.innerHTML = `
+            <div class="tt-order">📖✨ ẤN PHẨM ĐẶC BIỆT • PHÒNG LỊCH SỬ GIÁO DỤC</div>
+            <div class="tt-name" style="color:#ffd700; font-size:16px;">LỊCH SỬ RA ĐỜI NGÀY NHÀ GIÁO VIỆT NAM 20.11</div>
+            <div class="tt-term" style="color:#a7f3d0; margin-top:4px;">👆 Bấm vào Cuốn Sách Vàng để mở Sách Lật tìm hiểu từng trang</div>
+          `;
+          tooltip.style.display = 'flex';
+          tooltip.style.left = `${Math.min(window.innerWidth - 360, clientX + 16)}px`;
+          tooltip.style.top = `${Math.min(window.innerHeight - 120, clientY + 16)}px`;
+        }
+        return;
+      }
 
       // 0a. Nếu rê chuột vào Màn hình Kiosk / Bức Tường Ký Ức Số
       if (data.isMemoryTotem || data.isMemoryWall || data.isMemoryOpenLibraryBtn || data.isMemoryFrame) {
@@ -3497,6 +3578,13 @@ class VietnamTeachersMuseumApp {
 
       while (curr) {
         if (curr.userData) {
+          // Bắt click vào Cuốn Sách Vàng Lấp Lánh 3D: Lịch sử Ngày Nhà giáo Việt Nam 20/11
+          if (curr.userData.isBook2011) {
+            this.audio.playClickChime();
+            this.stopGuidedTour();
+            this.openBook2011Modal(0);
+            return;
+          }
           // Bắt click vào Màn hình cảm ứng chân đứng (Digital Totem Kiosk) / Bức tường Ký ức
           if (curr.userData.isMemoryTotem || curr.userData.isMemoryWall || curr.userData.isMemoryOpenLibraryBtn || curr.userData.isMemoryFrame) {
             this.audio.playClickChime();
@@ -3932,6 +4020,273 @@ class VietnamTeachersMuseumApp {
     this.renderMinimap();
 
     this.renderer.render(this.scene, this.camera);
+  }
+
+  // ==================== SÁCH LẬT 3D: LỊCH SỬ RA ĐỜI NGÀY NHÀ GIÁO VIỆT NAM 20/11 ====================
+  getBook2011SpreadsData() {
+    return [
+      {
+        spreadTitle: 'Chương I: Cội Nguồn Quốc Tế & Tổ Chức FISE (1946 – 1954)',
+        leftPageNum: 1,
+        rightPageNum: 2,
+        leftHTML: `
+          <div>
+            <div class="book2011-page-header">
+              <span class="book2011-page-kicker">✦ LỊCH SỬ NGÀY NHÀ GIÁO VIỆT NAM 20.11 ✦</span>
+              <span class="book2011-page-num-top">Trang 1</span>
+            </div>
+            <h4 class="book2011-page-title">Lịch sử ra đời của ngày Nhà giáo Việt Nam 20.11</h4>
+            <div class="book2011-lead-box">
+              “Ngày Nhà giáo Việt Nam 20.11 là dịp để các thế hệ học trò và xã hội bày tỏ tri ân, lòng biết ơn đối với các thầy cô giáo, những người đã cống hiến cho sự nghiệp “trồng người”.”
+            </div>
+            <p class="book2011-paragraph">
+              Truyền thống <strong>“Tôn sư trọng đạo”</strong> từ ngàn đời nay vốn là một giá trị văn hóa thiêng liêng của dân tộc Việt Nam. Hòa cùng dòng chảy tiến bộ của phong trào giáo giới thế giới, lịch sử ra đời của ngày <strong>20.11</strong> gắn liền với cuộc đấu tranh vì một nền giáo dục tiến bộ, dân chủ và bảo vệ quyền lợi chính đáng của các nhà giáo trên toàn cầu.
+            </p>
+            <div class="book2011-timeline-list">
+              <div class="book2011-timeline-item">
+                <div class="book2011-timeline-year">🏛️ Tháng 7.1946 • Paris (Pháp)</div>
+                <p class="book2011-timeline-desc">Thành lập <strong>Liên hiệp quốc tế Các công đoàn giáo dục (FISE)</strong> — tổ chức quốc tế của các nhà giáo tiến bộ.</p>
+              </div>
+              <div class="book2011-timeline-item">
+                <div class="book2011-timeline-year">📜 Năm 1949 • Warszawa (Ba Lan)</div>
+                <p class="book2011-timeline-desc">Xây dựng bản <strong>Hiến chương Các nhà giáo</strong> gồm <strong>15 chương</strong> bảo vệ quyền lợi nhà giáo.</p>
+              </div>
+            </div>
+          </div>
+          <div class="book2011-page-footer">
+            <span>Bảo tàng Nhà giáo Việt Nam</span>
+            <span>Chương I • Trang 1 / 6</span>
+          </div>
+        `,
+        rightHTML: `
+          <div>
+            <div class="book2011-page-header">
+              <span class="book2011-page-kicker">✦ LIÊN HIỆP QUỐC TẾ CÁC CÔNG ĐOÀN GIÁO DỤC (FISE) ✦</span>
+              <span class="book2011-page-num-top">Trang 2</span>
+            </div>
+            <h4 class="book2011-page-title">Từ Paris (1946) đến Bản Hiến chương Các nhà giáo 15 Chương</h4>
+            <p class="book2011-paragraph">
+              Để bảo vệ quyền lợi chân chính của các nhà giáo, <strong>tháng 7.1946</strong>, một tổ chức quốc tế của các nhà giáo tiến bộ được thành lập ở <strong>Paris (Pháp)</strong>, lấy tên là <strong>Liên hiệp quốc tế Các công đoàn giáo dục</strong> (<em>Fédération Internationale Syndicale des Enseignants - FISE</em>).
+            </p>
+            <p class="book2011-paragraph">
+              <strong>Năm 1949</strong>, tại hội nghị ở thủ đô của <strong>Ba Lan</strong>, tổ chức này xây dựng bản <strong>Hiến chương Các nhà giáo</strong> gồm <strong>15 chương</strong>. Nội dung hiến chương tập trung vào việc đấu tranh chống lại hệ thống giáo dục tư bản, phong kiến; xây dựng một nền giáo dục tiến bộ, bảo vệ quyền lợi chính đáng cho các nhà giáo.
+            </p>
+            <div class="book2011-timeline-list">
+              <div class="book2011-timeline-item">
+                <div class="book2011-timeline-year">🇻🇳 Đến tháng 7.1953 • Việt Nam gia nhập FISE</div>
+                <p class="book2011-timeline-desc">Đến <strong>tháng 7.1953</strong>, <strong>Công đoàn Giáo dục Việt Nam</strong> chính thức gia nhập tổ chức giáo giới quốc tế này.</p>
+              </div>
+              <div class="book2011-timeline-item">
+                <div class="book2011-timeline-year">🌏 Tháng 8.1954 • Nhất trí thông qua Hiến chương</div>
+                <p class="book2011-timeline-desc"><strong>Tháng 8.1954</strong>, tổ chức công đoàn của các nhà giáo tiến bộ và cách mạng trên thế giới nhất trí thông qua bản <strong>Hiến chương Các nhà giáo</strong>.</p>
+              </div>
+            </div>
+          </div>
+          <div class="book2011-page-footer">
+            <span>Bấm “Lật trang tiếp ▶” để đọc tiếp</span>
+            <span>Chương I • Trang 2 / 6</span>
+          </div>
+        `
+      },
+      {
+        spreadTitle: 'Chương II: Ngày Quốc Tế Hiến Chương & Quyết Định 167-HĐBT (1958 – 1982)',
+        leftPageNum: 3,
+        rightPageNum: 4,
+        leftHTML: `
+          <div>
+            <div class="book2011-page-header">
+              <span class="book2011-page-kicker">✦ HỘI NGHỊ WARSZAWA & NGÀY QUỐC TẾ HIẾN CHƯƠNG ✦</span>
+              <span class="book2011-page-num-top">Trang 3</span>
+            </div>
+            <h4 class="book2011-page-title">Ngày Quốc tế Hiến chương các nhà giáo 20.11</h4>
+            <p class="book2011-paragraph">
+              Từ ngày <strong>26 - 30.8.1957</strong> <em>(tư liệu: 26 - 30.8.1975 / 1957)</em>, tại <strong>Warszawa, thủ đô Ba Lan</strong> đã diễn ra hội nghị <strong>FISE</strong> với <strong>57 nước</strong> tham dự, trong đó có <strong>Công đoàn Giáo dục Việt Nam</strong>.
+            </p>
+            <div class="book2011-lead-box">
+              Hội nghị quyết định lấy ngày <strong>20.11.1958</strong> (ngày 20.11 hàng năm) là <strong>Ngày Quốc tế Hiến chương các nhà giáo</strong>.
+            </div>
+            <p class="book2011-paragraph">
+              Tại miền Bắc Việt Nam, ngày <strong>20.11.1958</strong> lần đầu tiên được tổ chức trọng thể trên toàn miền Bắc như một ngày hội lớn của giới giáo dục và toàn dân, cổ vũ tinh thần thi đua dạy tốt – học tốt trong sự nghiệp xây dựng đất nước và đấu tranh thống nhất Tổ quốc. Khi đất nước hoàn toàn thống nhất, ngày lễ này lan tỏa rộng khắp trên cả nước.
+            </p>
+          </div>
+          <div class="book2011-page-footer">
+            <span>Bảo tàng Nhà giáo Việt Nam</span>
+            <span>Chương II • Trang 3 / 6</span>
+          </div>
+        `,
+        rightHTML: `
+          <div>
+            <div class="book2011-page-header">
+              <span class="book2011-page-kicker">✦ DẤU MỐC LỊCH SỬ NGÀY 28.9.1982 ✦</span>
+              <span class="book2011-page-num-top">Trang 4</span>
+            </div>
+            <h4 class="book2011-page-title">Quyết định 167-HĐBT về Ngày Nhà giáo Việt Nam</h4>
+            <div class="book2011-decree-card">
+              <span class="book2011-decree-badge">QUYẾT ĐỊNH SỐ 167-HĐBT • NGÀY 28.9.1982</span>
+              <p class="book2011-paragraph" style="margin-bottom: 6px;">
+                Tại Việt Nam, ngày <strong>28.9.1982</strong>, thay mặt <strong>Hội đồng Bộ trưởng</strong> (nay là Chính phủ), Phó Chủ tịch Hội đồng Bộ trưởng <strong>Võ Nguyên Giáp</strong> đã ký <strong>Quyết định 167-HĐBT năm 1982</strong> về <strong>Ngày Nhà giáo Việt Nam</strong>. Theo đó, lấy ngày <strong>20.11 hàng năm</strong> là <strong>Ngày Nhà giáo Việt Nam</strong>.
+              </p>
+            </div>
+            <p class="book2011-paragraph">
+              Từ đó, ngày <strong>20.11</strong> đã trở thành ngày truyền thống của ngành Giáo dục Việt Nam và gắn liền với truyền thống tôn sư trọng đạo của đất nước ta. Năm 2024 là kỷ niệm <strong>42 năm</strong> ngày Nhà giáo Việt Nam (<strong>20.11.1982 - 20.11.2024</strong>).
+            </p>
+            <p class="book2011-paragraph">
+              Quyết định lịch sử này thể hiện sự quan tâm sâu sắc của Đảng, Nhà nước và nhân dân ta đối với vị trí, vai trò cao quý của đội ngũ nhà giáo trong công cuộc xây dựng và bảo vệ Tổ quốc.
+            </p>
+          </div>
+          <div class="book2011-page-footer">
+            <span>Bấm “Lật trang tiếp ▶” để đọc tiếp</span>
+            <span>Chương II • Trang 4 / 6</span>
+          </div>
+        `
+      },
+      {
+        spreadTitle: 'Chương III: Ý Nghĩa Lịch Sử & Truyền Thống Tri Ân Ngày 20.11',
+        leftPageNum: 5,
+        rightPageNum: 6,
+        leftHTML: `
+          <div>
+            <div class="book2011-page-header">
+              <span class="book2011-page-kicker">✦ TÔN VINH SỰ NGHIỆP “TRỒNG NGƯỜI” ✦</span>
+              <span class="book2011-page-num-top">Trang 5</span>
+            </div>
+            <h4 class="book2011-page-title">Ngày lễ Tri ân & Tôn vinh những tấm gương Nhà giáo</h4>
+            <p class="book2011-paragraph">
+              Ngày <strong>20.11 hàng năm</strong> trở thành ngày lễ tri ân, tôn vinh những nhà giáo, những tấm gương hoạt động giáo dục có đóng góp cho ngành giáo dục Việt Nam. Vào ngày này, cả xã hội và các thế hệ học trò thể hiện sự tri ân với thầy cô.
+            </p>
+            <p class="book2011-paragraph">
+              Ngày Nhà giáo Việt Nam <strong>20.11</strong> cũng là dịp để ngành giáo dục nhìn lại và đánh giá hiệu quả của các hoạt động giáo dục và lập phương hướng cho các cải tiến trong dạy và học.
+            </p>
+            <div class="book2011-lead-box">
+              “Dù khó khăn đến đâu cũng phải tiếp tục thi đua dạy tốt và học tốt.”<br/>
+              <small style="color:#8b1e24;">— Chủ tịch Hồ Chí Minh</small>
+            </div>
+          </div>
+          <div class="book2011-page-footer">
+            <span>Bảo tàng Nhà giáo Việt Nam</span>
+            <span>Chương III • Trang 5 / 6</span>
+          </div>
+        `,
+        rightHTML: `
+          <div>
+            <div class="book2011-page-header">
+              <span class="book2011-page-kicker">✦ SÁNG MÃI TRUYỀN THỐNG TÔN SƯ TRỌNG ĐẠO ✦</span>
+              <span class="book2011-page-num-top">Trang 6</span>
+            </div>
+            <h4 class="book2011-page-title">Lan tỏa Ý nghĩa tốt đẹp của Ngày Nhà giáo Việt Nam 20.11</h4>
+            <p class="book2011-paragraph">
+              Mỗi dịp <strong>20.11 hàng năm</strong>, nhiều hoạt động kỉ niệm, tôn vinh, tri ân các thầy cô giáo được tổ chức trang trọng, ý nghĩa trên khắp cả nước, thể hiện ý nghĩa tốt đẹp của ngày Nhà giáo Việt Nam.
+            </p>
+            <p class="book2011-paragraph">
+              Ngày <strong>20.11 hàng năm</strong> trở thành ngày lễ tri ân, tôn vinh những nhà giáo có đóng góp cho ngành giáo dục, là dịp để các thế hệ học trò thể hiện sự tri ân với thầy cô.
+            </p>
+            <div class="book2011-decree-card" style="text-align:center;">
+              <div style="font-weight:800; color:#8b1e24; font-size:15px; margin-bottom:6px;">
+                🪷 GỬI LỜI TRI ÂN THẦY CÔ TRÊN CỘI CÂY TRI THỨC 3D
+              </div>
+              <p style="font-size:13.5px; color:#1e293b; margin:0 0 10px;">
+                Các em học sinh và khách tham quan có thể gửi thiệp chúc mừng 20/11 trực tiếp lên Cội Cây Tri Thức của Bảo tàng:
+              </p>
+              <button type="button" class="book2011-nav-btn" onclick="window.app && (window.app.closeBook2011Modal(), window.app.openWishingTreeModal())">
+                ✨ Viết Thiệp Tri Ân Thầy Cô Ngay
+              </button>
+            </div>
+          </div>
+          <div class="book2011-page-footer">
+            <span>Bạn có thể bôi đen Ctrl+C hoặc bấm Sao chép bên dưới</span>
+            <span>Chương III • Trang 6 / 6</span>
+          </div>
+        `
+      }
+    ];
+  }
+
+  openBook2011Modal(spreadIndex = 0) {
+    this.closeArtifactModal();
+    this.closeMinisterModal();
+    this.closeTributeCardViewer();
+    this.closeWishingTreeModal();
+
+    const modal = document.getElementById('history-2011-book-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    this.renderBook2011Spread(spreadIndex, null);
+  }
+
+  closeBook2011Modal() {
+    document.getElementById('history-2011-book-modal')?.classList.add('hidden');
+  }
+
+  stepBook2011Spread(delta) {
+    const spreads = this.getBook2011SpreadsData();
+    const cur = this.book2011SpreadIndex || 0;
+    const next = Math.max(0, Math.min(spreads.length - 1, cur + delta));
+    if (next === cur) return;
+    this.renderBook2011Spread(next, delta > 0 ? 'next' : 'prev');
+  }
+
+  renderBook2011Spread(spreadIndex = 0, flipDir = null) {
+    const spreads = this.getBook2011SpreadsData();
+    const idx = Math.max(0, Math.min(spreads.length - 1, spreadIndex));
+    this.book2011SpreadIndex = idx;
+    const sp = spreads[idx];
+
+    const leftEl = document.getElementById('book2011-page-left');
+    const rightEl = document.getElementById('book2011-page-right');
+    const hardcover = document.getElementById('book2011-hardcover');
+    const indicator = document.getElementById('book2011-page-indicator');
+    const prevBtn = document.getElementById('btn-book2011-prev');
+    const nextBtn = document.getElementById('btn-book2011-next');
+
+    if (hardcover && flipDir) {
+      hardcover.classList.remove('flipping-next', 'flipping-prev');
+      void hardcover.offsetWidth;
+      hardcover.classList.add(flipDir === 'next' ? 'flipping-next' : 'flipping-prev');
+    }
+
+    if (leftEl) leftEl.innerHTML = sp.leftHTML;
+    if (rightEl) rightEl.innerHTML = sp.rightHTML;
+    if (indicator) {
+      indicator.textContent = `Trang ${sp.leftPageNum} – ${sp.rightPageNum} / ${spreads.length * 2}`;
+    }
+    if (prevBtn) prevBtn.disabled = idx === 0;
+    if (nextBtn) nextBtn.disabled = idx === spreads.length - 1;
+
+    document.querySelectorAll('#book2011-chapter-tabs .book2011-tab-btn').forEach((btn) => {
+      const bIdx = parseInt(btn.getAttribute('data-spread') || '0', 10);
+      btn.classList.toggle('active', bIdx === idx);
+    });
+  }
+
+  copyBook2011FullText() {
+    const fullText = [
+      'Lịch sử ra đời của ngày Nhà giáo Việt Nam 20.11',
+      '',
+      'Ngày Nhà giáo Việt Nam 20.11 là dịp để các thế hệ học trò và xã hội bày tỏ tri ân, lòng biết ơn đối với các thầy cô giáo, những người đã cống hiến cho sự nghiệp “trồng người”.',
+      'Để bảo vệ quyền lợi chân chính của các nhà giáo, tháng 7.1946, một tổ chức quốc tế của các nhà giáo tiến bộ được thành lập ở Paris (Pháp), lấy tên là Liên hiệp quốc tế Các công đoàn giáo dục (Fédération Internationale Syndicale des Enseignants - FISE).',
+      'Năm 1949, tại hội nghị ở thủ đô của Ba Lan, tổ chức này xây dựng bản Hiến chương Các nhà giáo gồm 15 chương. Nội dung hiến chương tập trung vào việc đấu tranh chống lại hệ thống giáo dục tư bản, phong kiến; xây dựng một nền giáo dục tiến bộ, bảo vệ quyền lợi chính đáng cho các nhà giáo.',
+      'Đến tháng 7.1953, Công đoàn Giáo dục Việt Nam gia nhập tổ chức giáo giới quốc tế này.',
+      'Tháng 8.1954, tổ chức công đoàn của các nhà giáo tiến bộ và cách mạng trên thế giới nhất trí thông qua bản Hiến chương Các nhà giáo.',
+      'Từ ngày 26 - 30.8.1957 (tư liệu: 26 - 30.8.1975), tại Warszawa, thủ đô Ba Lan đã diễn ra hội nghị FISE với 57 nước tham dự, trong đó có Công đoàn Giáo dục Việt Nam. Hội nghị quyết định lấy ngày 20.11.1958 là Ngày Quốc tế Hiến chương các nhà giáo.',
+      'Tại Việt Nam, ngày 28.9.1982, thay mặt Hội đồng Bộ trưởng (nay là Chính phủ), Phó Chủ tịch Hội đồng Bộ trưởng Võ Nguyên Giáp đã ký Quyết định 167-HĐBT năm 1982 về Ngày Nhà giáo Việt Nam. Theo đó, lấy ngày 20.11 hàng năm là Ngày Nhà giáo Việt Nam.',
+      'Từ đó, ngày 20.11 đã trở thành ngày truyền thống của ngành Giáo dục Việt Nam và gắn liền với truyền thống tôn sư trọng đạo của đất nước ta. Năm 2024 là kỷ niệm 42 năm ngày Nhà giáo Việt Nam (20.11.1982 - 20.11.2024).',
+      'Ngày 20.11 hàng năm trở thành ngày lễ tri ân, tôn vinh những nhà giáo, những tấm gương hoạt động giáo dục có đóng góp cho ngành giáo dục Việt Nam. Vào ngày này, cả xã hội và các thế hệ học trò thể hiện sự tri ân với thầy cô.',
+      'Ngày Nhà giáo Việt Nam 20.11 cũng là dịp để ngành giáo dục nhìn lại và đánh giá hiệu quả của các hoạt động giáo dục và lập phương hướng cho các cải tiến trong dạy và học. Mỗi dịp 20.11 hàng năm, nhiều hoạt động kỉ niệm, tôn vinh, tri ân các thầy cô giáo được tổ chức trang trọng, ý nghĩa trên khắp cả nước, thể hiện ý nghĩa tốt đẹp của ngày Nhà giáo Việt Nam.',
+      'Ngày 20.11 hàng năm trở thành ngày lễ tri ân, tôn vinh những nhà giáo có đóng góp cho ngành giáo dục, là dịp để các thế hệ học trò thể hiện sự tri ân với thầy cô.'
+    ].join('\n\n');
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(fullText).then(() => {
+        const btn = document.getElementById('btn-book2011-copy');
+        if (btn) {
+          const old = btn.textContent;
+          btn.textContent = '✓ Đã sao chép toàn văn Lịch sử 20/11!';
+          setTimeout(() => {
+            btn.textContent = old;
+          }, 2200);
+        }
+      });
+    }
   }
 }
 

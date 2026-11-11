@@ -565,6 +565,9 @@ class MuseumBuilder {
     // Dựng riêng Phòng 3: 15 Khung Ảnh Thật của 15 Bộ Trưởng Bộ Giáo Dục
     this.buildFifteenMinistersRoom();
 
+    // Dựng Cuốn Sách Vàng Lấp Lánh 3D: Lịch sử Ngày Nhà giáo Việt Nam 20/11 ở giữa Phòng Lịch Sử Giáo Dục
+    this.buildHistory2011GlowingBook3D();
+
     // Dựng các mũi tên vàng đồng chỉ hướng trên sàn nối giữa Đại Sảnh và 4 Phòng
     this.buildFloorNavigationArrows();
     this.buildDenseMiniStepArrows();
@@ -698,208 +701,776 @@ class MuseumBuilder {
     return tex;
   }
 
-  // ==================== HỆ THỐNG MŨI TÊN NHỎ MẢNH ĐIỀU HƯỚNG DÀY ĐẶC DƯỚI SÀN ====================
-  // Cho phép người dùng bấm vào các mũi tên nhỏ thanh mảnh để bước đi từng bước mượt mà (Street View Style)
-  // Tránh việc lăn chuột quá đà bị văng xuyên qua tường
+  // ==================== CUỐN SÁCH VÀNG LẤP LÁNH 3D: LỊCH SỬ NGÀY NHÀ GIÁO VIỆT NAM 20/11 ====================
+  // Đặt tại trung tâm Phòng Lịch Sử Phát Triển Giáo Dục Việt Nam (x = -19.5, z = 0)
+  // Khi bấm vào sẽ mở Sách Lật Tương Tác 3D (Flipbook) Lịch sử ra đời Ngày Nhà giáo Việt Nam 20/11
+  buildHistory2011GlowingBook3D() {
+    const cx = -19.5;
+    const cz = 0.0;
+    const bookGroup = new THREE.Group();
+    bookGroup.name = 'history-2011-glowing-book-group';
+    bookGroup.position.set(cx, 0, cz);
+    // Xoay hướng Đông (Math.PI / 2) để đón khách bước từ Đại Sảnh vào Phòng Lịch Sử
+    bookGroup.rotation.y = Math.PI / 2;
+
+    // 1. Thảm hào quang hoa sen vàng dưới sàn (Floor Lotus Aura)
+    const auraCanvas = document.createElement('canvas');
+    auraCanvas.width = 512;
+    auraCanvas.height = 512;
+    const aCtx = auraCanvas.getContext('2d');
+    const rad = aCtx.createRadialGradient(256, 256, 20, 256, 256, 250);
+    rad.addColorStop(0, 'rgba(255, 215, 0, 0.55)');
+    rad.addColorStop(0.55, 'rgba(212, 165, 55, 0.25)');
+    rad.addColorStop(0.85, 'rgba(14, 34, 64, 0.45)');
+    rad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    aCtx.fillStyle = rad;
+    aCtx.beginPath();
+    aCtx.arc(256, 256, 248, 0, Math.PI * 2);
+    aCtx.fill();
+
+    aCtx.strokeStyle = '#ffd700';
+    aCtx.lineWidth = 6;
+    aCtx.beginPath();
+    aCtx.arc(256, 256, 226, 0, Math.PI * 2);
+    aCtx.stroke();
+
+    aCtx.strokeStyle = 'rgba(255, 235, 160, 0.65)';
+    aCtx.lineWidth = 2;
+    aCtx.beginPath();
+    aCtx.arc(256, 256, 204, 0, Math.PI * 2);
+    aCtx.stroke();
+
+    const auraTex = new THREE.CanvasTexture(auraCanvas);
+    const auraDisc = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.1, 3.1),
+      new THREE.MeshBasicMaterial({ map: auraTex, transparent: true, depthWrite: false })
+    );
+    auraDisc.rotation.x = -Math.PI / 2;
+    auraDisc.position.y = 0.015;
+    bookGroup.add(auraDisc);
+
+    // 2. Bệ Đỡ Cẩm Thạch & Đồng Hoàng Gia Bát Giác (Octagonal Royal Pedestal)
+    const step1 = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.18, 1.28, 0.14, 8),
+      this.materials.ivoryWall
+    );
+    step1.position.y = 0.07;
+    bookGroup.add(step1);
+
+    const step1Gold = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.20, 1.22, 0.04, 8),
+      this.materials.brightGold
+    );
+    step1Gold.position.y = 0.145;
+    bookGroup.add(step1Gold);
+
+    const step2 = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.92, 1.02, 0.16, 8),
+      this.materials.navyPanel
+    );
+    step2.position.y = 0.22;
+    bookGroup.add(step2);
+
+    // Thân trụ đỡ chính khắc chỉ vàng
+    const pillar = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.52, 0.66, 0.82, 8),
+      this.materials.darkWood
+    );
+    pillar.position.y = 0.71;
+    bookGroup.add(pillar);
+
+    [0.36, 0.72, 1.08].forEach((ry) => {
+      const ring = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.62, 0.62, 0.035, 8),
+        this.materials.brightGold
+      );
+      ring.position.y = ry;
+      bookGroup.add(ring);
+    });
+
+    // Mặt bàn đỡ sách mạ vàng hoàng gia
+    const topCap = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.86, 0.68, 0.14, 8),
+      this.materials.bronzeGold
+    );
+    topCap.position.y = 1.18;
+    bookGroup.add(topCap);
+
+    // Vòng hào quang phát sáng trên mặt bệ
+    const topGlowRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.52, 0.72, 32),
+      new THREE.MeshBasicMaterial({ color: 0xffea85, transparent: true, opacity: 0.75, side: THREE.DoubleSide })
+    );
+    topGlowRing.rotation.x = -Math.PI / 2;
+    topGlowRing.position.y = 1.26;
+    bookGroup.add(topGlowRing);
+
+    // 3. Nhóm Cuốn Sách Vàng Mở Rộng Lơ Lửng & Tỏa Sáng (Floating Open Book)
+    const floatingBook = new THREE.Group();
+    floatingBook.position.set(0, 1.54, 0.05);
+    // Nghiêng về phía người xem để dễ đọc và thấy rõ 2 trang sách mở
+    floatingBook.rotation.x = 0.46;
+
+    const coverMat = new THREE.MeshStandardMaterial({
+      color: 0x6b101b, // Đỏ nhung hoàng gia
+      roughness: 0.32,
+      metalness: 0.35,
+      emissive: 0x2a0508,
+      emissiveIntensity: 0.35
+    });
+    const goldFoilMat = new THREE.MeshStandardMaterial({
+      color: 0xffd700,
+      roughness: 0.2,
+      metalness: 0.9,
+      emissive: 0xffb700,
+      emissiveIntensity: 0.45
+    });
+
+    // Gáy sách vàng kim ở giữa
+    const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.86, 16), goldFoilMat);
+    spine.rotation.x = Math.PI / 2;
+    floatingBook.add(spine);
+
+    // Bìa cứng bên Trái & bên Phải (Mở góc chữ V nhẹ trang trọng)
+    const leftWing = new THREE.Group();
+    leftWing.rotation.z = 0.14;
+    const rightWing = new THREE.Group();
+    rightWing.rotation.z = -0.14;
+
+    const coverW = 0.64;
+    const coverD = 0.84;
+
+    const leftCover = new THREE.Mesh(new THREE.BoxGeometry(coverW, 0.032, coverD), coverMat);
+    leftCover.position.set(-coverW / 2 - 0.02, -0.015, 0);
+    leftWing.add(leftCover);
+
+    const leftGoldRim = new THREE.Mesh(new THREE.BoxGeometry(coverW + 0.02, 0.022, coverD + 0.02), goldFoilMat);
+    leftGoldRim.position.set(-coverW / 2 - 0.02, -0.018, 0);
+    leftWing.add(leftGoldRim);
+
+    const rightCover = new THREE.Mesh(new THREE.BoxGeometry(coverW, 0.032, coverD), coverMat);
+    rightCover.position.set(coverW / 2 + 0.02, -0.015, 0);
+    rightWing.add(rightCover);
+
+    const rightGoldRim = new THREE.Mesh(new THREE.BoxGeometry(coverW + 0.02, 0.022, coverD + 0.02), goldFoilMat);
+    rightGoldRim.position.set(coverW / 2 + 0.02, -0.018, 0);
+    rightWing.add(rightGoldRim);
+
+    // Khối trang giấy dày ánh vàng kem
+    const pageBlockMat = new THREE.MeshStandardMaterial({
+      color: 0xfff8e7,
+      roughness: 0.4,
+      metalness: 0.1,
+      emissive: 0xffdfa0,
+      emissiveIntensity: 0.22
+    });
+
+    const leftPagesBlock = new THREE.Mesh(new THREE.BoxGeometry(coverW - 0.04, 0.042, coverD - 0.05), pageBlockMat);
+    leftPagesBlock.position.set(-coverW / 2 - 0.01, 0.018, 0);
+    leftWing.add(leftPagesBlock);
+
+    const rightPagesBlock = new THREE.Mesh(new THREE.BoxGeometry(coverW - 0.04, 0.042, coverD - 0.05), pageBlockMat);
+    rightPagesBlock.position.set(coverW / 2 + 0.01, 0.018, 0);
+    rightWing.add(rightPagesBlock);
+
+    // Vẽ nội dung sắc nét lên Trang Trái & Trang Phải của Cuốn Sách 3D
+    const createBookPageTexture = (isLeft) => {
+      const c = document.createElement('canvas');
+      c.width = 768;
+      c.height = 1024;
+      const ctx = c.getContext('2d');
+
+      const g = ctx.createLinearGradient(0, 0, 768, 1024);
+      g.addColorStop(0, '#fffdf5');
+      g.addColorStop(0.5, '#fdf3d7');
+      g.addColorStop(1, '#f5e2b3');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 768, 1024);
+
+      // Bóng gáy sách
+      const spineGrad = isLeft
+        ? ctx.createLinearGradient(680, 0, 768, 0)
+        : ctx.createLinearGradient(0, 0, 88, 0);
+      if (isLeft) {
+        spineGrad.addColorStop(0, 'rgba(120, 80, 20, 0)');
+        spineGrad.addColorStop(1, 'rgba(90, 55, 10, 0.32)');
+        ctx.fillStyle = spineGrad;
+        ctx.fillRect(680, 0, 88, 1024);
+      } else {
+        spineGrad.addColorStop(0, 'rgba(90, 55, 10, 0.32)');
+        spineGrad.addColorStop(1, 'rgba(120, 80, 20, 0)');
+        ctx.fillStyle = spineGrad;
+        ctx.fillRect(0, 0, 88, 1024);
+      }
+
+      // Khung viền hoàng gia trên trang sách
+      ctx.strokeStyle = '#b47b1c';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(38, 38, 692, 948);
+      ctx.strokeStyle = '#d4a338';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(52, 52, 664, 920);
+
+      ctx.textAlign = 'center';
+      if (isLeft) {
+        ctx.fillStyle = '#8b1e24';
+        ctx.font = 'bold 28px "Be Vietnam Pro", sans-serif';
+        ctx.fillText('✦ TƯ LIỆU LỊCH SỬ TRỌNG ĐIỂM ✦', 384, 115);
+
+        ctx.fillStyle = '#102a45';
+        ctx.font = 'bold 46px "Cormorant Garamond", Georgia, serif';
+        ctx.fillText('LỊCH SỬ RA ĐỜI', 384, 185);
+        ctx.fillText('NGÀY NHÀ GIÁO VN', 384, 240);
+
+        ctx.fillStyle = '#b8292f';
+        ctx.font = 'bold 86px "Cormorant Garamond", Georgia, serif';
+        ctx.fillText('20 • 11', 384, 345);
+
+        ctx.strokeStyle = '#b47b1c';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(140, 385);
+        ctx.lineTo(628, 385);
+        ctx.stroke();
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 25px "Be Vietnam Pro", sans-serif';
+        const leftMilestones = [
+          ['• Tháng 7.1946 (Paris):', 'Thành lập tổ chức quốc tế FISE bảo vệ quyền lợi nhà giáo.'],
+          ['• Năm 1949 (Ba Lan):', 'Xây dựng Hiến chương Các nhà giáo gồm 15 chương.'],
+          ['• Tháng 7.1953:', 'Công đoàn Giáo dục Việt Nam gia nhập tổ chức FISE.'],
+          ['• 20.11.1958:', 'Ngày Quốc tế Hiến chương các nhà giáo (57 nước tham dự).']
+        ];
+        let y = 445;
+        leftMilestones.forEach(([mTitle, mDesc]) => {
+          ctx.fillStyle = '#8b1e24';
+          ctx.font = 'bold 25px "Be Vietnam Pro", sans-serif';
+          ctx.fillText(mTitle, 82, y);
+          y += 34;
+          ctx.fillStyle = '#1e293b';
+          ctx.font = '500 22px "Be Vietnam Pro", sans-serif';
+          ctx.fillText(mDesc.slice(0, 36), 82, y);
+          if (mDesc.length > 36) {
+            y += 28;
+            ctx.fillText(mDesc.slice(36), 82, y);
+          }
+          y += 42;
+        });
+      } else {
+        ctx.fillStyle = '#8b1e24';
+        ctx.font = 'bold 28px "Be Vietnam Pro", sans-serif';
+        ctx.fillText('✦ QUYẾT ĐỊNH LỊCH SỬ 167-HĐBT ✦', 384, 115);
+
+        ctx.fillStyle = '#102a45';
+        ctx.font = 'bold 42px "Cormorant Garamond", Georgia, serif';
+        ctx.fillText('NGÀY 28 • 09 • 1982', 384, 180);
+
+        ctx.strokeStyle = '#b47b1c';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(140, 215);
+        ctx.lineTo(628, 215);
+        ctx.stroke();
+
+        ctx.fillStyle = '#1e293b';
+        ctx.font = '600 24px "Be Vietnam Pro", sans-serif';
+        const lines = [
+          'Thay mặt Hội đồng Bộ trưởng,',
+          'Phó Chủ tịch Võ Nguyên Giáp',
+          'đã ký Quyết định số 167-HĐBT',
+          'chính thức lấy ngày 20.11 hàng năm',
+          'là NGÀY NHÀ GIÁO VIỆT NAM.',
+          '',
+          '“Tôn vinh những người thầy',
+          'đã cống hiến cho sự nghiệp',
+          'Trồng Người cao quý.”'
+        ];
+        let y = 275;
+        lines.forEach((ln, idx) => {
+          ctx.fillStyle = idx >= 6 ? '#8b1e24' : '#102a45';
+          ctx.font = idx === 4 ? 'bold 26px "Be Vietnam Pro", sans-serif' : (idx >= 6 ? 'italic bold 25px "Cormorant Garamond", serif' : '600 23px "Be Vietnam Pro", sans-serif');
+          ctx.fillText(ln, 384, y);
+          y += 40;
+        });
+
+        // Nút kêu gọi bấm lật sách trên trang phải
+        ctx.fillStyle = '#8b1e24';
+        ctx.beginPath();
+        ctx.roundRect(94, 760, 580, 110, 55);
+        ctx.fill();
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#fff8dc';
+        ctx.font = 'bold 28px "Be Vietnam Pro", sans-serif';
+        ctx.fillText('📖 BẤM VÀO SÁCH ĐỂ LẬT ĐỌC', 384, 808);
+        ctx.fillStyle = '#ffd700';
+        ctx.font = 'bold 21px "Be Vietnam Pro", sans-serif';
+        ctx.fillText('Tìm hiểu trọn vẹn Lịch sử Ngày 20.11', 384, 844);
+      }
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.anisotropy = 8;
+      return tex;
+    };
+
+    const leftPageSurface = new THREE.Mesh(
+      new THREE.PlaneGeometry(coverW - 0.05, coverD - 0.06),
+      new THREE.MeshBasicMaterial({ map: createBookPageTexture(true) })
+    );
+    leftPageSurface.rotation.x = -Math.PI / 2;
+    leftPageSurface.position.set(-coverW / 2 - 0.01, 0.041, 0);
+    leftWing.add(leftPageSurface);
+
+    const rightPageSurface = new THREE.Mesh(
+      new THREE.PlaneGeometry(coverW - 0.05, coverD - 0.06),
+      new THREE.MeshBasicMaterial({ map: createBookPageTexture(false) })
+    );
+    rightPageSurface.rotation.x = -Math.PI / 2;
+    rightPageSurface.position.set(coverW / 2 + 0.01, 0.041, 0);
+    rightWing.add(rightPageSurface);
+
+    // Dải ruy-băng lụa đỏ tua rua vàng đánh dấu sách
+    const ribbon = new THREE.Mesh(
+      new THREE.BoxGeometry(0.045, 0.008, 0.55),
+      new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.4, emissive: 0x450a0a })
+    );
+    ribbon.position.set(0, 0.044, 0.26);
+    floatingBook.add(ribbon);
+
+    floatingBook.add(leftWing);
+    floatingBook.add(rightWing);
+    bookGroup.add(floatingBook);
+
+    // 4. Huy hiệu Hào Quang "20/11" Lơ Lửng Phía Trên Sách (Floating Golden Crest)
+    const crestCanvas = document.createElement('canvas');
+    crestCanvas.width = 512;
+    crestCanvas.height = 256;
+    const cCtx = crestCanvas.getContext('2d');
+    const cGrad = cCtx.createRadialGradient(256, 128, 10, 256, 128, 220);
+    cGrad.addColorStop(0, 'rgba(255, 230, 120, 0.95)');
+    cGrad.addColorStop(0.55, 'rgba(180, 110, 15, 0.85)');
+    cGrad.addColorStop(1, 'rgba(180, 110, 15, 0)');
+    cCtx.fillStyle = cGrad;
+    cCtx.beginPath();
+    cCtx.roundRect(24, 24, 464, 208, 104);
+    cCtx.fill();
+
+    cCtx.strokeStyle = '#fff3b0';
+    cCtx.lineWidth = 6;
+    cCtx.stroke();
+
+    cCtx.fillStyle = '#4a080e';
+    cCtx.font = 'bold 24px "Be Vietnam Pro", sans-serif';
+    cCtx.textAlign = 'center';
+    cCtx.fillText('✦ SÁCH VÀNG LỊCH SỬ ✦', 256, 78);
+
+    cCtx.fillStyle = '#ffffff';
+    cCtx.shadowColor = '#ffd700';
+    cCtx.shadowBlur = 14;
+    cCtx.font = 'bold 64px "Cormorant Garamond", Georgia, serif';
+    cCtx.fillText('20 • 11', 256, 148);
+    cCtx.shadowBlur = 0;
+
+    cCtx.fillStyle = '#fff8dc';
+    cCtx.font = 'bold 22px "Be Vietnam Pro", sans-serif';
+    cCtx.fillText('BẤM ĐỂ MỞ SÁCH LẬT TÌM HIỂU', 256, 198);
+
+    const crestTex = new THREE.CanvasTexture(crestCanvas);
+    const crestPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.15, 0.56),
+      new THREE.MeshBasicMaterial({ map: crestTex, transparent: true, side: THREE.DoubleSide, depthWrite: false })
+    );
+    crestPlane.position.set(0, 2.24, 0);
+    bookGroup.add(crestPlane);
+
+    // 5. Bảng đồng thuyết minh phía trước bệ sách (Front Lectern Plaque)
+    const plaqueGroup = new THREE.Group();
+    plaqueGroup.position.set(0, 0.88, 1.32);
+
+    const plaqueStand = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.035, 0.045, 0.86, 12),
+      this.materials.brightGold
+    );
+    plaqueStand.position.y = -0.42;
+    plaqueGroup.add(plaqueStand);
+
+    const plaqueBase = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.22, 0.26, 0.05, 16),
+      this.materials.bronzeGold
+    );
+    plaqueBase.position.y = -0.84;
+    plaqueGroup.add(plaqueBase);
+
+    const pCanvas = document.createElement('canvas');
+    pCanvas.width = 1024;
+    pCanvas.height = 512;
+    const pCtx = pCanvas.getContext('2d');
+    pCtx.fillStyle = '#09192f';
+    pCtx.fillRect(0, 0, 1024, 512);
+    pCtx.strokeStyle = '#ffd700';
+    pCtx.lineWidth = 14;
+    pCtx.strokeRect(20, 20, 984, 472);
+    pCtx.strokeStyle = 'rgba(255, 226, 122, 0.55)';
+    pCtx.lineWidth = 4;
+    pCtx.strokeRect(40, 40, 944, 432);
+
+    pCtx.textAlign = 'center';
+    pCtx.fillStyle = '#ffd700';
+    pCtx.font = 'bold 34px "Be Vietnam Pro", sans-serif';
+    pCtx.fillText('✦ ẤN PHẨM ĐẶC BIỆT • PHÒNG LỊCH SỬ GIÁO DỤC ✦', 512, 105);
+
+    pCtx.fillStyle = '#ffffff';
+    pCtx.font = 'bold 54px "Cormorant Garamond", Georgia, serif';
+    pCtx.fillText('LỊCH SỬ NGÀY NHÀ GIÁO VIỆT NAM 20.11', 512, 185);
+
+    pCtx.fillStyle = '#e2e8f0';
+    pCtx.font = '500 28px "Be Vietnam Pro", sans-serif';
+    pCtx.fillText('Từ Hiến chương Các nhà giáo (FISE 1946 – 1958) đến Quyết định 167-HĐBT (28/9/1982)', 512, 255);
+
+    pCtx.fillStyle = '#8b1e24';
+    pCtx.beginPath();
+    pCtx.roundRect(152, 315, 720, 110, 55);
+    pCtx.fill();
+    pCtx.strokeStyle = '#ffd700';
+    pCtx.lineWidth = 5;
+    pCtx.stroke();
+
+    pCtx.fillStyle = '#fff8dc';
+    pCtx.font = 'bold 34px "Be Vietnam Pro", sans-serif';
+    pCtx.fillText('📖 BẤM ĐỂ MỞ SÁCH LẬT TÌM HIỂU NGAY', 512, 382);
+
+    const pTex = new THREE.CanvasTexture(pCanvas);
+    const plaqueBoard = new THREE.Mesh(
+      new THREE.BoxGeometry(1.06, 0.54, 0.04),
+      this.materials.bronzeGold
+    );
+    plaqueBoard.rotation.x = -0.58;
+    const plaqueFace = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.02, 0.50),
+      new THREE.MeshBasicMaterial({ map: pTex })
+    );
+    plaqueFace.position.z = 0.022;
+    plaqueBoard.add(plaqueFace);
+    plaqueGroup.add(plaqueBoard);
+    bookGroup.add(plaqueGroup);
+
+    // 6. Ánh sáng vàng ấm & 180 Hạt Sao Pha Lê Lấp Lánh Bay Quanh Cuốn Sách (Sparkling Particles)
+    const bookLight = new THREE.PointLight(0xffd700, 1.85, 9.5);
+    bookLight.position.set(0, 2.15, 0.3);
+    bookGroup.add(bookLight);
+
+    const particleCount = 180;
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const phases = new Float32Array(particleCount);
+
+    for (let i = 0; i < particleCount; i++) {
+      const radius = 0.45 + Math.random() * 1.35;
+      const angle = Math.random() * Math.PI * 2;
+      const height = 0.85 + Math.random() * 2.1;
+      positions[i * 3] = Math.cos(angle) * radius;
+      positions[i * 3 + 1] = height;
+      positions[i * 3 + 2] = Math.sin(angle) * radius;
+
+      // Sắc vàng hoàng kim & trắng kim cương lấp lánh
+      const isDiamond = i % 3 === 0;
+      colors[i * 3] = 1.0;
+      colors[i * 3 + 1] = isDiamond ? 0.98 : 0.84;
+      colors[i * 3 + 2] = isDiamond ? 0.92 : 0.32;
+      phases[i] = Math.random() * Math.PI * 2;
+    }
+
+    const sparkleGeom = new THREE.BufferGeometry();
+    sparkleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    sparkleGeom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const spCanvas = document.createElement('canvas');
+    spCanvas.width = 64;
+    spCanvas.height = 64;
+    const spCtx = spCanvas.getContext('2d');
+    const spGrad = spCtx.createRadialGradient(32, 32, 2, 32, 32, 30);
+    spGrad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    spGrad.addColorStop(0.35, 'rgba(255, 225, 110, 0.9)');
+    spGrad.addColorStop(1, 'rgba(255, 190, 0, 0)');
+    spCtx.fillStyle = spGrad;
+    spCtx.beginPath();
+    spCtx.arc(32, 32, 30, 0, Math.PI * 2);
+    spCtx.fill();
+
+    const sparkleMat = new THREE.PointsMaterial({
+      size: 0.14,
+      map: new THREE.CanvasTexture(spCanvas),
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+
+    const sparklePoints = new THREE.Points(sparkleGeom, sparkleMat);
+    bookGroup.add(sparklePoints);
+
+    // Hiệu ứng chuyển động lơ lửng & hạt lấp lánh bay lên
+    this.animatedObjects.push({
+      mesh: floatingBook,
+      customUpdate: (time) => {
+        floatingBook.position.y = 1.54 + Math.sin(time * 2.2) * 0.055;
+        floatingBook.rotation.y = Math.sin(time * 0.9) * 0.12;
+        crestPlane.position.y = 2.24 + Math.sin(time * 2.2 + 0.6) * 0.05;
+        topGlowRing.scale.setScalar(1.0 + Math.sin(time * 3.0) * 0.06);
+
+        const posAttr = sparkleGeom.getAttribute('position');
+        for (let i = 0; i < particleCount; i++) {
+          let py = posAttr.getY(i) + 0.0045;
+          if (py > 3.0) py = 0.85;
+          const px = posAttr.getX(i) + Math.sin(time * 1.8 + phases[i]) * 0.0015;
+          const pz = posAttr.getZ(i) + Math.cos(time * 1.8 + phases[i]) * 0.0015;
+          posAttr.setXYZ(i, px, py, pz);
+        }
+        posAttr.needsUpdate = true;
+      }
+    });
+
+    // Gắn nhãn tương tác isBook2011 cho toàn bộ các phần của Cuốn Sách Vàng & Bệ Đỡ
+    const bookMeta = {
+      isBook2011: true,
+      title: 'Sách Vàng Lịch Sử Ngày Nhà Giáo Việt Nam 20/11',
+      subtitle: 'Bấm để mở Sách Lật tìm hiểu sự ra đời & ý nghĩa Ngày Nhà giáo Việt Nam 20/11'
+    };
+    bookGroup.userData = bookMeta;
+    bookGroup.traverse((child) => {
+      if (child.isMesh) {
+        child.userData = { ...bookMeta };
+        this.interactables.push(child);
+      }
+    });
+
+    this.scene.add(bookGroup);
+  }
+
+  // ==================== HỆ THỐNG MŨI TÊN NHỎ GỌN PHÂN BIỆT "ĐI VÀO" & "ĐI RA" DƯỚI SÀN ====================
+  // Thiết kế thanh mảnh, nhỏ gọn, phân biệt rõ:
+  // - Mũi tên ĐI VÀO (dir: 'in'): Viền Vàng Ngọc Lục Bảo, nhãn "VÀO ❯❯" hướng tiến vào phòng
+  // - Mũi tên ĐI RA (dir: 'out'): Viền Vàng Hổ Phách, nhãn "RA ❯❯" hướng quay ra Đại Sảnh
+  // - Điểm ngắm sát tường (dir: 'view'): Nhỏ gọn "✦ XEM" hướng vào tranh/hiện vật
   buildDenseMiniStepArrows() {
     const miniArrowsGroup = new THREE.Group();
     miniArrowsGroup.name = 'dense-mini-step-arrows-group';
 
-    // Canvas tạo texture mũi tên chevron vàng mạ thanh mảnh
-    const arrowCanvas = document.createElement('canvas');
-    arrowCanvas.width = 512;
-    arrowCanvas.height = 256;
-    const ctx = arrowCanvas.getContext('2d');
+    const makeCompactArrowMat = (mode) => {
+      const c = document.createElement('canvas');
+      c.width = 512;
+      c.height = 240;
+      const ctx = c.getContext('2d');
 
-    // Nền viên nang mờ trong suốt
-    const grad = ctx.createLinearGradient(0, 0, 512, 0);
-    grad.addColorStop(0, 'rgba(12, 26, 46, 0.85)');
-    grad.addColorStop(0.5, 'rgba(24, 48, 80, 0.92)');
-    grad.addColorStop(1, 'rgba(12, 26, 46, 0.85)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.roundRect(16, 16, 480, 224, 112);
-    ctx.fill();
+      const isOut = mode === 'out';
+      const isView = mode === 'view';
 
-    // Viền vàng kim tinh xảo
-    ctx.strokeStyle = '#ffd700';
-    ctx.lineWidth = 6;
-    ctx.stroke();
+      // Nền viên nang thanh mảnh
+      const grad = ctx.createLinearGradient(0, 0, 512, 0);
+      if (isOut) {
+        grad.addColorStop(0, 'rgba(56, 18, 24, 0.90)');
+        grad.addColorStop(0.5, 'rgba(88, 28, 36, 0.94)');
+        grad.addColorStop(1, 'rgba(56, 18, 24, 0.90)');
+      } else if (isView) {
+        grad.addColorStop(0, 'rgba(12, 28, 52, 0.86)');
+        grad.addColorStop(0.5, 'rgba(20, 44, 78, 0.92)');
+        grad.addColorStop(1, 'rgba(12, 28, 52, 0.86)');
+      } else {
+        grad.addColorStop(0, 'rgba(8, 38, 44, 0.90)');
+        grad.addColorStop(0.5, 'rgba(14, 62, 68, 0.94)');
+        grad.addColorStop(1, 'rgba(8, 38, 44, 0.90)');
+      }
 
-    // 2 Mũi tên Chevron mạ vàng thanh mảnh
-    ctx.fillStyle = '#ffd700';
-    const drawMiniChevron = (cx, cy, sz) => {
+      ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.moveTo(cx - sz * 0.7, cy - sz);
-      ctx.lineTo(cx + sz * 0.5, cy);
-      ctx.lineTo(cx - sz * 0.7, cy + sz);
-      ctx.lineTo(cx - sz * 0.2, cy);
-      ctx.closePath();
+      ctx.roundRect(16, 18, 480, 204, 102);
       ctx.fill();
+
+      // Viền mảnh sang trọng
+      ctx.strokeStyle = isOut ? '#fb923c' : (isView ? '#ffd700' : '#34d399');
+      ctx.lineWidth = 7;
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255, 235, 160, 0.55)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(28, 30, 456, 180, 90);
+      ctx.stroke();
+
+      // Nhãn phân biệt rõ ràng: VÀO / RA / XEM
+      ctx.fillStyle = isOut ? '#fed7aa' : (isView ? '#fde68a' : '#a7f3d0');
+      ctx.font = 'bold 54px "Be Vietnam Pro", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const labelText = isOut ? 'ĐI RA' : (isView ? '✦ XEM' : 'ĐI VÀO');
+      ctx.fillText(labelText, 195, 122);
+
+      // 2 Mũi tên Chevron sắc nét ở đầu phải (trỏ theo hướng tiến của mũi tên)
+      ctx.fillStyle = isOut ? '#fb923c' : '#ffd700';
+      const drawMiniChevron = (cx, cy, sz) => {
+        ctx.beginPath();
+        ctx.moveTo(cx - sz * 0.65, cy - sz * 0.85);
+        ctx.lineTo(cx + sz * 0.45, cy);
+        ctx.lineTo(cx - sz * 0.65, cy + sz * 0.85);
+        ctx.lineTo(cx - sz * 0.18, cy);
+        ctx.closePath();
+        ctx.fill();
+      };
+      drawMiniChevron(355, 120, 40);
+      drawMiniChevron(420, 120, 40);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.anisotropy = 8;
+      return new THREE.MeshBasicMaterial({
+        map: tex,
+        transparent: true,
+        opacity: 0.9,
+        depthWrite: false
+      });
     };
-    drawMiniChevron(180, 128, 48);
-    drawMiniChevron(330, 128, 48);
 
-    const miniArrowTex = new THREE.CanvasTexture(arrowCanvas);
-    miniArrowTex.anisotropy = 8;
+    const matIn = makeCompactArrowMat('in');
+    const matOut = makeCompactArrowMat('out');
+    const matView = makeCompactArrowMat('view');
 
-    const miniArrowMat = new THREE.MeshBasicMaterial({
-      map: miniArrowTex,
-      transparent: true,
-      opacity: 0.88,
-      depthWrite: false
-    });
-
-    const haloMat = new THREE.MeshBasicMaterial({
-      color: 0xffd700,
-      transparent: true,
-      opacity: 0.35,
-      side: THREE.DoubleSide
-    });
-
-    // Mạng lưới điểm bước chân điều hướng dày đặc dọc hành lang, vòng quanh cây/hiện vật và áp sát tường các phòng
+    // Mạng lưới mũi tên ĐI VÀO (dir: 'in'), ĐI RA (dir: 'out') và NGẮM TRANH (dir: 'view')
     const waypoints = [
       // =====================================================================
-      // 1. HÀNH LANG NAM (LỜI BÁC DẠY & BỘ ĐỒ DÙNG): Trục giữa + Vòng qua Tủ Thư Bác Hồ + Sát 2 bên tường
+      // 1. HÀNH LANG NAM (LỜI BÁC DẠY & BỘ ĐỒ DÙNG): Làn ĐI VÀO & Làn ĐI RA tách biệt rõ ràng
       // =====================================================================
-      // Trục giữa (đoạn không vướng tủ kính Bức thư Bác Hồ tại z = 25)
-      { x: 0, z: 12.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 18.0 } },
-      { x: 0, z: 15.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 21.0 } },
-      { x: 0, z: 18.0, rotY: 0, lookAt: { x: 0, y: 1.6, z: 22.0 } },
-      { x: 0, z: 30.5, rotY: 0, lookAt: { x: 0, y: 1.6, z: 36.0 } },
-      { x: 0, z: 33.5, rotY: 0, lookAt: { x: 0, y: 1.6, z: 38.0 } },
-      { x: 0, z: 19.0, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: 10.0 } },
-      { x: 0, z: 11.0, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: 0.0 } },
+      // Làn ĐI VÀO hành lang (bên phải theo chiều đi vào, x = -0.48)
+      { x: -0.48, z: 12.5, rotY: 0, dir: 'in', lookAt: { x: 0, y: 1.6, z: 19.0 } },
+      { x: -0.48, z: 16.5, rotY: 0, dir: 'in', lookAt: { x: 0, y: 1.6, z: 22.0 } },
+      { x: -0.48, z: 30.5, rotY: 0, dir: 'in', lookAt: { x: 0, y: 1.6, z: 36.5 } },
+      { x: -0.48, z: 34.0, rotY: 0, dir: 'in', lookAt: { x: 0, y: 1.6, z: 38.5 } },
 
-      // Nhánh vòng qua bên TRÁI (Tây) & bên PHẢI (Đông) Tủ kính Bức thư Bác Hồ (z = 20.5 -> 29.5)
-      { x: -2.8, z: 20.5, rotY: Math.PI, lookAt: { x: -2.8, y: 1.6, z: 13.0 } },
-      { x: -3.2, z: 23.0, rotY: Math.PI, lookAt: { x: -2.8, y: 1.6, z: 16.0 } },
-      { x: -3.2, z: 25.0, rotY: Math.PI / 2, lookAt: { x: 0.0, y: 1.4, z: 25.0 } }, // Đứng bên hông ngắm Bức thư Bác Hồ
-      { x: -3.2, z: 27.0, rotY: Math.PI, lookAt: { x: -2.8, y: 1.6, z: 20.0 } },
-      { x: -2.8, z: 29.5, rotY: Math.PI, lookAt: { x: -2.8, y: 1.6, z: 22.0 } },
+      // Làn ĐI RA về Đại Sảnh (bên phải theo chiều đi ra, x = +0.48)
+      { x: 0.48, z: 33.5, rotY: Math.PI, dir: 'out', lookAt: { x: 0, y: 1.6, z: 26.0 } },
+      { x: 0.48, z: 29.8, rotY: Math.PI, dir: 'out', lookAt: { x: 0, y: 1.6, z: 22.0 } },
+      { x: 0.48, z: 18.5, rotY: Math.PI, dir: 'out', lookAt: { x: 0, y: 1.6, z: 10.0 } },
+      { x: 0.48, z: 13.5, rotY: Math.PI, dir: 'out', lookAt: { x: 0, y: 1.6, z: 0.0 } },
 
-      { x: 2.8, z: 20.5, rotY: Math.PI, lookAt: { x: 2.8, y: 1.6, z: 13.0 } },
-      { x: 3.2, z: 23.0, rotY: Math.PI, lookAt: { x: 2.8, y: 1.6, z: 16.0 } },
-      { x: 3.2, z: 25.0, rotY: -Math.PI / 2, lookAt: { x: 0.0, y: 1.4, z: 25.0 } }, // Đứng bên hông phải ngắm Bức thư Bác Hồ
-      { x: 3.2, z: 27.0, rotY: Math.PI, lookAt: { x: 2.8, y: 1.6, z: 20.0 } },
-      { x: 2.8, z: 29.5, rotY: Math.PI, lookAt: { x: 2.8, y: 1.6, z: 22.0 } },
+      // Nhánh vòng qua 2 bên Tủ kính Bức thư Bác Hồ (z = 20.5 -> 29.0) có cả chiều VÀO và RA
+      { x: -2.9, z: 21.0, rotY: 0, dir: 'in', lookAt: { x: -2.9, y: 1.6, z: 27.5 } },
+      { x: -3.2, z: 25.0, rotY: Math.PI / 2, dir: 'view', lookAt: { x: 0.0, y: 1.4, z: 25.0 } },
+      { x: -2.9, z: 28.5, rotY: Math.PI, dir: 'out', lookAt: { x: -2.9, y: 1.6, z: 19.0 } },
 
-      // Dải Hotspot sát Tường Trái (Tường Tây hành lang: Bảng Lời Bác dạy & Tủ hiện vật, x = -6.8)
-      { x: -6.8, z: 14.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 14.0 } },
-      { x: -6.8, z: 18.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 18.0 } },
-      { x: -6.8, z: 22.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 22.0 } },
-      { x: -6.8, z: 26.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 26.0 } },
-      { x: -6.8, z: 30.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 30.0 } },
-      { x: -6.8, z: 34.0, rotY: -Math.PI / 2, lookAt: { x: -11.2, y: 2.4, z: 34.0 } },
+      { x: 2.9, z: 21.0, rotY: 0, dir: 'in', lookAt: { x: 2.9, y: 1.6, z: 27.5 } },
+      { x: 3.2, z: 25.0, rotY: -Math.PI / 2, dir: 'view', lookAt: { x: 0.0, y: 1.4, z: 25.0 } },
+      { x: 2.9, z: 28.5, rotY: Math.PI, dir: 'out', lookAt: { x: 2.9, y: 1.6, z: 19.0 } },
 
-      // Dải Hotspot sát Tường Phải (Tường Đông hành lang & Bức Tường Ký Ức, x = +6.8)
-      { x: 6.8, z: 14.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 14.0 } },
-      { x: 6.8, z: 18.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 18.0 } },
-      { x: 6.8, z: 22.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 22.0 } },
-      { x: 6.8, z: 26.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 26.0 } },
-      { x: 6.8, z: 30.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 30.0 } },
-      { x: 6.8, z: 34.0, rotY: Math.PI / 2, lookAt: { x: 11.2, y: 2.4, z: 34.0 } },
+      // Dải điểm XEM sát Tường Trái & Tường Phải hành lang
+      { x: -6.8, z: 15.0, rotY: -Math.PI / 2, dir: 'view', lookAt: { x: -11.2, y: 2.4, z: 15.0 } },
+      { x: -6.8, z: 21.0, rotY: -Math.PI / 2, dir: 'view', lookAt: { x: -11.2, y: 2.4, z: 21.0 } },
+      { x: -6.8, z: 27.0, rotY: -Math.PI / 2, dir: 'view', lookAt: { x: -11.2, y: 2.4, z: 27.0 } },
+      { x: -6.8, z: 33.0, rotY: -Math.PI / 2, dir: 'view', lookAt: { x: -11.2, y: 2.4, z: 33.0 } },
+
+      { x: 6.8, z: 15.0, rotY: Math.PI / 2, dir: 'view', lookAt: { x: 11.2, y: 2.4, z: 15.0 } },
+      { x: 6.8, z: 21.0, rotY: Math.PI / 2, dir: 'view', lookAt: { x: 11.2, y: 2.4, z: 21.0 } },
+      { x: 6.8, z: 27.0, rotY: Math.PI / 2, dir: 'view', lookAt: { x: 11.2, y: 2.4, z: 27.0 } },
+      { x: 6.8, z: 33.0, rotY: Math.PI / 2, dir: 'view', lookAt: { x: 11.2, y: 2.4, z: 33.0 } },
 
       // =====================================================================
-      // 2. VÒNG QUANH CỘI CÂY TRI THỨC TẠI ĐẠI SẢNH TRUNG TÂM (X = 0, Z = 0)
-      // Giúp đi vòng qua gốc cây & Đài Khuê Văn Các (z = -5.8) mượt mà từ mọi hướng
+      // 2. VÒNG QUANH CỘI CÂY TRI THỨC TẠI ĐẠI SẢNH (X = 0, Z = 0)
       // =====================================================================
-      { x: 0, z: 6.2, rotY: Math.PI, lookAt: { x: 0, y: 2.2, z: 0.0 } },
-      { x: -3.6, z: 5.0, rotY: Math.PI, lookAt: { x: -4.8, y: 1.8, z: -2.0 } },
-      { x: 3.6, z: 5.0, rotY: Math.PI, lookAt: { x: 4.8, y: 1.8, z: -2.0 } },
-      { x: -5.2, z: 2.2, rotY: Math.PI, lookAt: { x: -5.2, y: 1.8, z: -5.0 } },
-      { x: 5.2, z: 2.2, rotY: Math.PI, lookAt: { x: 5.2, y: 1.8, z: -5.0 } },
-      { x: -5.2, z: -1.8, rotY: Math.PI, lookAt: { x: -4.0, y: 1.8, z: -9.5 } },
-      { x: 5.2, z: -1.8, rotY: Math.PI, lookAt: { x: 4.0, y: 1.8, z: -9.5 } },
-      { x: -4.2, z: -5.8, rotY: Math.PI, lookAt: { x: 0, y: 1.8, z: -14.0 } }, // Lách bên trái Đài Khuê Văn Các
-      { x: 4.2, z: -5.8, rotY: Math.PI, lookAt: { x: 0, y: 1.8, z: -14.0 } },  // Lách bên phải Đài Khuê Văn Các
-      { x: -3.2, z: -8.5, rotY: Math.PI, lookAt: { x: -3.2, y: 1.8, z: -16.0 } },
-      { x: 3.2, z: -8.5, rotY: Math.PI, lookAt: { x: 3.2, y: 1.8, z: -16.0 } },
+      { x: -3.8, z: 4.8, rotY: Math.PI, dir: 'in', lookAt: { x: -4.8, y: 1.8, z: -2.0 } },
+      { x: 3.8, z: 4.8, rotY: Math.PI, dir: 'in', lookAt: { x: 4.8, y: 1.8, z: -2.0 } },
+      { x: -5.2, z: 1.5, rotY: Math.PI, dir: 'in', lookAt: { x: -5.2, y: 1.8, z: -5.5 } },
+      { x: 5.2, z: 1.5, rotY: Math.PI, dir: 'in', lookAt: { x: 5.2, y: 1.8, z: -5.5 } },
+      { x: -4.2, z: -5.8, rotY: Math.PI, dir: 'in', lookAt: { x: 0, y: 1.8, z: -14.0 } },
+      { x: 4.2, z: -5.8, rotY: Math.PI, dir: 'in', lookAt: { x: 0, y: 1.8, z: -14.0 } },
+      { x: -3.4, z: -5.8, rotY: 0, dir: 'out', lookAt: { x: 0, y: 2.0, z: 0.0 } },
+      { x: 3.4, z: -5.8, rotY: 0, dir: 'out', lookAt: { x: 0, y: 2.0, z: 0.0 } },
 
       // =====================================================================
       // 3. GIAN PHÒNG "NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT" (BẮC WING)
-      // Vòng quanh Cây Đa Tri Ân (0, -24.3) + Áp sát dải tường cong chữ S
       // =====================================================================
-      { x: 0, z: -8.5, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -16.0 } },
-      { x: 0, z: -12.5, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -20.0 } },
-      { x: 0, z: -16.0, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -24.3 } },
-      { x: 0, z: -19.2, rotY: Math.PI, lookAt: { x: 0, y: 1.6, z: -24.3 } },
+      // Làn ĐI VÀO phòng Nhà giáo (x = -0.48)
+      { x: -0.48, z: -8.8, rotY: Math.PI, dir: 'in', lookAt: { x: 0, y: 1.6, z: -16.0 } },
+      { x: -0.48, z: -13.0, rotY: Math.PI, dir: 'in', lookAt: { x: 0, y: 1.6, z: -20.5 } },
+      { x: -0.48, z: -17.5, rotY: Math.PI, dir: 'in', lookAt: { x: 0, y: 1.6, z: -24.3 } },
 
-      // 8 điểm vòng tròn bao quanh Cây Đa Tri Ân (bán kính R = 4.8m quanh tâm 0, -24.3)
-      { x: -3.6, z: -20.8, rotY: -Math.PI * 0.75, lookAt: { x: -9.5, y: 1.7, z: -20.8 } },
-      { x: -4.8, z: -24.3, rotY: -Math.PI / 2, lookAt: { x: -12.0, y: 1.7, z: -24.3 } },
-      { x: -3.6, z: -27.8, rotY: -Math.PI * 0.25, lookAt: { x: -9.5, y: 1.7, z: -31.5 } },
-      { x: 0, z: -29.2, rotY: Math.PI, lookAt: { x: 0, y: 1.7, z: -34.2 } },
-      { x: 3.6, z: -27.8, rotY: Math.PI * 0.25, lookAt: { x: 9.5, y: 1.7, z: -31.5 } },
-      { x: 4.8, z: -24.3, rotY: Math.PI / 2, lookAt: { x: 12.0, y: 1.7, z: -24.3 } },
-      { x: 3.6, z: -20.8, rotY: Math.PI * 0.75, lookAt: { x: 9.5, y: 1.7, z: -20.8 } },
-      { x: 0, z: -32.0, rotY: 0, lookAt: { x: 0, y: 1.8, z: -24.3 } },
+      // Làn ĐI RA về Đại Sảnh (x = +0.48)
+      { x: 0.48, z: -18.0, rotY: 0, dir: 'out', lookAt: { x: 0, y: 1.6, z: -10.0 } },
+      { x: 0.48, z: -13.0, rotY: 0, dir: 'out', lookAt: { x: 0, y: 1.6, z: -5.0 } },
+      { x: 0.48, z: -8.8, rotY: 0, dir: 'out', lookAt: { x: 0, y: 1.8, z: 0.0 } },
 
-      // =====================================================================
-      // 4. PHÒNG BỘ TRƯỞNG BỘ GIÁO DỤC QUA CÁC THỜI KỲ (ĐÔNG WING)
-      // Vòng quanh Bục Quả Cầu Vàng (22.5, 0) + Sát tường Bắc, Nam, Đông
-      // =====================================================================
-      { x: 3.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 10.0, y: 1.6, z: 0 } },
-      { x: 7.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 14.0, y: 1.6, z: 0 } },
-      { x: 11.5, z: 0, rotY: Math.PI / 2, lookAt: { x: 18.0, y: 1.6, z: 0 } },
-      { x: 14.8, z: 0, rotY: Math.PI / 2, lookAt: { x: 21.0, y: 1.6, z: 0 } },
-      { x: 17.8, z: 0, rotY: Math.PI / 2, lookAt: { x: 22.5, y: 1.6, z: 0 } },
-      // Vòng qua 2 bên Bục Quả Cầu Vàng (tâm 22.5, 0)
-      { x: 20.0, z: -3.6, rotY: Math.PI / 2, lookAt: { x: 26.0, y: 1.6, z: -3.6 } },
-      { x: 22.5, z: -4.2, rotY: Math.PI / 2, lookAt: { x: 28.0, y: 1.6, z: -3.6 } },
-      { x: 25.0, z: -3.6, rotY: Math.PI / 2, lookAt: { x: 30.0, y: 1.6, z: -2.0 } },
-      { x: 20.0, z: 3.6, rotY: Math.PI / 2, lookAt: { x: 26.0, y: 1.6, z: 3.6 } },
-      { x: 22.5, z: 4.2, rotY: Math.PI / 2, lookAt: { x: 28.0, y: 1.6, z: 3.6 } },
-      { x: 25.0, z: 3.6, rotY: Math.PI / 2, lookAt: { x: 30.0, y: 1.6, z: 2.0 } },
-      { x: 27.2, z: 0, rotY: Math.PI / 2, lookAt: { x: 33.8, y: 2.2, z: 0 } },
-      { x: 30.8, z: 0, rotY: Math.PI / 2, lookAt: { x: 34.0, y: 2.4, z: 0 } },
-
-      // Dãy Hotspot sát Tường Bắc (ngắm trực diện 8 chân dung Bộ trưởng 1 -> 8)
-      { x: 13.6, z: -5.4, rotY: Math.PI, lookAt: { x: 13.6, y: 2.4, z: -8.7 } },
-      { x: 16.3, z: -5.4, rotY: Math.PI, lookAt: { x: 16.3, y: 2.4, z: -8.7 } },
-      { x: 19.0, z: -5.4, rotY: Math.PI, lookAt: { x: 19.0, y: 2.4, z: -8.7 } },
-      { x: 21.7, z: -5.4, rotY: Math.PI, lookAt: { x: 21.7, y: 2.4, z: -8.7 } },
-      { x: 24.4, z: -5.4, rotY: Math.PI, lookAt: { x: 24.4, y: 2.4, z: -8.7 } },
-      { x: 27.1, z: -5.4, rotY: Math.PI, lookAt: { x: 27.1, y: 2.4, z: -8.7 } },
-      { x: 29.8, z: -5.4, rotY: Math.PI, lookAt: { x: 29.8, y: 2.4, z: -8.7 } },
-      { x: 32.5, z: -5.4, rotY: Math.PI, lookAt: { x: 32.5, y: 2.4, z: -8.7 } },
-
-      // Dãy Hotspot sát Tường Nam (ngắm trực diện 7 chân dung Bộ trưởng 9 -> 15)
-      { x: 14.5, z: 5.4, rotY: 0, lookAt: { x: 14.5, y: 2.4, z: 8.7 } },
-      { x: 17.5, z: 5.4, rotY: 0, lookAt: { x: 17.5, y: 2.4, z: 8.7 } },
-      { x: 20.5, z: 5.4, rotY: 0, lookAt: { x: 20.5, y: 2.4, z: 8.7 } },
-      { x: 23.5, z: 5.4, rotY: 0, lookAt: { x: 23.5, y: 2.4, z: 8.7 } },
-      { x: 26.5, z: 5.4, rotY: 0, lookAt: { x: 26.5, y: 2.4, z: 8.7 } },
-      { x: 29.5, z: 5.4, rotY: 0, lookAt: { x: 29.5, y: 2.4, z: 8.7 } },
-      { x: 32.5, z: 5.4, rotY: 0, lookAt: { x: 32.5, y: 2.4, z: 8.7 } },
-
-      // Chiều quay ngược lại hướng về Đại Sảnh
-      { x: 29.5, z: 0, rotY: -Math.PI / 2, lookAt: { x: 22.0, y: 1.6, z: 0 } },
-      { x: 16.5, z: 0, rotY: -Math.PI / 2, lookAt: { x: 9.0, y: 1.6, z: 0 } },
-      { x: 10.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: 0.0, y: 1.6, z: 0 } },
+      // Vòng quanh Cây Đa Tri Ân (0, -24.3)
+      { x: -3.8, z: -20.8, rotY: -Math.PI * 0.75, dir: 'in', lookAt: { x: -9.5, y: 1.7, z: -20.8 } },
+      { x: -4.8, z: -24.3, rotY: -Math.PI / 2, dir: 'view', lookAt: { x: -12.0, y: 1.7, z: -24.3 } },
+      { x: -3.8, z: -27.8, rotY: -Math.PI * 0.25, dir: 'in', lookAt: { x: -9.5, y: 1.7, z: -31.5 } },
+      { x: 0, z: -29.2, rotY: Math.PI, dir: 'in', lookAt: { x: 0, y: 1.7, z: -34.2 } },
+      { x: 3.8, z: -27.8, rotY: Math.PI * 0.25, dir: 'in', lookAt: { x: 9.5, y: 1.7, z: -31.5 } },
+      { x: 4.8, z: -24.3, rotY: Math.PI / 2, dir: 'view', lookAt: { x: 12.0, y: 1.7, z: -24.3 } },
+      { x: 3.8, z: -20.8, rotY: 0, dir: 'out', lookAt: { x: 0, y: 1.6, z: -12.0 } },
+      { x: 0, z: -31.8, rotY: 0, dir: 'out', lookAt: { x: 0, y: 1.8, z: -24.3 } },
 
       // =====================================================================
-      // 5. PHÒNG LỊCH SỬ GIÁO DỤC VIỆT NAM (TÂY WING)
-      // Trục giữa + Dải Hotspot sát tường Bắc, Nam, Tây
+      // 4. PHÒNG BỘ TRƯỞNG BỘ GIÁO DỤC VIỆT NAM QUA CÁC THỜI KỲ (ĐÔNG WING)
       // =====================================================================
-      { x: -3.5, z: 0, rotY: -Math.PI / 2, lookAt: { x: -10.0, y: 1.6, z: 0 } },
-      { x: -8.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: -16.0, y: 1.6, z: 0 } },
-      { x: -14.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: -22.0, y: 1.6, z: 0 } },
-      { x: -20.0, z: 0, rotY: -Math.PI / 2, lookAt: { x: -27.5, y: 2.0, z: 0 } },
-      { x: -24.5, z: 0, rotY: Math.PI / 2, lookAt: { x: -14.0, y: 1.6, z: 0 } },
-      // Sát tường Bắc & tường Nam phòng Lịch sử
-      { x: -15.5, z: -6.2, rotY: Math.PI, lookAt: { x: -15.5, y: 2.2, z: -10.5 } },
-      { x: -20.5, z: -6.2, rotY: Math.PI, lookAt: { x: -20.5, y: 2.2, z: -10.5 } },
-      { x: -24.5, z: -5.5, rotY: -Math.PI / 2, lookAt: { x: -27.8, y: 2.2, z: -5.5 } },
-      { x: -15.5, z: 6.2, rotY: 0, lookAt: { x: -15.5, y: 2.2, z: 10.5 } },
-      { x: -20.5, z: 6.2, rotY: 0, lookAt: { x: -20.5, y: 2.2, z: 10.5 } },
-      { x: -24.5, z: 5.5, rotY: -Math.PI / 2, lookAt: { x: -27.8, y: 2.2, z: 5.5 } }
+      // Làn ĐI VÀO (z = +0.46)
+      { x: 6.5, z: 0.46, rotY: Math.PI / 2, dir: 'in', lookAt: { x: 14.0, y: 1.6, z: 0 } },
+      { x: 11.2, z: 0.46, rotY: Math.PI / 2, dir: 'in', lookAt: { x: 18.5, y: 1.6, z: 0 } },
+      { x: 15.8, z: 0.46, rotY: Math.PI / 2, dir: 'in', lookAt: { x: 22.5, y: 1.6, z: 0 } },
+      { x: 26.8, z: 0.46, rotY: Math.PI / 2, dir: 'in', lookAt: { x: 33.8, y: 2.2, z: 0 } },
+      { x: 30.5, z: 0.46, rotY: Math.PI / 2, dir: 'in', lookAt: { x: 34.0, y: 2.4, z: 0 } },
+
+      // Làn ĐI RA về Đại Sảnh (z = -0.46)
+      { x: 30.0, z: -0.46, rotY: -Math.PI / 2, dir: 'out', lookAt: { x: 22.5, y: 1.6, z: 0 } },
+      { x: 26.2, z: -0.46, rotY: -Math.PI / 2, dir: 'out', lookAt: { x: 18.0, y: 1.6, z: 0 } },
+      { x: 16.5, z: -0.46, rotY: -Math.PI / 2, dir: 'out', lookAt: { x: 9.0, y: 1.6, z: 0 } },
+      { x: 11.2, z: -0.46, rotY: -Math.PI / 2, dir: 'out', lookAt: { x: 0.0, y: 1.6, z: 0 } },
+
+      // Vòng qua 2 bên Bục Quả Cầu Vàng (22.5, 0)
+      { x: 20.2, z: -3.5, rotY: Math.PI / 2, dir: 'in', lookAt: { x: 26.5, y: 1.6, z: -3.5 } },
+      { x: 24.8, z: -3.5, rotY: -Math.PI / 2, dir: 'out', lookAt: { x: 16.0, y: 1.6, z: -3.5 } },
+      { x: 20.2, z: 3.5, rotY: Math.PI / 2, dir: 'in', lookAt: { x: 26.5, y: 1.6, z: 3.5 } },
+      { x: 24.8, z: 3.5, rotY: -Math.PI / 2, dir: 'out', lookAt: { x: 16.0, y: 1.6, z: 3.5 } },
+
+      // Điểm XEM sát Tường Bắc & Tường Nam ngắm chân dung 15 Bộ trưởng
+      { x: 14.8, z: -5.5, rotY: Math.PI, dir: 'view', lookAt: { x: 14.8, y: 2.4, z: -8.7 } },
+      { x: 19.5, z: -5.5, rotY: Math.PI, dir: 'view', lookAt: { x: 19.5, y: 2.4, z: -8.7 } },
+      { x: 24.4, z: -5.5, rotY: Math.PI, dir: 'view', lookAt: { x: 24.4, y: 2.4, z: -8.7 } },
+      { x: 29.8, z: -5.5, rotY: Math.PI, dir: 'view', lookAt: { x: 29.8, y: 2.4, z: -8.7 } },
+
+      { x: 15.5, z: 5.5, rotY: 0, dir: 'view', lookAt: { x: 15.5, y: 2.4, z: 8.7 } },
+      { x: 20.5, z: 5.5, rotY: 0, dir: 'view', lookAt: { x: 20.5, y: 2.4, z: 8.7 } },
+      { x: 25.5, z: 5.5, rotY: 0, dir: 'view', lookAt: { x: 25.5, y: 2.4, z: 8.7 } },
+      { x: 30.5, z: 5.5, rotY: 0, dir: 'view', lookAt: { x: 30.5, y: 2.4, z: 8.7 } },
+
+      // =====================================================================
+      // 5. PHÒNG LỊCH SỬ GIÁO DỤC VIỆT NAM & CUỐN SÁCH VÀNG 20/11 (TÂY WING)
+      // =====================================================================
+      // Làn ĐI VÀO dẫn thẳng tới Cuốn Sách Vàng 20/11 (tại x = -19.5, z = 0)
+      { x: -6.5, z: -0.46, rotY: -Math.PI / 2, dir: 'in', lookAt: { x: -14.0, y: 1.6, z: 0 } },
+      { x: -11.5, z: -0.46, rotY: -Math.PI / 2, dir: 'in', lookAt: { x: -19.5, y: 1.6, z: 0 } },
+      { x: -15.6, z: 0.0, rotY: -Math.PI / 2, dir: 'in', lookAt: { x: -19.5, y: 1.55, z: 0 } }, // Đứng ngay trước Sách Vàng 20/11
+
+      // Vòng qua 2 bên Cuốn Sách Vàng 20/11 tiến sâu vào cuối phòng
+      { x: -19.5, z: -2.8, rotY: 0, dir: 'view', lookAt: { x: -19.5, y: 1.55, z: 0 } },
+      { x: -19.5, z: 2.8, rotY: Math.PI, dir: 'view', lookAt: { x: -19.5, y: 1.55, z: 0 } },
+      { x: -22.8, z: -0.46, rotY: -Math.PI / 2, dir: 'in', lookAt: { x: -27.5, y: 2.0, z: 0 } },
+
+      // Làn ĐI RA từ Phòng Lịch Sử về lại Đại Sảnh (z = +0.46)
+      { x: -23.2, z: 0.46, rotY: Math.PI / 2, dir: 'out', lookAt: { x: -15.0, y: 1.6, z: 0 } },
+      { x: -15.2, z: 0.46, rotY: Math.PI / 2, dir: 'out', lookAt: { x: -8.0, y: 1.6, z: 0 } },
+      { x: -11.2, z: 0.46, rotY: Math.PI / 2, dir: 'out', lookAt: { x: 0.0, y: 1.6, z: 0 } },
+
+      // Điểm XEM sát các bục giai đoạn lịch sử
+      { x: -16.2, z: -4.2, rotY: Math.PI, dir: 'view', lookAt: { x: -16.2, y: 1.8, z: -6.8 } },
+      { x: -21.6, z: -4.4, rotY: Math.PI, dir: 'view', lookAt: { x: -21.6, y: 1.8, z: -6.8 } },
+      { x: -16.2, z: 4.2, rotY: 0, dir: 'view', lookAt: { x: -16.2, y: 1.8, z: 6.8 } },
+      { x: -21.6, z: 4.4, rotY: 0, dir: 'view', lookAt: { x: -21.6, y: 1.8, z: 6.8 } }
     ];
 
-    // Tự động sinh thêm 18 điểm Hotspot bám dọc sát dải tường cong chữ S trong phòng Những Người Thầy Trong Sử Việt
+    // Tự động sinh các điểm XEM nhỏ gọn bám dọc sát dải tường cong chữ S trong phòng Những Người Thầy Trong Sử Việt
     if (typeof this.teachersGetPointAtDist === 'function') {
       const totalLen = this.teachersTotalCurveLength || 78.5;
-      for (let d = 3.2; d <= totalLen - 3.2; d += 4.2) {
+      for (let d = 4.0; d <= totalLen - 4.0; d += 5.2) {
         const pt = this.teachersGetPointAtDist(d);
         const standX = pt.wallX + pt.nx * 3.1;
         const standZ = pt.wallZ + pt.nz * 3.1;
@@ -908,6 +1479,7 @@ class MuseumBuilder {
           x: standX,
           z: standZ,
           rotY: lookWallAngle,
+          dir: 'view',
           lookAt: { x: pt.wallX, y: 1.75, z: pt.wallZ }
         });
       }
@@ -915,21 +1487,22 @@ class MuseumBuilder {
 
     waypoints.forEach((wp) => {
       const g = new THREE.Group();
-      g.position.set(wp.x, 0.024, wp.z);
-      g.rotation.y = wp.rotY;
+      g.position.set(wp.x, 0.023, wp.z);
+      // Xoay mặt phẳng sao cho đầu bên phải của texture (nơi có mũi tên ❯❯) trỏ đúng hướng di chuyển
+      g.rotation.y = wp.rotY - Math.PI / 2;
 
-      // Mặt phẳng mũi tên nhỏ mảnh
-      const p = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 0.36), miniArrowMat);
+      const isView = wp.dir === 'view';
+      const w = isView ? 0.30 : 0.38;
+      const h = isView ? 0.14 : 0.18;
+      const mat = wp.dir === 'out' ? matOut : (isView ? matView : matIn);
+
+      const p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
       p.rotation.x = -Math.PI / 2;
       g.add(p);
 
-      // Vòng tròn hào quang mảnh
-      const ring = new THREE.Mesh(new THREE.RingGeometry(0.24, 0.28, 24), haloMat);
-      ring.rotation.x = -Math.PI / 2;
-      g.add(ring);
-
       const interactMeta = {
         isTourArrow: true,
+        arrowDir: wp.dir || 'in',
         targetCamera: { x: wp.x, y: 1.6, z: wp.z },
         targetLookAt: wp.lookAt
       };
@@ -951,10 +1524,10 @@ class MuseumBuilder {
     // Dẫn từ trung tâm Đại Sảnh (Z = 0, X = 0) tỏa ra 4 hướng cửa 4 phòng
     // =========================================================================
     [
-      { w: 3.2, h: 18.0, x: 0, z: -9.0 },  // Hướng Bắc: Vào Phòng 15 Nhà Giáo
-      { w: 3.2, h: 36.0, x: 0, z: 18.0 },  // Hướng Nam: Hành Lang Lời Bác Dạy & Bộ Đồ Dùng (trải dài suốt 36m)
+      { w: 3.2, h: 18.0, x: 0, z: -9.0 },  // Hướng Bắc: Vào Phòng Nhà Giáo
+      { w: 3.2, h: 36.0, x: 0, z: 18.0 },  // Hướng Nam: Hành Lang Lời Bác Dạy & Bộ Đồ Dùng
       { w: 18.0, h: 3.2, x: -9.0, z: 0 },  // Hướng Tây: Vào Phòng Lịch Sử GD
-      { w: 18.0, h: 3.2, x: 9.0, z: 0 }    // Hướng Đông: Vào Phòng 15 Bộ Trưởng
+      { w: 18.0, h: 3.2, x: 9.0, z: 0 }    // Hướng Đông: Vào Phòng Bộ Trưởng
     ].forEach((st) => {
       const border = new THREE.Mesh(
         new THREE.PlaneGeometry(st.w + 0.4, st.h + 0.4),
@@ -974,100 +1547,110 @@ class MuseumBuilder {
     });
 
     // =========================================================================
-    // B. CÁC BIỂN CHỈ DẪN RẼ HƯỚNG TRÊN SÀN (DIRECTIONAL TURN SIGNBOARDS)
-    // Giữa Đại Sảnh và 4 Gian Phòng Chuyên Đề
+    // B. CÁC BIỂN CHỈ DẪN ĐI VÀO / ĐI RA TRÊN SÀN (NHỎ GỌN, PHÂN BIỆT RÕ VÀO / RA)
     // =========================================================================
     const markersConfig = [
-      // 1. Tại Đại Sảnh hướng vào các phòng
+      // 1. MŨI TÊN ĐI VÀO CÁC PHÒNG (Viền Vàng Ngọc Lục Bảo #34d399)
       {
-        x: -9.5, z: 0,
-        icon: '⬅', action: 'RẼ TRÁI • HƯỚNG TÂY',
-        title: 'LỊCH SỬ GIÁO DỤC VIỆT NAM',
-        subtitle: 'Quốc Tử Giám (1076), Đông Kinh Nghĩa Thục & Bình Dân Học Vụ',
-        targetZoneId: 'room-history'
+        x: -9.5, z: -0.55,
+        icon: '⬅', action: 'ĐI VÀO PHÒNG • HƯỚNG TÂY',
+        title: 'LỊCH SỬ GIÁO DỤC & SÁCH VÀNG 20/11',
+        subtitle: 'Các giai đoạn Giáo dục Việt Nam & Sách Lật Lịch sử Ngày 20/11',
+        targetZoneId: 'room-history',
+        accent: '#34d399'
       },
       {
-        x: 0, z: -9.5,
-        icon: '⬆', action: 'TIẾN THẲNG • VÁCH CONG UỐN LƯỢN',
+        x: -0.55, z: -9.5,
+        icon: '⬆', action: 'ĐI VÀO PHÒNG • HƯỚNG BẮC',
         title: 'NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT',
-        subtitle: 'Hành trình tôn vinh 40 bậc danh sư trong lịch sử dân tộc',
-        targetZoneId: 'room-educators'
+        subtitle: 'Hành trình tôn vinh các bậc Danh sư trong lịch sử dân tộc',
+        targetZoneId: 'room-educators',
+        accent: '#34d399'
       },
       {
-        x: 8.8, z: 0,
-        icon: '➡', action: 'TIẾN VÀO • GIAN PHÒNG ĐỘC LẬP',
-        title: 'BỘ TRƯỞNG BỘ GD&ĐT QUA CÁC THỜI KỲ',
-        subtitle: 'Khám phá Chân dung & Dấu ấn 15 vị Tư lệnh ngành Giáo dục (1945 – Nay)',
-        targetZoneId: 'room-ministers'
+        x: 8.8, z: 0.55,
+        icon: '➡', action: 'ĐI VÀO PHÒNG • HƯỚNG ĐÔNG',
+        title: 'BỘ TRƯỞNG BỘ GIÁO DỤC QUA CÁC THỜI KỲ',
+        subtitle: 'Chân dung & Dấu ấn 15 vị Bộ trưởng Bộ Giáo dục Việt Nam',
+        targetZoneId: 'room-ministers',
+        accent: '#34d399'
       },
-      // 1b. Điểm điều hướng bên hông Trái & Phải vòng qua Cây Tri Ân tiến thẳng vào Gian Nhà Giáo
       {
         x: -4.8, z: -3.8,
-        icon: '↖', action: 'LỐI VÀO BÊN HÔNG TRÁI',
+        icon: '↖', action: 'ĐI VÀO • LỐI HÔNG TRÁI',
         title: 'NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT',
-        subtitle: 'Bấm để bước vòng qua cây tiến thẳng vào trung tâm Gian Nhà Giáo',
+        subtitle: 'Bước vòng qua cây tiến thẳng vào trung tâm Gian Nhà Giáo',
         targetZoneId: 'room-educators',
         customPos: { x: 0, y: 1.8, z: -16.0 },
-        customLookAt: { x: 0, y: 2.0, z: -24.3 }
+        customLookAt: { x: 0, y: 2.0, z: -24.3 },
+        accent: '#34d399'
       },
       {
         x: 4.8, z: -3.8,
-        icon: '↗', action: 'LỐI VÀO BÊN HÔNG PHẢI',
+        icon: '↗', action: 'ĐI VÀO • LỐI HÔNG PHẢI',
         title: 'NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT',
-        subtitle: 'Bấm để bước vòng qua cây tiến thẳng vào trung tâm Gian Nhà Giáo',
+        subtitle: 'Bước vòng qua cây tiến thẳng vào trung tâm Gian Nhà Giáo',
         targetZoneId: 'room-educators',
         customPos: { x: 0, y: 1.8, z: -16.0 },
-        customLookAt: { x: 0, y: 2.0, z: -24.3 }
+        customLookAt: { x: 0, y: 2.0, z: -24.3 },
+        accent: '#34d399'
       },
       {
-        x: 0, z: 9.5,
-        icon: '⬇', action: 'TIẾN THẲNG • HÀNH LANG DANH DỰ',
-        title: 'HÀNH LANG LỜI BÁC DẠY & BỘ ĐỒ DÙNG',
-        subtitle: 'Thư Bác Hồ khai trường Tháng 9/1945, lời căn dặn bất hủ & kỷ vật dạy học',
-        targetZoneId: 'room-tools'
+        x: -0.55, z: 9.5,
+        icon: '⬇', action: 'ĐI VÀO • HÀNH LANG NAM',
+        title: 'LỜI BÁC DẠY & BỘ ĐỒ DÙNG DẠY HỌC',
+        subtitle: 'Thư Bác Hồ khai trường 9/1945, lời căn dặn & kỷ vật dạy học',
+        targetZoneId: 'room-tools',
+        accent: '#34d399'
       },
 
-      // 2. Từ trong 4 phòng quay về Đại Sảnh
+      // 2. MŨI TÊN ĐI RA ĐẠI SẢNH TRUNG TÂM (Viền Vàng Hổ Phách #fb923c)
       {
-        x: -16.5, z: 0,
-        icon: '➡', action: 'QUAY LẠI TRUNG TÂM',
-        title: 'ĐẠI SẢNH & CỘI CÂY TRI THỨC',
-        subtitle: 'Trở về Điện Tri Ân, Cội Cây Tri Thức và Bàn Giấy Bút 3D',
-        targetZoneId: 'grand-hall'
+        x: -14.2, z: 0.55,
+        icon: '➡', action: 'ĐI RA • VỀ ĐẠI SẢNH',
+        title: 'QUAY LẠI ĐẠI SẢNH TRUNG TÂM',
+        subtitle: 'Trở về Cội Cây Tri Thức và Không gian trung tâm',
+        targetZoneId: 'grand-hall',
+        accent: '#fb923c'
       },
       {
-        x: 0, z: -16.5,
-        icon: '⬇', action: 'QUAY LẠI TRUNG TÂM',
-        title: 'ĐẠI SẢNH & CỘI CÂY TRI THỨC',
-        subtitle: 'Trở về Điện Tri Ân, Cội Cây Tri Thức và Bàn Giấy Bút 3D',
-        targetZoneId: 'grand-hall'
+        x: 0.55, z: -15.8,
+        icon: '⬇', action: 'ĐI RA • VỀ ĐẠI SẢNH',
+        title: 'QUAY LẠI ĐẠI SẢNH TRUNG TÂM',
+        subtitle: 'Trở về Cội Cây Tri Thức và Không gian trung tâm',
+        targetZoneId: 'grand-hall',
+        accent: '#fb923c'
       },
       {
-        x: 13.2, z: 0,
-        icon: '⬅', action: 'QUAY LẠI ĐẠI SẢNH',
-        title: 'ĐẠI SẢNH & CỘI CÂY TRI THỨC',
-        subtitle: 'Trở về Trung tâm Đại Sảnh, Cội Cây Tri Thức và Bàn Giấy Bút 3D',
-        targetZoneId: 'grand-hall'
+        x: 13.2, z: -0.55,
+        icon: '⬅', action: 'ĐI RA • VỀ ĐẠI SẢNH',
+        title: 'QUAY LẠI ĐẠI SẢNH TRUNG TÂM',
+        subtitle: 'Trở về Cội Cây Tri Thức và Không gian trung tâm',
+        targetZoneId: 'grand-hall',
+        accent: '#fb923c'
       },
       {
-        x: 0, z: 16.5,
-        icon: '⬆', action: 'QUAY LẠI TRUNG TÂM',
-        title: 'ĐẠI SẢNH & CỘI CÂY TRI THỨC',
-        subtitle: 'Trở về Điện Tri Ân, Cội Cây Tri Thức và Bàn Giấy Bút 3D',
-        targetZoneId: 'grand-hall'
+        x: 0.55, z: 15.8,
+        icon: '⬆', action: 'ĐI RA • VỀ ĐẠI SẢNH',
+        title: 'QUAY LẠI ĐẠI SẢNH TRUNG TÂM',
+        subtitle: 'Trở về Cội Cây Tri Thức và Không gian trung tâm',
+        targetZoneId: 'grand-hall',
+        accent: '#fb923c'
       }
     ];
 
     markersConfig.forEach((mc) => {
       const markerGroup = new THREE.Group();
-      markerGroup.position.set(mc.x, 0.026, mc.z);
+      markerGroup.position.set(mc.x, 0.025, mc.z);
 
       const markerTex = this.createDirectionalMarkerTexture(mc);
 
-      const diskGeom = new THREE.PlaneGeometry(1.85, 1.85);
+      // Thu gọn kích thước đĩa chỉ hướng từ 1.85m xuống 0.96m để thanh lịch, gọn gàng
+      const diskGeom = new THREE.PlaneGeometry(0.96, 0.96);
       const diskMat = new THREE.MeshBasicMaterial({
         map: markerTex,
-        transparent: true
+        transparent: true,
+        depthWrite: false
       });
       const disk = new THREE.Mesh(diskGeom, diskMat);
       disk.rotation.x = -Math.PI / 2;
@@ -1078,17 +1661,6 @@ class MuseumBuilder {
         customLookAt: mc.customLookAt
       };
       markerGroup.add(disk);
-
-      const haloGeom = new THREE.RingGeometry(0.92, 1.04, 32);
-      const haloMat = new THREE.MeshBasicMaterial({
-        color: 0xffd700,
-        transparent: true,
-        opacity: 0.65,
-        side: THREE.DoubleSide
-      });
-      const halo = new THREE.Mesh(haloGeom, haloMat);
-      halo.rotation.x = -Math.PI / 2;
-      markerGroup.add(halo);
 
       this.interactables.push(disk);
       wayfindingGroup.add(markerGroup);
@@ -2318,37 +2890,26 @@ class MuseumBuilder {
     arrowG.position.set(config.x, 0.024, config.z);
     arrowG.rotation.y = config.rotY;
 
-    // Tấm phẳng mũi tên hiển thị đồ họa
+    // Tấm phẳng mũi tên hiển thị đồ họa (thu gọn thanh mảnh 0.78m x 0.32m, bỏ vòng tròn thừa)
     const arrowTex = this.createDirectionArrowTexture(config);
     const arrowPlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.6, 0.65),
+      new THREE.PlaneGeometry(0.78, 0.32),
       new THREE.MeshBasicMaterial({
         map: arrowTex,
         transparent: true,
-        opacity: 0.95,
+        opacity: 0.92,
         depthWrite: false
       })
     );
     arrowPlane.rotation.x = -Math.PI / 2;
     arrowG.add(arrowPlane);
 
-    // Vòng hào quang vàng kim phát sáng nhẹ quanh mũi tên
-    const glowRing = new THREE.Mesh(
-      new THREE.RingGeometry(0.75, 0.82, 32),
-      new THREE.MeshBasicMaterial({
-        color: 0xffd700,
-        transparent: true,
-        opacity: 0.45,
-        side: THREE.DoubleSide
-      })
-    );
-    glowRing.rotation.x = -Math.PI / 2;
-    arrowG.add(glowRing);
-
     // Gán dữ liệu tương tác để click vào mũi tên thì camera lướt êm ái tới điểm chỉ định
     const interactData = {
       isTourArrow: true,
-      tourArrowData: config
+      tourArrowData: config,
+      targetCamera: config.targetCamera,
+      targetLookAt: config.targetLookAt
     };
     arrowG.userData = interactData;
     arrowPlane.userData = interactData;
@@ -5099,8 +5660,8 @@ class MuseumBuilder {
 
       const stepTex = new THREE.CanvasTexture(stepCanvas);
       const stepDisc = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.65, 1.65),
-        new THREE.MeshBasicMaterial({ map: stepTex, transparent: true })
+        new THREE.PlaneGeometry(0.72, 0.72),
+        new THREE.MeshBasicMaterial({ map: stepTex, transparent: true, depthWrite: false })
       );
       stepDisc.rotation.x = -Math.PI / 2;
       stepMeshGroup.add(stepDisc);
