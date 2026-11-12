@@ -805,176 +805,280 @@ class MuseumBuilder {
     topGlowRing.position.y = 1.26;
     bookGroup.add(topGlowRing);
 
-    // 3. Nhóm Cuốn Sách Vàng Mở Rộng Lơ Lửng & Tỏa Sáng (Floating Open Book)
-    const floatingBook = new THREE.Group();
-    floatingBook.position.set(0, 1.54, 0.05);
-    // Nghiêng về phía người xem để dễ đọc và thấy rõ 2 trang sách mở
-    floatingBook.rotation.x = 0.46;
+    // 3. Giá đỡ sách gỗ gụ cổ điển trên mặt bệ (Antique Wooden Lectern Cradle)
+    const cradleBase = new THREE.Mesh(
+      new THREE.BoxGeometry(0.96, 0.05, 0.68),
+      this.materials.darkWood
+    );
+    cradleBase.position.set(0, 1.27, 0.02);
+    cradleBase.rotation.x = 0.22;
+    bookGroup.add(cradleBase);
 
-    const coverMat = new THREE.MeshStandardMaterial({
-      color: 0x6b101b, // Đỏ nhung hoàng gia
-      roughness: 0.32,
-      metalness: 0.35,
-      emissive: 0x2a0508,
+    const cradleLip = new THREE.Mesh(
+      new THREE.BoxGeometry(1.02, 0.045, 0.045),
+      this.materials.bronzeGold
+    );
+    cradleLip.position.set(0, 1.23, 0.35);
+    cradleLip.rotation.x = 0.22;
+    bookGroup.add(cradleLip);
+
+    // 4. Cuốn Cổ Thư Hoàng Gia Mở Rộng (Antique Leather & Brass Illuminated Tome)
+    const floatingBook = new THREE.Group();
+    floatingBook.position.set(0, 1.48, 0.04);
+    // Nghiêng góc 25 độ về phía người xem trên giá đỡ cổ điển
+    floatingBook.rotation.x = 0.44;
+
+    // Vật liệu da thuộc nâu gụ cổ điển & đồng cổ mạ vàng
+    const antiqueLeatherMat = new THREE.MeshStandardMaterial({
+      color: 0x36170b,
+      roughness: 0.52,
+      metalness: 0.18,
+      emissive: 0x160702,
+      emissiveIntensity: 0.25
+    });
+    const antiqueBrassMat = new THREE.MeshStandardMaterial({
+      color: 0xd4a338,
+      roughness: 0.28,
+      metalness: 0.85,
+      emissive: 0x5c3e08,
       emissiveIntensity: 0.35
     });
-    const goldFoilMat = new THREE.MeshStandardMaterial({
-      color: 0xffd700,
-      roughness: 0.2,
-      metalness: 0.9,
-      emissive: 0xffb700,
-      emissiveIntensity: 0.45
-    });
-
-    // Gáy sách vàng kim ở giữa
-    const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.86, 16), goldFoilMat);
-    spine.rotation.x = Math.PI / 2;
-    floatingBook.add(spine);
-
-    // Bìa cứng bên Trái & bên Phải (Mở góc chữ V nhẹ trang trọng)
-    const leftWing = new THREE.Group();
-    leftWing.rotation.z = 0.14;
-    const rightWing = new THREE.Group();
-    rightWing.rotation.z = -0.14;
-
-    const coverW = 0.64;
-    const coverD = 0.84;
-
-    const leftCover = new THREE.Mesh(new THREE.BoxGeometry(coverW, 0.032, coverD), coverMat);
-    leftCover.position.set(-coverW / 2 - 0.02, -0.015, 0);
-    leftWing.add(leftCover);
-
-    const leftGoldRim = new THREE.Mesh(new THREE.BoxGeometry(coverW + 0.02, 0.022, coverD + 0.02), goldFoilMat);
-    leftGoldRim.position.set(-coverW / 2 - 0.02, -0.018, 0);
-    leftWing.add(leftGoldRim);
-
-    const rightCover = new THREE.Mesh(new THREE.BoxGeometry(coverW, 0.032, coverD), coverMat);
-    rightCover.position.set(coverW / 2 + 0.02, -0.015, 0);
-    rightWing.add(rightCover);
-
-    const rightGoldRim = new THREE.Mesh(new THREE.BoxGeometry(coverW + 0.02, 0.022, coverD + 0.02), goldFoilMat);
-    rightGoldRim.position.set(coverW / 2 + 0.02, -0.018, 0);
-    rightWing.add(rightGoldRim);
-
-    // Khối trang giấy dày ánh vàng kem
-    const pageBlockMat = new THREE.MeshStandardMaterial({
-      color: 0xfff8e7,
-      roughness: 0.4,
-      metalness: 0.1,
-      emissive: 0xffdfa0,
+    const gildedPageEdgeMat = new THREE.MeshStandardMaterial({
+      color: 0xd8b467,
+      roughness: 0.38,
+      metalness: 0.55,
+      emissive: 0x4a3508,
       emissiveIntensity: 0.22
     });
+    const innerParchmentBlockMat = new THREE.MeshStandardMaterial({
+      color: 0xead7b3,
+      roughness: 0.65,
+      metalness: 0.05,
+      emissive: 0x3b2a10,
+      emissiveIntensity: 0.18
+    });
 
-    const leftPagesBlock = new THREE.Mesh(new THREE.BoxGeometry(coverW - 0.04, 0.042, coverD - 0.05), pageBlockMat);
-    leftPagesBlock.position.set(-coverW / 2 - 0.01, 0.018, 0);
-    leftWing.add(leftPagesBlock);
+    // Gáy sách da cổ nằm phía dưới khe sách kèm 5 đai đồng cổ điển (Raised Spine Bands)
+    const spineLeather = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.055, 0.055, 0.90, 16, 1, false, Math.PI * 0.5, Math.PI),
+      antiqueLeatherMat
+    );
+    spineLeather.rotation.x = Math.PI / 2;
+    spineLeather.position.set(0, -0.012, 0);
+    floatingBook.add(spineLeather);
 
-    const rightPagesBlock = new THREE.Mesh(new THREE.BoxGeometry(coverW - 0.04, 0.042, coverD - 0.05), pageBlockMat);
-    rightPagesBlock.position.set(coverW / 2 + 0.01, 0.018, 0);
-    rightWing.add(rightPagesBlock);
+    [-0.34, -0.17, 0, 0.17, 0.34].forEach((sz) => {
+      const band = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.062, 0.062, 0.026, 16),
+        antiqueBrassMat
+      );
+      band.rotation.x = Math.PI / 2;
+      band.position.set(0, -0.014, sz);
+      floatingBook.add(band);
+    });
 
-    // Vẽ nội dung sắc nét lên Trang Trái & Trang Phải của Cuốn Sách 3D
+    // Hai cánh sách mở chữ V tự nhiên
+    const leftWing = new THREE.Group();
+    leftWing.rotation.z = 0.11;
+    const rightWing = new THREE.Group();
+    rightWing.rotation.z = -0.11;
+
+    const coverW = 0.66;
+    const coverD = 0.88;
+
+    const buildBookHalf = (wing, sideSign) => {
+      const xCenter = sideSign * (coverW / 2 + 0.015);
+
+      // Bìa da thuộc dày cổ điển
+      const leatherBoard = new THREE.Mesh(
+        new THREE.BoxGeometry(coverW, 0.030, coverD),
+        antiqueLeatherMat
+      );
+      leatherBoard.position.set(xCenter, -0.018, 0);
+      wing.add(leatherBoard);
+
+      // Nẹp viền đồng cổ bao quanh bìa da
+      const brassRim = new THREE.Mesh(
+        new THREE.BoxGeometry(coverW + 0.016, 0.022, coverD + 0.016),
+        antiqueBrassMat
+      );
+      brassRim.position.set(xCenter, -0.020, 0);
+      wing.add(brassRim);
+
+      // Bọc góc đồng chạm nổi ở 2 góc ngoài của bìa sách (Antique Corner Bosses)
+      const outerX = sideSign * (coverW - 0.035);
+      [-coverD / 2 + 0.045, coverD / 2 - 0.045].forEach((cz) => {
+        const cornerBoss = new THREE.Mesh(
+          new THREE.BoxGeometry(0.095, 0.036, 0.095),
+          antiqueBrassMat
+        );
+        cornerBoss.position.set(outerX, -0.016, cz);
+        wing.add(cornerBoss);
+
+        const bossStud = new THREE.Mesh(
+          new THREE.SphereGeometry(0.016, 12, 12),
+          this.materials.brightGold
+        );
+        bossStud.position.set(outerX + sideSign * 0.015, 0.004, cz);
+        wing.add(bossStud);
+      });
+
+      // 3 lớp khối trang giấy cổ dày xếp bậc thang (Stepped Gilded Page Blocks)
+      [
+        { w: coverW - 0.035, d: coverD - 0.045, h: 0.024, y: 0.008, mat: gildedPageEdgeMat },
+        { w: coverW - 0.050, d: coverD - 0.060, h: 0.020, y: 0.026, mat: innerParchmentBlockMat },
+        { w: coverW - 0.064, d: coverD - 0.072, h: 0.014, y: 0.038, mat: gildedPageEdgeMat }
+      ].forEach((layer) => {
+        const blk = new THREE.Mesh(
+          new THREE.BoxGeometry(layer.w, layer.h, layer.d),
+          layer.mat
+        );
+        blk.position.set(sideSign * (layer.w / 2 + 0.008), layer.y, 0);
+        wing.add(blk);
+      });
+    };
+
+    buildBookHalf(leftWing, -1);
+    buildBookHalf(rightWing, 1);
+
+    // Vẽ trang giấy da dê cổ (Aged Parchment & Classical Illuminated Calligraphy)
     const createBookPageTexture = (isLeft) => {
       const c = document.createElement('canvas');
       c.width = 768;
       c.height = 1024;
       const ctx = c.getContext('2d');
 
-      const g = ctx.createLinearGradient(0, 0, 768, 1024);
-      g.addColorStop(0, '#fffdf5');
-      g.addColorStop(0.5, '#fdf3d7');
-      g.addColorStop(1, '#f5e2b3');
+      // Nền giấy cổ ngả màu trầm ấm (Vintage Parchment)
+      const g = ctx.createRadialGradient(384, 512, 60, 384, 512, 620);
+      g.addColorStop(0, '#f7ebd2');
+      g.addColorStop(0.65, '#ead4ac');
+      g.addColorStop(1, '#cfb07c');
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, 768, 1024);
 
-      // Bóng gáy sách
-      const spineGrad = isLeft
-        ? ctx.createLinearGradient(680, 0, 768, 0)
-        : ctx.createLinearGradient(0, 0, 88, 0);
-      if (isLeft) {
-        spineGrad.addColorStop(0, 'rgba(120, 80, 20, 0)');
-        spineGrad.addColorStop(1, 'rgba(90, 55, 10, 0.32)');
-        ctx.fillStyle = spineGrad;
-        ctx.fillRect(680, 0, 88, 1024);
-      } else {
-        spineGrad.addColorStop(0, 'rgba(90, 55, 10, 0.32)');
-        spineGrad.addColorStop(1, 'rgba(120, 80, 20, 0)');
-        ctx.fillStyle = spineGrad;
-        ctx.fillRect(0, 0, 88, 1024);
+      // Vân giấy cổ nhẹ
+      ctx.strokeStyle = 'rgba(120, 82, 32, 0.05)';
+      ctx.lineWidth = 1;
+      for (let py = 20; py < 1004; py += 14) {
+        ctx.beginPath();
+        ctx.moveTo(20, py);
+        ctx.lineTo(748, py);
+        ctx.stroke();
       }
 
-      // Khung viền hoàng gia trên trang sách
-      ctx.strokeStyle = '#b47b1c';
-      ctx.lineWidth = 8;
-      ctx.strokeRect(38, 38, 692, 948);
-      ctx.strokeStyle = '#d4a338';
+      // Đổ bóng sâu ở khe gáy sách giữa 2 trang
+      const spineGrad = isLeft
+        ? ctx.createLinearGradient(640, 0, 768, 0)
+        : ctx.createLinearGradient(0, 0, 128, 0);
+      if (isLeft) {
+        spineGrad.addColorStop(0, 'rgba(70, 42, 10, 0)');
+        spineGrad.addColorStop(0.7, 'rgba(70, 42, 10, 0.22)');
+        spineGrad.addColorStop(1, 'rgba(42, 22, 4, 0.52)');
+        ctx.fillStyle = spineGrad;
+        ctx.fillRect(640, 0, 128, 1024);
+      } else {
+        spineGrad.addColorStop(0, 'rgba(42, 22, 4, 0.52)');
+        spineGrad.addColorStop(0.3, 'rgba(70, 42, 10, 0.22)');
+        spineGrad.addColorStop(1, 'rgba(70, 42, 10, 0)');
+        ctx.fillStyle = spineGrad;
+        ctx.fillRect(0, 0, 128, 1024);
+      }
+
+      // Khung viền cổ điển kép + hoa văn góc (Classical Double Border & Corner Flourishes)
+      ctx.strokeStyle = '#6e4715';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(42, 42, 684, 940);
+
+      ctx.strokeStyle = '#9c6b24';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(56, 56, 656, 912);
+
+      // Hoa văn góc cổ điển
+      const cornerCoords = [
+        [56, 56, 1, 1],
+        [712, 56, -1, 1],
+        [56, 968, 1, -1],
+        [712, 968, -1, -1]
+      ];
+      ctx.strokeStyle = '#781d1d';
       ctx.lineWidth = 3;
-      ctx.strokeRect(52, 52, 664, 920);
+      cornerCoords.forEach(([cx0, cy0, dx, dy]) => {
+        ctx.beginPath();
+        ctx.moveTo(cx0, cy0 + dy * 28);
+        ctx.lineTo(cx0 + dx * 28, cy0 + dy * 28);
+        ctx.lineTo(cx0 + dx * 28, cy0);
+        ctx.stroke();
+      });
 
       ctx.textAlign = 'center';
       if (isLeft) {
-        ctx.fillStyle = '#8b1e24';
-        ctx.font = 'bold 28px "Be Vietnam Pro", sans-serif';
-        ctx.fillText('✦ TƯ LIỆU LỊCH SỬ TRỌNG ĐIỂM ✦', 384, 115);
+        ctx.fillStyle = '#781d1d';
+        ctx.font = 'bold 24px "Cormorant Garamond", Georgia, serif';
+        ctx.fillText('— TƯ LIỆU LỊCH SỬ GIÁO DỤC VIỆT NAM —', 384, 110);
 
-        ctx.fillStyle = '#102a45';
+        ctx.fillStyle = '#2b1704';
         ctx.font = 'bold 46px "Cormorant Garamond", Georgia, serif';
-        ctx.fillText('LỊCH SỬ RA ĐỜI', 384, 185);
-        ctx.fillText('NGÀY NHÀ GIÁO VN', 384, 240);
+        ctx.fillText('LỊCH SỬ RA ĐỜI', 384, 178);
+        ctx.fillText('NGÀY NHÀ GIÁO VIỆT NAM', 384, 232);
 
-        ctx.fillStyle = '#b8292f';
-        ctx.font = 'bold 86px "Cormorant Garamond", Georgia, serif';
-        ctx.fillText('20 • 11', 384, 345);
+        ctx.fillStyle = '#7f1d1d';
+        ctx.font = 'bold 84px "Cormorant Garamond", Georgia, serif';
+        ctx.fillText('20 • 11', 384, 332);
 
-        ctx.strokeStyle = '#b47b1c';
-        ctx.lineWidth = 3;
+        // Hoa văn ngăn cách cổ điển
+        ctx.strokeStyle = '#6e4715';
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.moveTo(140, 385);
-        ctx.lineTo(628, 385);
+        ctx.moveTo(130, 368);
+        ctx.lineTo(638, 368);
         ctx.stroke();
+        ctx.fillStyle = '#781d1d';
+        ctx.font = '26px serif';
+        ctx.fillText('❖', 384, 377);
 
         ctx.textAlign = 'left';
-        ctx.fillStyle = '#1e293b';
-        ctx.font = 'bold 25px "Be Vietnam Pro", sans-serif';
         const leftMilestones = [
-          ['• Tháng 7.1946 (Paris):', 'Thành lập tổ chức quốc tế FISE bảo vệ quyền lợi nhà giáo.'],
-          ['• Năm 1949 (Ba Lan):', 'Xây dựng Hiến chương Các nhà giáo gồm 15 chương.'],
-          ['• Tháng 7.1953:', 'Công đoàn Giáo dục Việt Nam gia nhập tổ chức FISE.'],
-          ['• 20.11.1958:', 'Ngày Quốc tế Hiến chương các nhà giáo (57 nước tham dự).']
+          ['• Tháng 7.1946 (Paris, Pháp):', 'Thành lập Liên hiệp quốc tế Các công đoàn giáo dục (FISE).'],
+          ['• Năm 1949 (Warszawa, Ba Lan):', 'Xây dựng bản Hiến chương Các nhà giáo gồm 15 chương.'],
+          ['• Tháng 7.1953:', 'Công đoàn Giáo dục Việt Nam gia nhập tổ chức quốc tế FISE.'],
+          ['• Ngày 20.11.1958:', 'Ngày Quốc tế Hiến chương các nhà giáo (57 nước tham dự).']
         ];
-        let y = 445;
+        let y = 435;
         leftMilestones.forEach(([mTitle, mDesc]) => {
-          ctx.fillStyle = '#8b1e24';
-          ctx.font = 'bold 25px "Be Vietnam Pro", sans-serif';
-          ctx.fillText(mTitle, 82, y);
-          y += 34;
-          ctx.fillStyle = '#1e293b';
-          ctx.font = '500 22px "Be Vietnam Pro", sans-serif';
-          ctx.fillText(mDesc.slice(0, 36), 82, y);
-          if (mDesc.length > 36) {
+          ctx.fillStyle = '#6e1414';
+          ctx.font = 'bold 25px "Cormorant Garamond", Georgia, serif';
+          ctx.fillText(mTitle, 84, y);
+          y += 32;
+          ctx.fillStyle = '#2b1806';
+          ctx.font = '600 21px "Be Vietnam Pro", sans-serif';
+          ctx.fillText(mDesc.slice(0, 38), 84, y);
+          if (mDesc.length > 38) {
             y += 28;
-            ctx.fillText(mDesc.slice(36), 82, y);
+            ctx.fillText(mDesc.slice(38), 84, y);
           }
           y += 42;
         });
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#6e4715';
+        ctx.font = 'italic 20px "Cormorant Garamond", Georgia, serif';
+        ctx.fillText('— Trang I —', 384, 935);
       } else {
-        ctx.fillStyle = '#8b1e24';
-        ctx.font = 'bold 28px "Be Vietnam Pro", sans-serif';
-        ctx.fillText('✦ QUYẾT ĐỊNH LỊCH SỬ 167-HĐBT ✦', 384, 115);
+        ctx.fillStyle = '#781d1d';
+        ctx.font = 'bold 24px "Cormorant Garamond", Georgia, serif';
+        ctx.fillText('— QUYẾT ĐỊNH LỊCH SỬ SỐ 167-HĐBT —', 384, 110);
 
-        ctx.fillStyle = '#102a45';
+        ctx.fillStyle = '#2b1704';
         ctx.font = 'bold 42px "Cormorant Garamond", Georgia, serif';
-        ctx.fillText('NGÀY 28 • 09 • 1982', 384, 180);
+        ctx.fillText('NGÀY 28 THÁNG 9 NĂM 1982', 384, 175);
 
-        ctx.strokeStyle = '#b47b1c';
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#6e4715';
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.moveTo(140, 215);
-        ctx.lineTo(628, 215);
+        ctx.moveTo(130, 208);
+        ctx.lineTo(638, 208);
         ctx.stroke();
 
-        ctx.fillStyle = '#1e293b';
-        ctx.font = '600 24px "Be Vietnam Pro", sans-serif';
         const lines = [
           'Thay mặt Hội đồng Bộ trưởng,',
           'Phó Chủ tịch Võ Nguyên Giáp',
@@ -984,31 +1088,42 @@ class MuseumBuilder {
           '',
           '“Tôn vinh những người thầy',
           'đã cống hiến cho sự nghiệp',
-          'Trồng Người cao quý.”'
+          'Trồng Người cao quý của dân tộc.”'
         ];
-        let y = 275;
+        let y = 268;
         lines.forEach((ln, idx) => {
-          ctx.fillStyle = idx >= 6 ? '#8b1e24' : '#102a45';
-          ctx.font = idx === 4 ? 'bold 26px "Be Vietnam Pro", sans-serif' : (idx >= 6 ? 'italic bold 25px "Cormorant Garamond", serif' : '600 23px "Be Vietnam Pro", sans-serif');
+          ctx.fillStyle = idx >= 6 ? '#6e1414' : '#2b1704';
+          ctx.font = idx === 4
+            ? 'bold 26px "Cormorant Garamond", Georgia, serif'
+            : (idx >= 6 ? 'italic bold 26px "Cormorant Garamond", Georgia, serif' : '600 22px "Be Vietnam Pro", sans-serif');
           ctx.fillText(ln, 384, y);
-          y += 40;
+          y += 39;
         });
 
-        // Nút kêu gọi bấm lật sách trên trang phải
-        ctx.fillStyle = '#8b1e24';
-        ctx.beginPath();
-        ctx.roundRect(94, 760, 580, 110, 55);
-        ctx.fill();
-        ctx.strokeStyle = '#ffd700';
+        // Ấn triện đỏ cổ truyền (Traditional Vermilion Seal Stamp)
+        ctx.save();
+        ctx.translate(565, 765);
+        ctx.rotate(-0.08);
+        ctx.strokeStyle = 'rgba(168, 28, 28, 0.82)';
         ctx.lineWidth = 5;
-        ctx.stroke();
+        ctx.strokeRect(-64, -64, 128, 128);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-56, -56, 112, 112);
+        ctx.fillStyle = 'rgba(168, 28, 28, 0.82)';
+        ctx.font = 'bold 22px "Cormorant Garamond", serif';
+        ctx.fillText('TÔN SƯ', 0, -14);
+        ctx.fillText('TRỌNG ĐẠO', 0, 18);
+        ctx.fillText('20 • 11', 0, 46);
+        ctx.restore();
 
-        ctx.fillStyle = '#fff8dc';
-        ctx.font = 'bold 28px "Be Vietnam Pro", sans-serif';
-        ctx.fillText('📖 BẤM VÀO SÁCH ĐỂ LẬT ĐỌC', 384, 808);
-        ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 21px "Be Vietnam Pro", sans-serif';
-        ctx.fillText('Tìm hiểu trọn vẹn Lịch sử Ngày 20.11', 384, 844);
+        // Dòng chữ mời lật sách thanh nhã kiểu cổ thư
+        ctx.fillStyle = '#5c3409';
+        ctx.font = 'italic bold 23px "Cormorant Garamond", Georgia, serif';
+        ctx.fillText('✦ Chạm vào cổ thư để lật đọc từng trang ✦', 320, 868);
+
+        ctx.fillStyle = '#6e4715';
+        ctx.font = 'italic 20px "Cormorant Garamond", Georgia, serif';
+        ctx.fillText('— Trang II —', 384, 935);
       }
 
       const tex = new THREE.CanvasTexture(c);
@@ -1016,75 +1131,52 @@ class MuseumBuilder {
       return tex;
     };
 
-    const leftPageSurface = new THREE.Mesh(
-      new THREE.PlaneGeometry(coverW - 0.05, coverD - 0.06),
-      new THREE.MeshBasicMaterial({ map: createBookPageTexture(true) })
-    );
-    leftPageSurface.rotation.x = -Math.PI / 2;
-    leftPageSurface.position.set(-coverW / 2 - 0.01, 0.041, 0);
-    leftWing.add(leftPageSurface);
+    // Tạo mặt trang giấy uốn cong tự nhiên (Arched Page Geometry) như sách cổ thật
+    const createArchedPageMesh = (isLeft) => {
+      const pw = coverW - 0.068;
+      const pd = coverD - 0.078;
+      const geom = new THREE.PlaneGeometry(pw, pd, 20, 1);
+      geom.rotateX(-Math.PI / 2);
+      const pos = geom.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const lx = pos.getX(i); // từ -pw/2 đến +pw/2
+        // Chuẩn hóa t = 0 tại gáy sách, t = 1 tại mép ngoài trang sách
+        const t = isLeft ? (pw / 2 - lx) / pw : (lx + pw / 2) / pw;
+        // Đường cong vòm trang sách cổ: nhô cao ở giữa trang và hạ nhẹ ở gáy & mép
+        const archY = Math.sin(t * Math.PI) * 0.036 - Math.pow(1 - t, 3) * 0.012;
+        pos.setY(i, archY);
+      }
+      geom.computeVertexNormals();
+      const mesh = new THREE.Mesh(
+        geom,
+        new THREE.MeshBasicMaterial({ map: createBookPageTexture(isLeft) })
+      );
+      mesh.position.set(isLeft ? -(pw / 2 + 0.008) : (pw / 2 + 0.008), 0.048, 0);
+      return mesh;
+    };
 
-    const rightPageSurface = new THREE.Mesh(
-      new THREE.PlaneGeometry(coverW - 0.05, coverD - 0.06),
-      new THREE.MeshBasicMaterial({ map: createBookPageTexture(false) })
-    );
-    rightPageSurface.rotation.x = -Math.PI / 2;
-    rightPageSurface.position.set(coverW / 2 + 0.01, 0.041, 0);
-    rightWing.add(rightPageSurface);
+    leftWing.add(createArchedPageMesh(true));
+    rightWing.add(createArchedPageMesh(false));
 
-    // Dải ruy-băng lụa đỏ tua rua vàng đánh dấu sách
+    // Dải lụa đỏ đánh dấu sách cổ + tua rua vàng rủ qua mép trước
     const ribbon = new THREE.Mesh(
-      new THREE.BoxGeometry(0.045, 0.008, 0.55),
-      new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.4, emissive: 0x450a0a })
+      new THREE.BoxGeometry(0.032, 0.006, 0.56),
+      new THREE.MeshStandardMaterial({ color: 0x7f1d1d, roughness: 0.45, emissive: 0x2a0505 })
     );
-    ribbon.position.set(0, 0.044, 0.26);
+    ribbon.position.set(0, 0.046, 0.24);
     floatingBook.add(ribbon);
+
+    const tassel = new THREE.Mesh(
+      new THREE.ConeGeometry(0.022, 0.07, 12),
+      antiqueBrassMat
+    );
+    tassel.position.set(0, 0.01, 0.52);
+    tassel.rotation.x = 0.35;
+    floatingBook.add(tassel);
 
     floatingBook.add(leftWing);
     floatingBook.add(rightWing);
     bookGroup.add(floatingBook);
-
-    // 4. Huy hiệu Hào Quang "20/11" Lơ Lửng Phía Trên Sách (Floating Golden Crest)
-    const crestCanvas = document.createElement('canvas');
-    crestCanvas.width = 512;
-    crestCanvas.height = 256;
-    const cCtx = crestCanvas.getContext('2d');
-    const cGrad = cCtx.createRadialGradient(256, 128, 10, 256, 128, 220);
-    cGrad.addColorStop(0, 'rgba(255, 230, 120, 0.95)');
-    cGrad.addColorStop(0.55, 'rgba(180, 110, 15, 0.85)');
-    cGrad.addColorStop(1, 'rgba(180, 110, 15, 0)');
-    cCtx.fillStyle = cGrad;
-    cCtx.beginPath();
-    cCtx.roundRect(24, 24, 464, 208, 104);
-    cCtx.fill();
-
-    cCtx.strokeStyle = '#fff3b0';
-    cCtx.lineWidth = 6;
-    cCtx.stroke();
-
-    cCtx.fillStyle = '#4a080e';
-    cCtx.font = 'bold 24px "Be Vietnam Pro", sans-serif';
-    cCtx.textAlign = 'center';
-    cCtx.fillText('✦ SÁCH VÀNG LỊCH SỬ ✦', 256, 78);
-
-    cCtx.fillStyle = '#ffffff';
-    cCtx.shadowColor = '#ffd700';
-    cCtx.shadowBlur = 14;
-    cCtx.font = 'bold 64px "Cormorant Garamond", Georgia, serif';
-    cCtx.fillText('20 • 11', 256, 148);
-    cCtx.shadowBlur = 0;
-
-    cCtx.fillStyle = '#fff8dc';
-    cCtx.font = 'bold 22px "Be Vietnam Pro", sans-serif';
-    cCtx.fillText('BẤM ĐỂ MỞ SÁCH LẬT TÌM HIỂU', 256, 198);
-
-    const crestTex = new THREE.CanvasTexture(crestCanvas);
-    const crestPlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.15, 0.56),
-      new THREE.MeshBasicMaterial({ map: crestTex, transparent: true, side: THREE.DoubleSide, depthWrite: false })
-    );
-    crestPlane.position.set(0, 2.24, 0);
-    bookGroup.add(crestPlane);
 
     // 5. Bảng đồng thuyết minh phía trước bệ sách (Front Lectern Plaque)
     const plaqueGroup = new THREE.Group();
@@ -1119,16 +1211,16 @@ class MuseumBuilder {
 
     pCtx.textAlign = 'center';
     pCtx.fillStyle = '#ffd700';
-    pCtx.font = 'bold 34px "Be Vietnam Pro", sans-serif';
-    pCtx.fillText('✦ ẤN PHẨM ĐẶC BIỆT • PHÒNG LỊCH SỬ GIÁO DỤC ✦', 512, 105);
+    pCtx.font = 'bold 30px "Be Vietnam Pro", sans-serif';
+    pCtx.fillText('✦ ẤN PHẨM ĐẶC BIỆT • PHÒNG LỊCH SỬ GIÁO DỤC ✦', 512, 102);
 
     pCtx.fillStyle = '#ffffff';
-    pCtx.font = 'bold 54px "Cormorant Garamond", Georgia, serif';
-    pCtx.fillText('LỊCH SỬ NGÀY NHÀ GIÁO VIỆT NAM 20.11', 512, 185);
+    pCtx.font = 'bold 46px "Cormorant Garamond", Georgia, serif';
+    pCtx.fillText('LỊCH SỬ NGÀY NHÀ GIÁO VIỆT NAM 20.11', 512, 178);
 
     pCtx.fillStyle = '#e2e8f0';
-    pCtx.font = '500 28px "Be Vietnam Pro", sans-serif';
-    pCtx.fillText('Từ Hiến chương Các nhà giáo (FISE 1946 – 1958) đến Quyết định 167-HĐBT (28/9/1982)', 512, 255);
+    pCtx.font = '500 22px "Be Vietnam Pro", sans-serif';
+    pCtx.fillText('Từ Hiến chương Các nhà giáo (FISE 1946–1958) đến Quyết định 167-HĐBT (28/9/1982)', 512, 246);
 
     pCtx.fillStyle = '#8b1e24';
     pCtx.beginPath();
@@ -1139,8 +1231,8 @@ class MuseumBuilder {
     pCtx.stroke();
 
     pCtx.fillStyle = '#fff8dc';
-    pCtx.font = 'bold 34px "Be Vietnam Pro", sans-serif';
-    pCtx.fillText('📖 BẤM ĐỂ MỞ SÁCH LẬT TÌM HIỂU NGAY', 512, 382);
+    pCtx.font = 'bold 32px "Be Vietnam Pro", sans-serif';
+    pCtx.fillText('📖 BẤM ĐỂ MỞ SÁCH LẬT TÌM HIỂU NGAY', 512, 380);
 
     const pTex = new THREE.CanvasTexture(pCanvas);
     const plaqueBoard = new THREE.Mesh(
@@ -1213,13 +1305,12 @@ class MuseumBuilder {
     const sparklePoints = new THREE.Points(sparkleGeom, sparkleMat);
     bookGroup.add(sparklePoints);
 
-    // Hiệu ứng chuyển động lơ lửng & hạt lấp lánh bay lên
+    // Hiệu ứng chuyển động lơ lửng nhẹ nhàng & hạt lấp lánh bay lên
     this.animatedObjects.push({
       mesh: floatingBook,
       customUpdate: (time) => {
-        floatingBook.position.y = 1.54 + Math.sin(time * 2.2) * 0.055;
-        floatingBook.rotation.y = Math.sin(time * 0.9) * 0.12;
-        crestPlane.position.y = 2.24 + Math.sin(time * 2.2 + 0.6) * 0.05;
+        floatingBook.position.y = 1.48 + Math.sin(time * 2.0) * 0.035;
+        floatingBook.rotation.y = Math.sin(time * 0.8) * 0.08;
         topGlowRing.scale.setScalar(1.0 + Math.sin(time * 3.0) * 0.06);
 
         const posAttr = sparkleGeom.getAttribute('position');
