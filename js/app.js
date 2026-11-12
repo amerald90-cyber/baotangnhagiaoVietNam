@@ -2953,19 +2953,15 @@ class VietnamTeachersMuseumApp {
         e.preventDefault();
         const delta = Math.sign(e.deltaY);
         if (this.cameraMode === 'inspect' && this.selectedArtifact) {
-          this.orbitRadius = Math.max(1.8, Math.min(7.5, this.orbitRadius + delta * 0.35));
-          this.targetCameraPos.set(
-            this.selectedArtifact.position.x + Math.sin(this.orbitAngle) * this.orbitRadius,
-            this.orbitHeight,
-            this.selectedArtifact.position.z + Math.cos(this.orbitAngle) * this.orbitRadius
-          );
-        } else {
-          // Lăn chuột tiến lùi êm ái, biên độ vừa phải (0.55m) chống giật hoặc vọt ra ngoài phòng
-          const forward = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
-          this.targetCameraPos.addScaledVector(forward, -delta * 0.55);
-          this.clampPositionToMuseumBounds(this.targetCameraPos);
-          this.updateLookAtFromYawPitch();
+          // Chuyển sang chế độ di chuyển tự do có kiểm soát biên tường & dẫn hướng ra cửa sảnh chính
+          this.cameraMode = 'free';
+          this.syncYawPitchFromLookAt();
         }
+        const prevPos = this.targetCameraPos.clone();
+        const forward = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+        this.targetCameraPos.addScaledVector(forward, -delta * 0.52);
+        this.applyWheelDoorwayGuidanceAndBounds(prevPos, this.targetCameraPos, delta);
+        this.updateLookAtFromYawPitch();
       },
       { passive: false }
     );
@@ -3780,51 +3776,214 @@ class VietnamTeachersMuseumApp {
     }
   }
 
+  // ==================== CHỐNG XUYÊN TƯỜNG TUYỆT ĐỐI & TỰ ĐỘNG DẪN HƯỚNG RA CỬA SẢNH CHÍNH KHI LĂN CHUỘT ====================
+  getEducatorsCurveMaxAbsX(z) {
+    // Nội suy biên độ rộng an toàn (đã trừ khoảng đệm 1.45m cách mặt tường) dọc theo dải tường cong chữ S (Z từ -10.8 đến -34.5)
+    if (z >= -11.8) return 2.5; // Cổng vòm cửa phòng
+    if (z >= -13.5) return 2.5 + ((-11.8 - z) / 1.7) * 4.8; // Mở rộng từ 2.5m lên 7.3m
+    if (z >= -17.5) return 7.3 + ((-13.5 - z) / 4.0) * 3.6; // Mở rộng lên 10.9m
+    if (z >= -21.5) return 10.9 + ((-17.5 - z) / 4.0) * 2.1; // Mở rộng lên 13.0m
+    if (z >= -30.0) return 13.1; // Bụng phòng rộng nhất
+    if (z >= -33.6) return 13.1 - ((-30.0 - z) / 3.6) * 1.5; // Bo góc Bắc: 11.6m
+    return 10.2;
+  }
+
+  getEducatorsCurveMinZ(x) {
+    // Vách Bắc uốn lượn chữ S: tại X = 0 tường võng xuống Z = -34.2, tại hai bên X = ±7.5 tường ở Z = -37.0 (trừ đệm 1.45m)
+    const absX = Math.abs(x);
+    if (absX <= 4.0) {
+      return -32.6 - (absX / 4.0) * 1.8; // Tại x=0 là -32.6, tại x=±4 là -34.4
+    }
+    if (absX <= 9.5) {
+      return -34.4 - ((absX - 4.0) / 5.5) * 0.9; // Lên tới -35.3 ở hai hông Bắc
+    }
+    return -33.5;
+  }
+
+  applyWheelDoorwayGuidanceAndBounds(prevPos, pos, delta) {
+    const stepLen = 0.52;
+
+    // 1. NẾU ĐANG Ở PHÒNG NHỮNG NGƯỜI THẦY TRONG SỬ VIỆT (BẮC, Z < -10.5)
+    if (prevPos.z < -10.5) {
+      const maxAbsX = this.getEducatorsCurveMaxAbsX(pos.z);
+      const minZ = this.getEducatorsCurveMinZ(pos.x);
+      const hitOuterWall = Math.abs(pos.x) > maxAbsX - 0.15 || pos.z < minZ + 0.15;
+      const headingToExit = pos.z > prevPos.z;
+      const hitDoorWall = pos.z > -11.4 && Math.abs(pos.x) > 2.4;
+
+      // Nếu lăn chuột lùi (delta > 0) chạm tường cong HOẶC đang lăn về phía cửa ra nhưng lệch tâm cửa:
+      // Tự động dẫn hướng mượt mà về Cửa Ra Đại Sảnh Chính (x = 0, z = -10.0 -> 0)
+      if ((delta > 0 && hitOuterWall) || hitDoorWall || (headingToExit && prevPos.z > -16.5 && Math.abs(pos.x) > 2.2)) {
+        pos.x = prevPos.x * 0.78; // Hút êm về trục giữa cửa x = 0
+        pos.z = Math.min(-6.2, prevPos.z + stepLen * 0.92); // Tiến dần ra cửa về Đại Sảnh
+      }
+
+      // Lách mượt qua bệ Cây Đa Tri Ân tại tâm (0, -24.3) bán kính 2.45m
+      const distTree = Math.hypot(pos.x - 0, pos.z - (-24.3));
+      if (distTree < 2.45) {
+        const pushAngle = Math.atan2(pos.x || 0.25, pos.z - (-24.3));
+        pos.x = Math.sin(pushAngle) * 2.5;
+        pos.z = -24.3 + Math.cos(pushAngle) * 2.5;
+      }
+
+      this.clampPositionToMuseumBounds(pos);
+      return;
+    }
+
+    // 2. NẾU ĐANG Ở PHÒNG BỘ TRƯỞNG BỘ GIÁO DỤC (ĐÔNG, X > 10.6)
+    if (prevPos.x > 10.6) {
+      const hitOuterWall = pos.x > 32.1 || Math.abs(pos.z) > 7.1;
+      const headingToExit = pos.x < prevPos.x;
+      const hitDoorWall = pos.x < 11.8 && Math.abs(pos.z) > 2.2;
+
+      // Nếu lăn chuột quá tay chạm tường cuối/tường bên HOẶC đi ra cửa nhưng lệch vách cửa:
+      // Tự động trượt êm về trục giữa (z = 0) và đi ra Cửa Đại Sảnh Chính (x = 11.2 -> 0)
+      if ((delta > 0 && hitOuterWall) || hitDoorWall || (headingToExit && prevPos.x < 16.5 && Math.abs(pos.z) > 2.0)) {
+        pos.z = prevPos.z * 0.76; // Trượt êm về tâm cửa z = 0
+        pos.x = Math.max(6.5, prevPos.x - stepLen * 0.92); // Đi thẳng ra cửa về Đại Sảnh
+      }
+
+      // Lách mượt qua Bục Quả Cầu Vàng tại (22.5, 0) bán kính 1.85m
+      const distGlobe = Math.hypot(pos.x - 22.5, pos.z);
+      if (distGlobe < 1.85) {
+        const sideSign = pos.z >= 0 ? 1 : -1;
+        pos.z = sideSign * 1.95;
+      }
+
+      this.clampPositionToMuseumBounds(pos);
+      return;
+    }
+
+    // 3. NẾU ĐANG Ở PHÒNG LỊCH SỬ GIÁO DỤC & CỔ THƯ 20/11 (TÂY, X < -10.6)
+    if (prevPos.x < -10.6) {
+      const hitOuterWall = pos.x < -25.9 || Math.abs(pos.z) > 9.1;
+      const headingToExit = pos.x > prevPos.x;
+      const hitDoorWall = pos.x > -11.6 && Math.abs(pos.z) > 3.8;
+
+      // Nếu lăn chuột quá tay chạm tường Tây (-28m) / tường Bắc Nam HOẶC đi ra cửa lệch tâm:
+      // Tự động trượt êm về trục giữa (z = 0) và đi ra Cửa Đại Sảnh Chính (x = -10.8 -> 0)
+      if ((delta > 0 && hitOuterWall) || hitDoorWall || (headingToExit && prevPos.x > -16.5 && Math.abs(pos.z) > 3.4)) {
+        pos.z = prevPos.z * 0.78;
+        pos.x = Math.min(-6.5, prevPos.x + stepLen * 0.92);
+      }
+
+      // Lách mượt qua Bệ Cổ Thư 20/11 tại (-19.5, 0) bán kính 1.55m
+      const distBook = Math.hypot(pos.x - (-19.5), pos.z);
+      if (distBook < 1.55) {
+        const angle = Math.atan2(pos.z || 0.25, pos.x - (-19.5));
+        pos.x = -19.5 + Math.cos(angle) * 1.62;
+        pos.z = Math.sin(angle) * 1.62;
+      }
+
+      this.clampPositionToMuseumBounds(pos);
+      return;
+    }
+
+    // 4. NẾU ĐANG Ở HÀNH LANG NAM (LỜI BÁC DẠY & BỘ ĐỒ DÙNG, Z từ 10.5 đến 39.2)
+    if (prevPos.z > 10.5 && prevPos.z <= 39.2) {
+      const hitSideOrEndWall = Math.abs(pos.x) > 9.3 || (pos.z > 37.6 && Math.abs(pos.x) > 3.2);
+      const headingToGrandHall = pos.z < prevPos.z;
+      const hitNorthDoorWall = pos.z < 11.4 && Math.abs(pos.x) > 4.6;
+
+      if ((delta > 0 && hitSideOrEndWall) || hitNorthDoorWall || (headingToGrandHall && prevPos.z < 16.0 && Math.abs(pos.x) > 4.2)) {
+        pos.x = prevPos.x * 0.78;
+        pos.z = Math.max(6.5, prevPos.z - stepLen * 0.92);
+      }
+
+      // Lách mượt qua Tủ kính Bức thư Bác Hồ tại (0, 25.0)
+      const distHoCase = Math.hypot(pos.x, pos.z - 25.0);
+      if (distHoCase < 2.15) {
+        const sideSign = pos.x >= 0 ? 1 : -1;
+        pos.x = sideSign * 2.25;
+      }
+
+      this.clampPositionToMuseumBounds(pos);
+      return;
+    }
+
+    // 5. ĐẠI SẢNH TRUNG TÂM & QUẢNG TRƯỜNG
+    this.clampPositionToMuseumBounds(pos);
+  }
+
   clampPositionToMuseumBounds(pos) {
-    // 1. Ngoài quảng trường tiền sảnh (Z > 39.5)
-    if (pos.z > 39.5) {
+    // 1. Ngoài quảng trường tiền sảnh (Z > 39.2)
+    if (pos.z > 39.2) {
       pos.x = Math.max(-28.0, Math.min(28.0, pos.x));
-      pos.z = Math.max(39.0, Math.min(68.0, pos.z));
+      pos.z = Math.max(39.3, Math.min(68.0, pos.z));
       pos.y = Math.max(1.6, Math.min(6.5, pos.y));
       return;
     }
 
-    // 2. Bên trong Gian Phòng Dải Tường Cong: Nhà Giáo Việt Nam Qua Các Thời Kỳ (Phía Bắc, Z < -10.5)
-    if (pos.z < -10.5) {
-      pos.x = Math.max(-14.5, Math.min(14.5, pos.x));
-      pos.z = Math.max(-36.5, Math.min(-11.0, pos.z));
+    // 2. Bên trong Gian Phòng Dải Tường Cong: Những Người Thầy Trong Sử Việt (Phía Bắc, Z < -10.6)
+    if (pos.z < -10.6) {
+      // Nếu đang ở vùng cổ cửa vòm (-11.5 <= z < -10.6) và nằm trong bề rộng cửa (|x| <= 2.55) -> Cho phép đi thông ra Đại Sảnh!
+      if (pos.z > -11.4 && Math.abs(pos.x) <= 2.55) {
+        pos.x = Math.max(-2.45, Math.min(2.45, pos.x));
+        pos.y = 1.6;
+        return;
+      }
+      const minZ = this.getEducatorsCurveMinZ(pos.x);
+      pos.z = Math.max(minZ, Math.min(-11.3, pos.z));
+      const maxAbsX = this.getEducatorsCurveMaxAbsX(pos.z);
+      pos.x = Math.max(-maxAbsX, Math.min(maxAbsX, pos.x));
       pos.y = 1.6;
       return;
     }
 
-    // 3. Bên trong Hành Lang Nam (Lời Bác Dạy & Đồ Dùng Dạy Học, Z từ 10.5 đến 39.5)
-    // Tường hành lang ở X = ±11.2 -> Khóa chặt X trong khoảng [-9.8, 9.8] để tuyệt đối không văng xuyên tường!
-    if (pos.z >= 10.5 && pos.z <= 39.5) {
-      pos.x = Math.max(-9.8, Math.min(9.8, pos.x));
-      pos.z = Math.max(10.5, Math.min(39.5, pos.z));
+    // 3. Bên trong Hành Lang Nam (Lời Bác Dạy & Đồ Dùng Dạy Học, Z từ 10.6 đến 39.2)
+    if (pos.z > 10.6 && pos.z <= 39.2) {
+      pos.x = Math.max(-9.5, Math.min(9.5, pos.x));
+      // Cuối hành lang tại Z = 39.5: chỉ cho đi qua cửa chính nếu |x| <= 3.2, còn hai bên khóa ở Z <= 37.8
+      const maxZ = Math.abs(pos.x) <= 3.2 ? 39.2 : 37.8;
+      pos.z = Math.max(10.6, Math.min(maxZ, pos.z));
       pos.y = 1.6;
       return;
     }
 
-    // 4. Bên trong Gian Phòng 15 Vị Bộ Trưởng (Phía Đông, X > 11.0)
-    if (pos.x > 11.0) {
-      pos.x = Math.max(11.2, Math.min(32.5, pos.x));
-      pos.z = Math.max(-7.5, Math.min(7.5, pos.z));
+    // 4. Bên trong Gian Phòng 15 Vị Bộ Trưởng (Phía Đông, X > 10.8)
+    // Tường Đông ở X = 34.2, Tường Bắc/Nam ở Z = ±9.0, Vách cửa ở X = 11.2 (Cửa rộng Z ∈ [-2.4, +2.4])
+    if (pos.x > 10.8) {
+      if (pos.x < 11.6 && Math.abs(pos.z) <= 2.35) {
+        pos.z = Math.max(-2.25, Math.min(2.25, pos.z));
+        pos.y = 1.6;
+        return;
+      }
+      pos.x = Math.max(11.5, Math.min(32.3, pos.x));
+      pos.z = Math.max(-7.4, Math.min(7.4, pos.z));
       pos.y = 1.6;
       return;
     }
 
-    // 5. Bên trong Gian Phòng Lịch Sử Giáo Dục (Phía Tây, X < -11.0)
-    if (pos.x < -11.0) {
-      pos.x = Math.max(-32.5, Math.min(-11.2, pos.x));
-      pos.z = Math.max(-7.5, Math.min(7.5, pos.z));
+    // 5. Bên trong Gian Phòng Lịch Sử Giáo Dục (Phía Tây, X < -10.8)
+    // Tường Tây ở X = -28.0 (khóa chặt tại -26.2 để tuyệt đối không xuyên tường!), Tường Bắc/Nam ở Z = ±11.0
+    if (pos.x < -10.8) {
+      if (pos.x > -11.6 && Math.abs(pos.z) <= 4.2) {
+        pos.z = Math.max(-4.1, Math.min(4.1, pos.z));
+        pos.y = 1.6;
+        return;
+      }
+      pos.x = Math.max(-26.2, Math.min(-11.4, pos.x));
+      pos.z = Math.max(-9.3, Math.min(9.3, pos.z));
       pos.y = 1.6;
       return;
     }
 
-    // 6. Khu vực Đại Sảnh Trung Tâm Rotunda Hub (Z từ -10.5 đến 10.5, X từ -11.0 đến 11.0)
-    pos.x = Math.max(-10.2, Math.min(10.2, pos.x));
-    pos.z = Math.max(-10.5, Math.min(10.5, pos.z));
+    // 6. Khu vực Đại Sảnh Trung Tâm Rotunda Hub (Z từ -10.6 đến 10.6, X từ -10.8 đến 10.8)
+    // Chặn các góc tường chéo của Đại Sảnh để chỉ đi vào 4 phòng qua đúng 4 cửa chính
+    if (pos.z < -9.6 && Math.abs(pos.x) > 2.55) {
+      pos.z = -9.6;
+    }
+    if (pos.z > 9.8 && Math.abs(pos.x) > 4.8) {
+      pos.z = 9.8;
+    }
+    if (pos.x > 9.8 && Math.abs(pos.z) > 2.35) {
+      pos.x = 9.8;
+    }
+    if (pos.x < -9.8 && Math.abs(pos.z) > 4.2) {
+      pos.x = -9.8;
+    }
+    pos.x = Math.max(-10.8, Math.min(10.8, pos.x));
+    pos.z = Math.max(-10.6, Math.min(10.6, pos.z));
     pos.y = 1.6;
   }
 
