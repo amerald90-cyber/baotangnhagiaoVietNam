@@ -1,9 +1,25 @@
 // Xây dựng không gian kiến trúc 3D Bảo tàng Nhà giáo Việt Nam
 // Gồm: Đại Sảnh (Đài Biểu Tượng + Cây Tri Ân Xoay 3D gắn thẻ lời chúc), Phòng 1 (Lịch sử 5 giai đoạn), Phòng 2 (15 Nhà giáo ưu tú), Phòng 3 (15 Bộ trưởng Bộ GD), Phòng 4 (Khu Bộ đồ dùng)
 
+// Polyfill ctx.roundRect cho trình duyệt điện thoại iOS/Android cũ & trình duyệt nhúng (Zalo, Messenger)
+if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, radii) {
+    let r = typeof radii === 'number' ? radii : (Array.isArray(radii) ? radii[0] || 0 : 0);
+    r = Math.min(r, w / 2, h / 2);
+    this.moveTo(x + r, y);
+    this.arcTo(x + w, y, x + w, y + h, r);
+    this.arcTo(x + w, y + h, x, y + h, r);
+    this.arcTo(x, y + h, x, y, r);
+    this.arcTo(x, y, x + w, y, r);
+    this.closePath();
+    return this;
+  };
+}
+
 class MuseumBuilder {
   constructor(scene) {
     this.scene = scene;
+    this.isMobile = typeof window !== 'undefined' && (window.innerWidth <= 900 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
     this.interactables = [];
     this.artifactGroups = new Map();
     this.animatedObjects = [];
@@ -2086,9 +2102,17 @@ class MuseumBuilder {
   }
 
   buildLighting() {
-    const hemiLight = new THREE.HemisphereLight(0xfff4e0, 0x2c2219, 0.9);
+    const hemiLight = new THREE.HemisphereLight(0xfff4e0, 0x2c2219, this.isMobile ? 1.35 : 0.9);
     hemiLight.position.set(0, 16, 0);
     this.scene.add(hemiLight);
+    if (this.isMobile) {
+      const mobileAmb = new THREE.AmbientLight(0xfff6e5, 0.55);
+      this.scene.add(mobileAmb);
+      const mobileCenter = new THREE.PointLight(0xffe4b5, 1.6, 45);
+      mobileCenter.position.set(0, 8.5, 0);
+      this.scene.add(mobileCenter);
+      return;
+    }
 
     const centerSpot = new THREE.SpotLight(0xffe4b5, 3.2, 28, Math.PI / 4, 0.55, 1.2);
     centerSpot.position.set(0, 12.0, 0);
@@ -2358,12 +2382,14 @@ class MuseumBuilder {
     const galleryAmbient = new THREE.AmbientLight(0xfff8ee, 0.75);
     galleryArch.add(galleryAmbient);
 
-    // 5 Đèn PointLight tỏa đều khắp không gian
-    [[-8, -18], [-8, -30], [8, -18], [8, -30], [0, -24]].forEach(([px, pz]) => {
-      const pLight = new THREE.PointLight(0xffecd1, 0.75, 22, 1.4);
-      pLight.position.set(px, 5.2, pz);
-      galleryArch.add(pLight);
-    });
+    // 5 Đèn PointLight tỏa đều khắp không gian (tắt bớt trên mobile để tránh vượt giới hạn WebGL shader)
+    if (!this.isMobile) {
+      [[-8, -18], [-8, -30], [8, -18], [8, -30], [0, -24]].forEach(([px, pz]) => {
+        const pLight = new THREE.PointLight(0xffecd1, 0.75, 22, 1.4);
+        pLight.position.set(px, 5.2, pz);
+        galleryArch.add(pLight);
+      });
+    }
 
     parent.add(galleryArch);
   }
@@ -5853,11 +5879,13 @@ class MuseumBuilder {
 
       // 3. ĐÈN SPOTLIGHT ÂM TRẦN CHIẾU RỌI XIÊN GÓC 45 ĐỘ XUỐNG TỪNG VỊ TRÍ TRANH
       const spotZ = isNorth ? -5.2 : 5.2;
-      const spotLight = new THREE.SpotLight(0xfff5e0, 2.2, 14, Math.PI / 5, 0.45, 1.2);
-      spotLight.position.set(x, 7.55, spotZ);
-      spotLight.target.position.set(x, 3.35, z);
-      this.scene.add(spotLight.target);
-      this.scene.add(spotLight);
+      if (!this.isMobile) {
+        const spotLight = new THREE.SpotLight(0xfff5e0, 2.2, 14, Math.PI / 5, 0.45, 1.2);
+        spotLight.position.set(x, 7.55, spotZ);
+        spotLight.target.position.set(x, 3.35, z);
+        this.scene.add(spotLight.target);
+        this.scene.add(spotLight);
+      }
 
       // Đui đèn âm trần mạ đồng
       const spotCanister = new THREE.Mesh(
@@ -6104,11 +6132,13 @@ class MuseumBuilder {
     group.userData = { artifactId: art.id, artifact: art };
 
     // Đèn Spotlight riêng trên trần
-    const spot = new THREE.SpotLight(0xffe3b3, 2.5, 15, Math.PI / 6, 0.48, 1.2);
-    spot.position.set(art.position.x, 7.3, art.position.z);
-    spot.target.position.set(art.position.x, 1.2, art.position.z);
-    this.scene.add(spot);
-    this.scene.add(spot.target);
+    if (!this.isMobile) {
+      const spot = new THREE.SpotLight(0xffe3b3, 2.5, 15, Math.PI / 6, 0.48, 1.2);
+      spot.position.set(art.position.x, 7.3, art.position.z);
+      spot.target.position.set(art.position.x, 1.2, art.position.z);
+      this.scene.add(spot);
+      this.scene.add(spot.target);
+    }
 
     // Quầng sáng dưới chân hiện vật
     const lightPool = new THREE.Mesh(
@@ -7844,11 +7874,13 @@ class MuseumBuilder {
       g.add(plaque);
 
       // Đèn rọi spotlight riêng cho từng bức đại tự
-      const spot = new THREE.SpotLight(0xfff3db, 2.2, 12, Math.PI / 5, 0.5, 1.2);
-      spot.position.set(t.x > 0 ? t.x - 3.5 : t.x + 3.5, 6.8, t.z);
-      spot.target.position.set(t.x, t.y, t.z);
-      this.scene.add(spot);
-      this.scene.add(spot.target);
+      if (!this.isMobile) {
+        const spot = new THREE.SpotLight(0xfff3db, 2.2, 12, Math.PI / 5, 0.5, 1.2);
+        spot.position.set(t.x > 0 ? t.x - 3.5 : t.x + 3.5, 6.8, t.z);
+        spot.target.position.set(t.x, t.y, t.z);
+        this.scene.add(spot);
+        this.scene.add(spot.target);
+      }
 
       this.scene.add(g);
     });
@@ -8644,13 +8676,15 @@ class MuseumBuilder {
     extGroup.add(signFace);
 
     // 4 Đèn rọi spotlight riêng cho biển hiệu mặt tiền
-    [-4.5, -1.5, 1.5, 4.5].forEach((lx) => {
-      const spot = new THREE.SpotLight(0xfff5e0, 2.6, 12, Math.PI / 4, 0.4);
-      spot.position.set(lx, 10.4, 46.2);
-      spot.target.position.set(lx, 7.6, 44.2);
-      extGroup.add(spot);
-      extGroup.add(spot.target);
-    });
+    if (!this.isMobile) {
+      [-4.5, -1.5, 1.5, 4.5].forEach((lx) => {
+        const spot = new THREE.SpotLight(0xfff5e0, 2.6, 12, Math.PI / 4, 0.4);
+        spot.position.set(lx, 10.4, 46.2);
+        spot.target.position.set(lx, 7.6, 44.2);
+        extGroup.add(spot);
+        extGroup.add(spot.target);
+      });
+    }
 
     // 8. BỘ CỬA CHÍNH ĐẠI SẢNH MỞ RỘNG ĐÓN ÁNH SÁNG TỪ TRONG RA (Z = 39.5)
     // Cánh cửa Trái (quay mở góc ~75 độ vào phía trong)
@@ -8760,9 +8794,11 @@ class MuseumBuilder {
         lampG.add(globe);
       });
 
-      const lampLight = new THREE.PointLight(0xffdfa0, 1.8, 11);
-      lampLight.position.set(0, 3.8, 0);
-      lampG.add(lampLight);
+      if (!this.isMobile) {
+        const lampLight = new THREE.PointLight(0xffdfa0, 1.8, 11);
+        lampLight.position.set(0, 3.8, 0);
+        lampG.add(lampLight);
+      }
 
       extGroup.add(lampG);
     });
