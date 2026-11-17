@@ -14,6 +14,7 @@ class VietnamTeachersMuseumApp {
       0.1,
       140
     );
+    this.updateResponsiveCameraFov();
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -2837,18 +2838,93 @@ class VietnamTeachersMuseumApp {
     this.openTributeCardViewer(0);
   }
 
-  // ==================== SỰ KIỆN CHUỘT, BÀN PHÍM & MŨI TÊN CHUYỂN PHÒNG ====================
+  // Tự động mở rộng góc nhìn dọc (FOV) khi màn hình điện thoại xoay dọc (aspect < 1)
+  // giúp không gian 3D, cổng bảo tàng và các gian phòng hiển thị trọn vẹn trên điện thoại; giữ nguyên 55 độ trên máy tính
+  updateResponsiveCameraFov() {
+    if (!this.camera) return;
+    const aspect = window.innerWidth / Math.max(1, window.innerHeight);
+    this.camera.aspect = aspect;
+    if (aspect < 1.0) {
+      this.camera.fov = Math.min(76, Math.round(55 / Math.pow(aspect, 0.36)));
+    } else {
+      this.camera.fov = 55;
+    }
+    this.camera.updateProjectionMatrix();
+  }
+
+  // ==================== SỰ KIỆN CHUỘT, BÀN PHÍM, CẢM ỨNG ĐIỆN THOẠI & MŨI TÊN CHUYỂN PHÒNG ====================
   bindEvents() {
-    window.addEventListener('resize', () => {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
+    const handleViewportResize = () => {
+      this.updateResponsiveCameraFov();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener('resize', handleViewportResize);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(handleViewportResize, 120);
     });
 
     const dom = this.renderer.domElement;
+    dom.style.touchAction = 'none';
+
+    // Hỗ trợ chụm/mở 2 ngón tay (Pinch Gesture) trên điện thoại để bước tiến/lùi mượt mà trong bảo tàng
+    this.isPinching = false;
+    this.lastPinchDist = 0;
+
+    dom.addEventListener(
+      'touchstart',
+      (e) => {
+        if (e.touches && e.touches.length === 2) {
+          this.isPinching = true;
+          this.isDragging = false;
+          this.isDraggingTree = false;
+          this.dragMoved = true;
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          this.lastPinchDist = Math.hypot(dx, dy);
+        }
+      },
+      { passive: true }
+    );
+
+    dom.addEventListener(
+      'touchmove',
+      (e) => {
+        if (this.isPinching && e.touches && e.touches.length === 2) {
+          e.preventDefault();
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          const dist = Math.hypot(dx, dy);
+          const diff = dist - this.lastPinchDist;
+          if (Math.abs(diff) > 6) {
+            this.lastPinchDist = dist;
+            // Mở rộng 2 ngón (diff > 0) -> tiến tới (delta = -1); Chụm 2 ngón (diff < 0) -> lùi ra cửa (delta = +1)
+            const delta = diff > 0 ? -1 : 1;
+            if (this.cameraMode === 'inspect' && this.selectedArtifact) {
+              this.cameraMode = 'free';
+              this.syncYawPitchFromLookAt();
+            }
+            const prevPos = this.targetCameraPos.clone();
+            const forward = new THREE.Vector3(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+            this.targetCameraPos.addScaledVector(forward, -delta * 0.42);
+            this.applyWheelDoorwayGuidanceAndBounds(prevPos, this.targetCameraPos, delta);
+            this.updateLookAtFromYawPitch();
+          }
+        }
+      },
+      { passive: false }
+    );
+
+    const endPinch = (e) => {
+      if (!e.touches || e.touches.length < 2) {
+        this.isPinching = false;
+      }
+    };
+    dom.addEventListener('touchend', endPinch, { passive: true });
+    dom.addEventListener('touchcancel', endPinch, { passive: true });
 
     dom.addEventListener('pointerdown', (e) => {
-      if (e.button !== 0) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (this.isPinching) return;
       this.isDragging = true;
       this.dragMoved = false;
       this.isDraggingTree = false;
@@ -2858,7 +2934,7 @@ class VietnamTeachersMuseumApp {
       this.prevMouse.x = e.clientX;
       this.prevMouse.y = e.clientY;
 
-      // Kiểm tra xem chuột có đang nhấn trúng vào khu vực Cây (sảnh ngoài hoặc trong phòng) không
+      // Kiểm tra xem chuột / ngón tay có đang nhấn trúng vào khu vực Cây (sảnh ngoài hoặc trong phòng) không
       try {
         const mouseNorm = new THREE.Vector2(
           (e.clientX / window.innerWidth) * 2 - 1,
@@ -2891,17 +2967,21 @@ class VietnamTeachersMuseumApp {
     });
 
     window.addEventListener('pointermove', (e) => {
+      if (this.isPinching) return;
       this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
       this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
       if (!this.isDragging) {
-        this.checkHoverArtifact(e.clientX, e.clientY);
+        if (e.pointerType !== 'touch') {
+          this.checkHoverArtifact(e.clientX, e.clientY);
+        }
         return;
       }
 
       const totalDx = e.clientX - this.downMouse.x;
       const totalDy = e.clientY - this.downMouse.y;
-      if (Math.hypot(totalDx, totalDy) > 8) {
+      const tapThreshold = e.pointerType === 'touch' ? 16 : 8;
+      if (Math.hypot(totalDx, totalDy) > tapThreshold) {
         this.dragMoved = true;
       }
 
@@ -2910,9 +2990,9 @@ class VietnamTeachersMuseumApp {
       this.prevMouse.x = e.clientX;
       this.prevMouse.y = e.clientY;
 
-      // NẾU ĐANG KÉO CHUỘT TRÊN CÂY: XOAY CÂY THEO TAY NGƯỜI DÙNG ĐỂ CHỌN THƯ
+      // NẾU ĐANG KÉO CHUỘT / VUỐT TAY TRÊN CÂY: XOAY CÂY THEO TAY NGƯỜI DÙNG ĐỂ CHỌN THƯ
       if (this.isDraggingTree && this.treeDragTarget) {
-        const turnSpeed = 0.0095;
+        const turnSpeed = e.pointerType === 'touch' ? 0.012 : 0.0095;
         this.treeDragTarget.rotation.y += dx * turnSpeed;
         this.treeAngularVelocity = dx * turnSpeed * 0.6;
         return; // Ưu tiên xoay cây, không xoay camera
@@ -2927,24 +3007,36 @@ class VietnamTeachersMuseumApp {
           this.selectedArtifact.position.z + Math.cos(this.orbitAngle) * this.orbitRadius
         );
       } else {
-        this.yaw += dx * 0.0042;
+        const yawSpeed = e.pointerType === 'touch' ? 0.0052 : 0.0042;
+        const pitchSpeed = e.pointerType === 'touch' ? 0.0034 : 0.0028;
+        this.yaw += dx * yawSpeed;
         const minPitch = Math.PI / 2 - 1.9; // ~ -0.329 rad
         const maxPitch = Math.PI / 2 - 1.2; // ~ +0.371 rad
-        this.pitch = Math.max(minPitch, Math.min(maxPitch, this.pitch + dy * 0.0028));
+        this.pitch = Math.max(minPitch, Math.min(maxPitch, this.pitch + dy * pitchSpeed));
         this.updateLookAtFromYawPitch();
       }
     });
 
     window.addEventListener('pointerup', (e) => {
+      if (this.isPinching) return;
       if (!this.isDragging) return;
       this.isDragging = false;
-      const wasDraggingTree = this.isDraggingTree;
       this.isDraggingTree = false;
 
-      // Nếu chỉ là một cú click nhẹ (không kéo) thì mở thiệp hoặc tương tác bình thường
+      if (e.pointerType === 'touch') {
+        const tooltip = document.getElementById('artifact-tooltip');
+        if (tooltip) tooltip.style.display = 'none';
+      }
+
+      // Nếu chỉ là một cú click / chạm nhẹ (không kéo) thì mở thiệp hoặc tương tác bình thường
       if (!this.dragMoved) {
         this.handleCanvasClick(e);
       }
+    });
+
+    window.addEventListener('pointercancel', () => {
+      this.isDragging = false;
+      this.isDraggingTree = false;
     });
 
     dom.addEventListener(

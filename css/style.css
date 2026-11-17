@@ -5019,6 +5019,432 @@ input, textarea, [contenteditable="true"] {
   }
 }
 
+/* ==================== TỐI ƯU HÓA TOÀN DIỆN CHO ĐIỆN THOẠI & CẢM ỨNG (MOBILE RESPONSIVE) ==================== */
+#canvas-container,
+#canvas-container canvas {
+  touch-action: none;
+}
+
+/* Không bung nhãn chữ dài trên mũi tên 2 bên khi chạm cảm ứng điện thoại */
+@media (hover: none) and (pointer: coarse) {
+  .room-side-arrow:hover .arrow-text {
+    max-width: 0 !important;
+    opacity: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* 1. Thanh Header trên cùng gọn gàng, vừa vặn mọi màn hình dọc */
+  .top-hud {
+    padding: max(10px, env(safe-area-inset-top)) 12px 10px;
+    gap: 8px;
+  }
+
+  .brand-block {
+    padding-left: 10px;
+    border-left-width: 2.5px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .brand-kicker {
+    font-size: 8.5px;
+    letter-spacing: 1.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .brand-name {
+    font-size: clamp(14px, 4.2vw, 18.5px);
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .top-actions {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .speaker-icon-only-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+
+  .menu-trigger-btn {
+    height: 38px;
+    padding: 0 13px;
+    font-size: 12.5px;
+    gap: 6px;
+  }
+
+  /* 2. Mũi tên chuyển phòng nhanh 2 bên màn hình */
+  .room-side-arrow {
+    padding: 4px;
+  }
+  .room-side-arrow.left {
+    left: 8px;
+  }
+  .room-side-arrow.right {
+    right: 8px;
+  }
+  .room-side-arrow .arrow-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
+  }
+  .room-side-arrow .arrow-text {
+    display: none !important;
+  }
+
+  /* 3. Nút Bước Vào ngoại cảnh & Thanh Rẽ Hướng nhanh dưới đáy */
+  .exterior-cta-overlay {
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+  .btn-exterior-enter-pill {
+    padding: 11px 24px;
+    font-size: 13.5px;
+  }
+
+  .quick-turn-hud {
+    bottom: max(10px, env(safe-area-inset-bottom, 10px));
+    padding: 6px 10px 7px;
+    border-radius: 20px;
+    max-width: 96vw;
+    width: auto;
+  }
+  .turn-hud-title {
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+  }
+  .turn-hud-buttons {
+    gap: 5px;
+    max-width: 92vw;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .turn-hud-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* 4. Màn hình giới thiệu (#welcome-overlay) */
+  #welcome-overlay {
+    padding: 12px;
+  }
+  .welcome-card {
+    padding: 22px 16px;
+    max-height: 88dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .welcome-title {
+    font-size: 24px;
+  }
+  .welcome-subtitle {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+  .welcome-desc {
+    font-size: 13px;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+  .welcome-guides {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .btn-primary-gold {
+    width: 100%;
+    padding: 13px 18px;
+    font-size: 12.5px;
+  }
+
+  /* 5. Menu Bảo Tàng (#museum-menu-drawer) & Ngăn kéo Danh mục (#catalog-drawer) */
+  .museum-menu-popover {
+    top: calc(54px + env(safe-area-inset-top, 0px));
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-height: calc(100dvh - 68px - env(safe-area-inset-top, 0px));
+    padding: 14px;
+    border-radius: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .menu-primary-actions-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .menu-tree-buttons-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .menu-location-card {
+    flex-direction: row;
+    padding: 8px 10px;
+  }
+  #catalog-drawer {
+    width: min(100vw, 350px);
+  }
+
+  /* 6. Modal Chi tiết Hiện vật (#artifact-modal) */
+  #artifact-modal {
+    top: calc(54px + env(safe-area-inset-top, 0px));
+    right: 8px;
+    left: 8px;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    border-radius: 12px;
+  }
+  .modal-top-bar {
+    padding: 14px 16px 10px;
+  }
+  #modal-title {
+    font-size: 19px;
+  }
+  .modal-body {
+    padding: 14px 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .minister-hero-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px;
+  }
+  .minister-hero-img {
+    width: 120px;
+    height: 155px;
+  }
+  .ministers-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .educators-grid {
+    grid-template-columns: 1fr;
+  }
+  .modal-footer {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+  .modal-footer span {
+    display: none;
+  }
+
+  /* 7. Thiệp Tri Ân Hoàng Gia (#tribute-card-viewer-modal) */
+  .tribute-viewer-backdrop {
+    padding: 10px;
+  }
+  .tribute-royal-card {
+    width: 96vw;
+    max-height: 88dvh;
+    overflow-y: auto;
+    padding: 22px 16px 18px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .royal-title {
+    font-size: 22px;
+  }
+  .royal-recipient-line {
+    padding: 5px 12px;
+    font-size: 12.5px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .royal-recipient-line strong {
+    font-size: 16.5px;
+  }
+  .royal-message-box {
+    padding: 14px 14px;
+    font-size: 17px;
+  }
+  .royal-card-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .royal-nav-btn,
+  .royal-close-center-btn {
+    flex: 1 1 auto;
+    padding: 8px 10px;
+    font-size: 11.5px;
+  }
+
+  /* 8. Modal Bàn Giấy Bút (#wishing-tree-modal) & Tra cứu thông điệp (#tribute-search-modal) */
+  .wishing-tree-dialog,
+  .tribute-search-dialog {
+    width: 96vw !important;
+    max-height: 90dvh !important;
+    border-radius: 12px;
+  }
+  .wishing-dialog-body,
+  .tribute-search-dialog-body {
+    padding: 12px 14px 16px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .starry-heading {
+    font-size: 19px !important;
+  }
+
+  /* Chống iOS Safari tự động phóng to khi bấm vào ô nhập liệu */
+  input[type="text"],
+  input[type="search"],
+  textarea,
+  select,
+  .form-input,
+  .form-textarea {
+    font-size: 16px !important;
+  }
+
+  /* 9. Hồ sơ Bộ trưởng, Nhà giáo & Pano Chuyên đề */
+  .minister-modal-container,
+  .theme-modal-container {
+    width: 96vw !important;
+    max-height: 90dvh !important;
+    padding: 16px 14px !important;
+    border-radius: 12px !important;
+  }
+  .minister-modal-content {
+    padding: 12px 6px !important;
+    gap: 14px !important;
+    max-height: calc(90dvh - 28px) !important;
+  }
+  .minister-portrait-frame {
+    max-width: 155px !important;
+    margin: 0 auto;
+  }
+  .minister-gold-name,
+  .theme-modal-title {
+    font-size: 20px !important;
+    letter-spacing: 0.8px !important;
+  }
+  .minister-modal-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .minister-nav-btn {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+  .minister-nav-btn.resume {
+    width: 100%;
+    margin-left: 0 !important;
+    justify-content: center;
+  }
+
+  /* 10. Bức Tường Ký Ức Số (#memory-wall-library-modal, #memory-detail-modal, #memory-upload-modal) */
+  .memory-modal-container {
+    width: 96vw !important;
+    max-height: 90dvh !important;
+    padding: 16px 14px !important;
+    overflow-y: auto !important;
+  }
+  .memory-title {
+    font-size: 20px !important;
+  }
+  .memory-toolbar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .memory-filter-pills {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    padding-bottom: 4px;
+  }
+  .form-row-2col {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 11. Sách Lật 3D Lịch Sử Ngày Nhà Giáo Việt Nam 20/11 (#history-2011-book-modal) */
+  .book2011-modal-backdrop {
+    padding: 8px;
+  }
+  .book2011-modal-shell {
+    width: 96vw;
+    max-height: 92dvh;
+    gap: 8px;
+  }
+  .book2011-top-bar {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .book2011-top-title h3 {
+    font-size: 16px;
+  }
+  .book2011-chapter-tabs {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .book2011-tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+  .book2011-hardcover {
+    min-height: 0;
+    max-height: 60dvh;
+    padding: 8px;
+    border-width: 2.5px;
+  }
+  .book2011-page-left,
+  .book2011-page-right {
+    padding: 14px 14px 12px;
+  }
+  .book2011-page-title {
+    font-size: 20px;
+  }
+  .book2011-paragraph,
+  .book2011-lead-box {
+    font-size: 13.5px;
+  }
+  .book2011-footer-bar {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .book2011-nav-btn {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+  .book2011-copy-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-kicker {
+    display: none;
+  }
+  .brand-name {
+    font-size: 14.5px;
+  }
+  .menu-primary-actions-grid {
+    grid-template-columns: 1fr;
+  }
+  .book2011-footer-center {
+    width: 100%;
+    justify-content: space-between;
+    order: -1;
+  }
+  .book2011-nav-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+
 
 
 
