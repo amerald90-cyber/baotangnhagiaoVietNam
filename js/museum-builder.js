@@ -16,6 +16,65 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
   };
 }
 
+// Tối ưu bộ nhớ RAM & VRAM WebGL cho Điện thoại (iOS Safari / Android Chrome / Zalo WebView)
+// Tránh tràn bộ nhớ (màn hình trắng) do hơn 200 Canvas 2048x1024 / 768x1024 và nhân đôi NPOT mipmaps
+(function () {
+  const isMobileDevice =
+    typeof window !== 'undefined' &&
+    (window.innerWidth <= 900 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || ''));
+  if (!isMobileDevice) return;
+
+  // 1. Tự động thu nhỏ bộ đệm vật lý (backing store) của các Canvas 2D tạo texture 3D trên điện thoại
+  // nhưng vẫn giữ nguyên 100% hệ tọa độ vẽ nhờ ctx.setTransform
+  if (typeof HTMLCanvasElement !== 'undefined') {
+    const origGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, attrs) {
+      if (type === '2d' && !this.id && (this.width >= 200 || this.height >= 200)) {
+        if (!this._mobileScaled) {
+          this._mobileScaled = true;
+          this._logicalW = this.width;
+          this._logicalH = this.height;
+          const maxDim = Math.max(this.width, this.height);
+          const scale = maxDim >= 1400 ? 0.25 : (maxDim >= 700 ? 0.375 : 0.5);
+          const newW = Math.max(64, Math.round(this.width * scale));
+          const newH = Math.max(64, Math.round(this.height * scale));
+          this._mobileScaleX = newW / this._logicalW;
+          this._mobileScaleY = newH / this._logicalH;
+          this.width = newW;
+          this.height = newH;
+        }
+        const ctx = origGetContext.call(this, type, attrs);
+        if (ctx && this._mobileScaleX && this._mobileScaleY) {
+          ctx.setTransform(this._mobileScaleX, 0, 0, this._mobileScaleY, 0, 0);
+        }
+        return ctx;
+      }
+      return origGetContext.call(this, type, attrs);
+    };
+  }
+
+  // 2. Tắt tạo Mipmap & tránh nhân đôi Canvas Power-of-Two ngầm trong Three.js trên điện thoại
+  if (typeof THREE !== 'undefined' && THREE.CanvasTexture) {
+    Object.defineProperties(THREE.CanvasTexture.prototype, {
+      generateMipmaps: {
+        get() { return false; },
+        set() {},
+        configurable: true
+      },
+      anisotropy: {
+        get() { return 1; },
+        set() {},
+        configurable: true
+      },
+      minFilter: {
+        get() { return THREE.LinearFilter; },
+        set() {},
+        configurable: true
+      }
+    });
+  }
+})();
+
 class MuseumBuilder {
   constructor(scene) {
     this.scene = scene;
@@ -2703,6 +2762,32 @@ class MuseumBuilder {
 
   // ==================== THANH NẸP CHỈ KIM LOẠI / CHỈ ĐỒNG VÀNG MỜ (BRASS TRIM) ====================
   // Làm ranh giới phân định 3 giai đoạn lịch sử nhẹ nhàng, tinh tế và thanh lịch
+  // Giải phóng triệt để bộ nhớ Canvas & WebGL Texture khi dựng lại nhóm 3D (chống tràn RAM trên điện thoại)
+  disposeGroupResources(group) {
+    if (!group) return;
+    const sharedMats = new Set(Object.values(this.materials || {}));
+    group.traverse((child) => {
+      if (child.isMesh) {
+        if (child.geometry) {
+          try { child.geometry.dispose(); } catch (e) {}
+        }
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach((m) => {
+          if (!m || sharedMats.has(m)) return;
+          if (m.map) {
+            const img = m.map.image;
+            try { m.map.dispose(); } catch (e) {}
+            if (img && img.tagName === 'CANVAS') {
+              img.width = 1;
+              img.height = 1;
+            }
+          }
+          try { m.dispose(); } catch (e) {}
+        });
+      }
+    });
+  }
+
   // ==================== DỰNG & CẬP NHẬT ĐỘNG KHUNG TRANH NHÀ GIÁO TỪ GOOGLE SHEET ====================
   // Nhà giáo nào có STT nhỏ hơn / nằm ở dòng trên trong Google Sheet sẽ hiển thị trước (từ trái sang phải dọc tường chữ S)
   rebuildTeachersGalleryFrames(teachersList) {
@@ -2712,7 +2797,8 @@ class MuseumBuilder {
       : (window.teachersData || []);
     if (!list.length) return;
 
-    // Xóa các khung tranh cũ khỏi nhóm động và danh sách tương tác
+    // Xóa và giải phóng bộ nhớ các khung tranh cũ khỏi nhóm động và danh sách tương tác
+    this.disposeGroupResources(this.teachersDynamicGroup);
     while (this.teachersDynamicGroup.children.length > 0) {
       this.teachersDynamicGroup.remove(this.teachersDynamicGroup.children[0]);
     }
@@ -3437,10 +3523,10 @@ class MuseumBuilder {
     }
 
     if (candidates.length > 0) {
-      const imgObj = new Image();
+      let imgObj = new Image();
       let candidateIdx = 0;
       const tryNextCandidate = () => {
-        if (candidateIdx >= candidates.length) return;
+        if (!imgObj || candidateIdx >= candidates.length) return;
         const nextSrc = String(candidates[candidateIdx++]);
         if (nextSrc.startsWith('http')) {
           imgObj.crossOrigin = 'anonymous';
@@ -3453,14 +3539,22 @@ class MuseumBuilder {
       imgObj.onload = () => {
         drawCard(imgObj);
         portraitTex.needsUpdate = true;
+        imgObj.onload = null;
+        imgObj.onerror = null;
+        imgObj = null;
       };
       imgObj.onerror = () => {
         tryNextCandidate();
       };
-      tryNextCandidate();
-      if (imgObj.complete && imgObj.naturalWidth > 0) {
-        drawCard(imgObj);
-        portraitTex.needsUpdate = true;
+      if (this.isMobile) {
+        const delayMs = Math.min(1800, (Number(teacher.id) || 0) * 35);
+        setTimeout(() => tryNextCandidate(), delayMs);
+      } else {
+        tryNextCandidate();
+        if (imgObj && imgObj.complete && imgObj.naturalWidth > 0) {
+          drawCard(imgObj);
+          portraitTex.needsUpdate = true;
+        }
       }
     }
 
@@ -4682,8 +4776,8 @@ class MuseumBuilder {
   // Vẽ giao diện màn hình cảm ứng Kiosk Ký Ức với 6 ảnh chân dung thực tế
   renderMemoryTotemScreen(canvas, texture) {
     const ctx = canvas.getContext('2d');
-    const W = canvas.width;
-    const H = canvas.height;
+    const W = canvas._logicalW || canvas.width;
+    const H = canvas._logicalH || canvas.height;
 
     // 1. Nền chuyển sắc Deep Sapphire trang trọng
     const bgGrad = ctx.createLinearGradient(0, 0, W, H);
@@ -7087,10 +7181,12 @@ class MuseumBuilder {
   // Xóa và dựng lại 32 Thẻ Lụa Vàng + 48 Tinh Cầu Pha Lê Phát Sáng trên cây 3D
   rebuildWishingTreeCards(tributesList) {
     if (!this.wishCardsContainer) return;
+    this.disposeGroupResources(this.wishCardsContainer);
     while (this.wishCardsContainer.children.length > 0) {
       this.wishCardsContainer.remove(this.wishCardsContainer.children[0]);
     }
     if (this.starGemsContainer) {
+      this.disposeGroupResources(this.starGemsContainer);
       while (this.starGemsContainer.children.length > 0) {
         this.starGemsContainer.remove(this.starGemsContainer.children[0]);
       }

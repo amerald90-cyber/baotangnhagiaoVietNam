@@ -779,9 +779,27 @@ class VietnamTeachersMuseumApp {
               stt: item.orderKey
             }));
 
+            const makeVisualSig = (arr) =>
+              (arr || [])
+                .map((t) => `${t.name || ''}|${t.years || ''}|${t.stageNum || 1}|${t.subTheme || ''}|${t.title || ''}|${t.img || ''}|${t.driveFileId || ''}`)
+                .join(';;');
+
+            const oldSig = makeVisualSig(window.teachersData);
+            const newSig = makeVisualSig(finalTeachers);
             window.teachersData = finalTeachers;
-            if (this.builder && typeof this.builder.rebuildTeachersGalleryFrames === 'function') {
-              this.builder.rebuildTeachersGalleryFrames(finalTeachers);
+
+            if (oldSig !== newSig) {
+              if (this.builder && typeof this.builder.rebuildTeachersGalleryFrames === 'function') {
+                this.builder.rebuildTeachersGalleryFrames(finalTeachers);
+              }
+            } else if (this.builder && this.builder.teachersDynamicGroup) {
+              // Cập nhật nội dung chi tiết (tiểu sử, câu nói) trực tiếp vào các khung tranh hiện có, không tạo lại 80 Canvas tránh tràn RAM trên điện thoại
+              this.builder.teachersDynamicGroup.traverse((child) => {
+                if (child.userData && child.userData.isTeacherFrame && child.userData.id) {
+                  const updated = finalTeachers.find((t) => t.id === child.userData.id);
+                  if (updated) child.userData.teacherData = updated;
+                }
+              });
             }
             if (typeof this.populateCatalogDrawer === 'function') {
               this.populateCatalogDrawer();
